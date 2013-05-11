@@ -1,0 +1,13 @@
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\bin\Debug\GridConverter.exe.config
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\bin\Debug\GridConverter.exe
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\bin\Debug\GridConverter.pdb
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\MainWindow.baml
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\MainWindow.g.cs
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\App.g.cs
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\GridConverter_MarkupCompile.cache
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\GridConverter.g.resources
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\ConverteToGG.Properties.Resources.resources
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\ConvertToGG.csproj.GenerateResource.Cache
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\GridConverter.exe
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\GridConverter.pdb
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\ConvertToGG.csprojResolveAssemblyReference.cache
