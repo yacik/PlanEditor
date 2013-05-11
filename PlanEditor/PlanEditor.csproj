@@ -58,9 +58,9 @@
     </Compile>
     <Compile Include="Helpers\Colours.cs" />
     <Compile Include="Entities\Building.cs" />
-    <Compile Include="IO\LoadFile.cs" />
-    <Compile Include="IO\LoadIntdFile.cs" />
-    <Compile Include="IO\SaveFile.cs" />
+    <Compile Include="Helpers\IO\LoadFile.cs" />
+    <Compile Include="Helpers\IO\LoadIntdFile.cs" />
+    <Compile Include="Helpers\IO\SaveFile.cs" />
     <Compile Include="RegGrid\RecognizeGrid.cs" />
     <Compile Include="Room.xaml.cs">
       <DependentUpon>Room.xaml</DependentUpon>
@@ -70,7 +70,7 @@
     <Compile Include="Graph\Edge.cs" />
     <Compile Include="Graph\Graph.cs" />
     <Compile Include="Graph\Vertex.cs" />
-    <Compile Include="IO\SaveToEvac.cs" />
+    <Compile Include="Helpers\IO\SaveToEvac.cs" />
     <Compile Include="Helpers\Data.cs" />
     <Compile Include="SVGConverter\ConvertStrings.cs" />
     <Page Include="Building.xaml">

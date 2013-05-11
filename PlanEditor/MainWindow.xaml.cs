@@ -22,11 +22,11 @@ using PlanEditor.Entities;
 
 namespace PlanEditor
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
+        private enum CanvasMode { Move, Path, Select, Connect }
+        private CanvasMode Mode;
+
         private TransformGroup m_transformGroup;
         private TranslateTransform m_translation;
         private ScaleTransform m_scale;        
@@ -35,24 +35,20 @@ namespace PlanEditor
         private double m_lastPosX;
         private double m_lastPosY;
         private Line m_line;
-        private bool m_firstClick = false;
-        private enum CanvasMode { Move, Path, Select, Connect }
-        private CanvasMode Mode;
+        private Entities.Building m_Building;
+        private bool m_firstClick = false;        
         private string m_fileName = "C:\\Users\\Andrey\\Desktop\\out";
-        private bool m_ConnectClick1 = true;
-        private bool m_ConnectClick2 = false;
-
+        private bool m_isConnected = true;
+        private Place m_place1 = null;
+        private Place m_place2 = null;
+        private Point m_firstClickPlace;
+        private Point m_secondClickPlace;
         private List<Entity> m_selected = new List<Entity>();
         private List<Line> m_lines = new List<Line>();        
         private List<List<Line>> m_drawGrid = new List<List<Line>>();
         private List<Place> m_CurStagePlaces = new List<Place>();
-        private List<Portal> m_CurStagePortals = new List<Portal>();
-
-        Place place1 = null;
-        Place place2 = null;
-
-        private Entities.Building m_Building;
-
+        private List<Portal> m_CurStagePortals = new List<Portal>();        
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -146,8 +142,6 @@ namespace PlanEditor
         {
 
         }
-
-        
 
         private void GridField_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -414,15 +408,32 @@ namespace PlanEditor
         private void AddNewLine(double x, double y)
         {
             m_line = new Line();
-            m_lines.Add(m_line);
+
             m_line.X1 = x;
             m_line.Y1 = y;
+            m_line.X2 = x;
+            m_line.Y2 = y;
 
             m_line.Stroke = Colours.Black;
             m_line.StrokeThickness = 1;
             m_line.RenderTransform = m_transformGroup;
-
+            
             ContentPanel.Children.Add(m_line);
+            m_lines.Add(m_line);
+        }
+
+        private void MovePath(double x, double y)
+        {
+            if (!m_firstClick && m_line == null) return;
+
+            x = x - m_translation.X;
+            y = y - m_translation.Y;
+
+            x /= m_scale.ScaleX;
+            y /= m_scale.ScaleY;
+
+            m_line.X2 = x;
+            m_line.Y2 = y;
         }
 
         private void DrawPlan()
@@ -436,21 +447,6 @@ namespace PlanEditor
             {
                 p.UI.Visibility = System.Windows.Visibility.Visible;
             }
-        }
-
-        //// Help functions
-        private void MovePath(double x, double y)
-        {
-            if (!m_firstClick && m_line == null) return;
-
-            double _x = x - m_translation.X;
-            double _y = y - m_translation.Y;
-
-            _x /= m_scale.ScaleX;
-            _y /= m_scale.ScaleY;
-
-            m_line.X2 = _x;
-            m_line.Y2 = _y;
         }
 
         private void Move(double x, double y)
@@ -580,70 +576,68 @@ namespace PlanEditor
 
             foreach (var v in m_selected)
             {
-                if (v.Type == Entity.EntityType.Portal)
+                switch(v.Type)
                 {
-                    Portal portal = v as Portal;
-                    switch (portal.Orientation)
-                    {
-                        case Portal.PortalOrient.Horizontal:
-                            if (x < portal.min || x > portal.max) return;
-                            break;
-                        case Portal.PortalOrient.Vertical:
-                            if (y < portal.min || y > portal.max) return;
-                            break;
-                    }
-                }                
+                    case Entity.EntityType.Portal:
+                        MovePortal(x, y, moveX, moveY, v);
+                        break;
+                    case Entity.EntityType.Place:
+                        MovePlace(x, y, moveX, moveY, v);
+                        break;
 
-                PathGeometry pg = v.UI.Data as PathGeometry;
-                Point p = pg.Figures[0].StartPoint;
-                double _x = p.X + moveX;
-                double _y = p.Y + moveY;
-                pg.Figures[0].StartPoint = new Point(_x, _y);
-
-                int count = pg.Figures[0].Segments.Count;
-                for (int i = 0; i < count; ++i)
-                {
-                    LineSegment ls = pg.Figures[0].Segments[i] as LineSegment;
-                    _x = ls.Point.X + moveX;
-                    _y = ls.Point.Y + moveY;
-                    ls.Point = new Point(_x, _y);
-                }                
+                    default:
+                    break;
+                }
             }
         }
 
-        private void ConnectPlaces(double x, double y)
+        private void ConnectPlaces(double x, double y)        
         {
-            foreach (var p in m_Building.Places[m_curStage])
+            if (m_isConnected)
             {
-                if (MyMath.Geometry.IsCollide(x, y, p.PointsX, p.PointsY))
+                m_isConnected = !m_isConnected;
+                m_firstClickPlace = new Point(x, y);
+
+                foreach (var p in m_Building.Places[m_curStage])
                 {
-                    if (m_ConnectClick1)
+                    if (MyMath.Geometry.IsCollide(x, y, p.PointsX, p.PointsY))
                     {
-                        m_ConnectClick1 = false;
-                        m_ConnectClick2 = true;
-                        place1 = p;
-                    }
-                    else if (m_ConnectClick2)
-                    {
-                        m_ConnectClick2 = false;
-                        if (place1 == p) continue;
-                        place2 = p;
-                        ConnectTwoRooms();
+                        m_place1 = p;
+                        break;
                     }
                 }
-            }            
-            //ConnectTwoRooms_d();
-        }
+            }
+            else if (!m_isConnected)
+            {
+                m_isConnected = !m_isConnected;
+                m_secondClickPlace = new Point(x, y);
 
-        private void ConnectTwoRooms()
-        {
-            if (place1 != null)
-                Debug.Write(place1.ID + " ");    
-            else if (place2 != null)
-                Debug.Write(place2.ID);
+                foreach (var p in m_Building.Places[m_curStage])
+                {
+                    if (MyMath.Geometry.IsCollide(x, y, p.PointsX, p.PointsY))
+                    {
+                        if (m_place1 != p)
+                        {
+                            m_place2 = p;
+                            break;
+                        }
+                    }
+                }
+                m_lastPosX = x;
+                m_lastPosY = y;
 
-            Debug.WriteLine("\n");
-        }
+                if (m_place1 == null && m_place2 == null)
+                {
+                    MessageBox.Show("Помещения не выбраны");
+                    return;
+                }
+
+                if (m_place1 == null || m_place2 == null)
+                    ConnectOutsidePortal();
+                if (m_place1 != null && m_place2 != null)
+                    ConncetInnerPortal();                
+            }
+        }        
 
         private void Click_Property(object sender, RoutedEventArgs e)
         {
@@ -783,165 +777,123 @@ namespace PlanEditor
             bld.ShowDialog();
         }
 
-        /*
-        private void ConnectTwoRooms_d()
-        {
-            if (place1 != null && place2 != null)
+        private void ConnectOutsidePortal()
+        {            
+            Place place = null;
+
+            if (m_place1 == null)
+                place = m_place2;
+            else
+                place = m_place1;
+
+            Portal portal = new Portal();
+            portal.RoomA = place;
+            portal.RoomB = null;
+            m_Building.Portals[m_curStage].Add(portal);
+            portal.RoomA.IsMovable = false;
+
+            double min = double.MaxValue;
+            List<Line> lines = place.Lines;
+            
+            foreach (var v in lines)
             {
-                Portal portal = new Portal();
-                portal.RoomA = place1;
-                portal.RoomB = place2;
-
-                List<Line> lines1 = place1.Lines;
-                List<Line> lines2 = place2.Lines;
-
-                Line l1 = null;
-                Line l2 = null;
-
-                double d_x = MyMath.Geometry.Tan(m_ConnectClick1.X, m_ConnectClick2.X);
-                double d_y = MyMath.Geometry.Tan(m_ConnectClick1.Y, m_ConnectClick2.Y);
-
-                bool isVer = d_x > d_y ? true : false;
-                if (isVer)
-                    portal.Orientation = Portal.PortalOrient.Vertical;
-                else
-                    portal.Orientation = Portal.PortalOrient.Horizontal;
+                double d = 0;
                 
+                if (IsHorizontal(v.X1, v.Y1, v.X2, v.Y2))
+                    d = MyMath.Geometry.Tan(m_lastPosY, v.Y1);                    
+                else
+                    d = MyMath.Geometry.Tan(m_lastPosX, v.X1);
+
+                if (d < min)
+                {
+                    min = d;
+                    portal.ParentWall = v;
+                }
+            }
+            Line line = portal.ParentWall;
+            if (IsHorizontal(line.X1, line.Y1, line.X2, line.Y2))
+            {
+                portal.Orientation = Portal.PortalOrient.Horizontal;                
+                portal.SetUI();                
+            }
+            else
+            {
+                portal.Orientation = Portal.PortalOrient.Vertical;
+                portal.SetUI();                
+            }
+
+            portal.UI.RenderTransform = m_transformGroup;
+            ContentPanel.Children.Add(portal.UI);
+
+            m_place1 = null;
+            m_place2 = null;
+        }
+
+        private void ConncetInnerPortal()
+        {
+            Portal portal = new Portal();
+            portal.RoomA = m_place1;
+            portal.RoomB = m_place2;
+            portal.RoomA.IsMovable = false;
+            portal.RoomB.IsMovable = false;
+
+            m_Building.Portals[m_curStage].Add(portal);
+
+            List<Line> lines1 = m_place1.Lines;
+            List<Line> lines2 = m_place2.Lines;
+
+            Line line1 = null;
+            Line line2 = null;
+
+            foreach (var l1 in lines1)
+            {
                 double min = double.MaxValue;
 
-                foreach (var l_1 in lines1)
+                bool isHor1 = IsHorizontal(l1.X1, l1.Y1, l1.X2, l1.Y2);
+
+                foreach (var l2 in lines2)
                 {
-                    Point p1 = new Point(l_1.X1, l_1.Y1);
-                    Point p2 = new Point(l_1.X2, l_1.Y2);
+                    bool isHor2 = IsHorizontal(l2.X1, l2.Y1, l2.X2, l2.Y2);
 
-                    d_x = MyMath.Geometry.Tan(p1.X, p2.X);
-                    d_y = MyMath.Geometry.Tan(p1.Y, p2.Y);
-
-                    bool secVer = d_x > d_y ? true : false;
-
-                    if (secVer == isVer) continue;
-                    
-                    foreach (var l_2 in lines2)
+                    if (isHor1 && isHor2) 
                     {
-                        Point _p1 = new Point(l_2.X1, l_2.Y1);
-                        Point _p2 = new Point(l_2.X2, l_2.Y2);
-
-                        d_x = MyMath.Geometry.Tan(_p1.X, _p2.X);
-                        d_y = MyMath.Geometry.Tan(_p1.Y, _p2.Y);
-
-                        secVer = d_x < d_y ? true : false;
-                        if (secVer != isVer) continue;
-
-                        double v = -1;
-                        if (isVer)
-                            v = MyMath.Geometry.Tan(p1.X, _p1.X);
-                        else
-                            v = MyMath.Geometry.Tan(p1.Y, _p1.Y);
-
-                        if (v < min && v != -1)
+                        double d = MyMath.Geometry.Tan(l1.Y1, l2.Y1);
+                        if (d < min)
                         {
-                            min = v;
-                            l1 = l_1;
-                            l2 = l_2;
+                            min = d;
+                            line1 = l1;
+                            line2 = l2;
+                        }
+                    }
+                    else if (!isHor1 && !isHor2)
+                    {                     
+                        double d = MyMath.Geometry.Tan(l1.X1, l2.X1);
+                        if (d < min)
+                        {
+                            min = d;
+                            line1 = l1;
+                            line2 = l2;
                         }
                     }
                 }
-                double[] mas;
-
-                if (isVer)
-                    mas = GetMinMax(l1.Y1, l1.Y2, l2.Y1, l2.Y2);
-                else
-                    mas = GetMinMax(l1.X1, l1.X2, l2.X1, l2.X2);
-
-                portal.min = mas[0];
-                portal.max = mas[1];
-
-                Debug.WriteLine(mas[0] + " " + mas[1]);
-
-                m_CurStagePortals.Add(portal);
-
-                double shift = 1.0 / Data.Sigma;
-
-                //////////////////////////////////////////
-
-                var pg = new PathGeometry();
-                pg.FillRule = FillRule.Nonzero;
-
-                var pf = new PathFigure();
-                pg.Figures.Add(pf);
-
-                pf.StartPoint = new Point(portal.min, l1.Y1);
-                Point startPoint = pf.StartPoint;
-
-                for (int i = 0; i < 4; ++i)
-                {
-                    LineSegment ls = new LineSegment();
-
-                    switch (i)
-                    {
-                        case 0:
-                            ls.Point = new Point(startPoint.X + shift, startPoint.Y);
-                            break;
-                        case 1:
-                            ls.Point = new Point(startPoint.X + shift, startPoint.Y + 10);
-                            break;
-                        case 2:
-                            ls.Point = new Point(startPoint.X, startPoint.Y + 10);
-                            break;
-                        case 3:
-                            ls.Point = new Point(startPoint.X, startPoint.Y);
-                            break;
-                    }
-                    pf.Segments.Add(ls);
-                }
-
-                Path p = new Path();
-                p.RenderTransform = m_transformGroup;
-                p.Fill = Colours.Red;
-                p.StrokeThickness = 2;
-                p.Stroke = Colours.Yellow;
-                p.Data = pg;
-                portal.UI = p;
-                ContentPanel.Children.Add(p);
-                /////////////////////////////
-                             
-                place1 = null;
-                place2 = null;
             }
+
+            line1.Stroke = Colours.Emerland;
+            line2.Stroke = Colours.Emerland;
+            line1.StrokeThickness = 3;
+            line2.StrokeThickness = 3;
+            ContentPanel.Children.Add(line1);
+            ContentPanel.Children.Add(line2);
         }
-        // переделать!!!!
-        private double[] GetMinMax(double p1, double p2, double p3, double p4)
+
+        private bool IsHorizontal(double x1, double y1, double x2, double y2)
         {
-            double[] mas = { p1, p2, p3, p4};
-            double max = double.MinValue;
-            double min = double.MaxValue;
+            double x = MyMath.Geometry.Tan(x1, x2);
+            double y = MyMath.Geometry.Tan(y1, y2);
 
-            for (int i = 0; i < mas.Length; ++i)
-            {
-                if (mas[i] > max)
-                    max = mas[i];
-                else if (mas[i] < min)
-                    min = mas[i];
-            }
-
-            double a = -1;
-            double b = -1;
-            for (int i = 0; i < mas.Length; ++i)
-            {
-                if (mas[i] == max || mas[i] == min) continue;
-                
-                if (a == -1)
-                    a = mas[i];
-                else if (b == -1)
-                    b = mas[i];
-            }
-            Debug.WriteLine("min: " + min + " max: " + max + " a: " + a + " b: " + b);
-            if (a < b)
-                return new double[] { a, b };
-            else
-                return new double[] { b, a };
+            return (x > y);
         }
-        */
+
         private void Click_Grid(object sender, RoutedEventArgs e)
         {
             RecognizeGrid rg = new RecognizeGrid(m_grid, m_Building);
@@ -968,6 +920,71 @@ namespace PlanEditor
         {
             SaveToEvac sv = new SaveToEvac();
             sv.Save("C:\\Users\\Andrey\\Desktop\\out.txt", m_grid, m_Building);
+        }
+        private void MovePortal(double x, double y, double moveX, double moveY, Entity v)
+        {
+            Portal portal = v as Portal;
+            PathGeometry pg = v.UI.Data as PathGeometry;
+            Point p = pg.Figures[0].StartPoint;
+            double sX = p.X;
+            double sY = p.Y;
+
+            if (portal.Orientation == Portal.PortalOrient.Horizontal)
+            {                
+                sX = p.X + moveX;
+                sY = p.Y;
+                moveY = 0;
+                
+                if (sX < portal.Min()) return;
+                double d = MyMath.Geometry.Tan(sX, portal.Max());
+                if (d <= portal.Wide)
+                    return;
+            }
+            else
+            {
+                sX = p.X;
+                sY = p.Y + moveY;
+                moveX = 0;
+                if (sY < portal.Min()) return;
+
+                double d = MyMath.Geometry.Tan(sY, portal.Max());
+                if (d <= portal.Wide)
+                    return;
+            }
+
+            pg.Figures[0].StartPoint = new Point(sX, sY);
+
+            int count = pg.Figures[0].Segments.Count;
+            for (int i = 0; i < count; ++i)
+            {
+                double _x = sX;
+                double _y = sY;
+                LineSegment ls = pg.Figures[0].Segments[i] as LineSegment;
+                _x = ls.Point.X + moveX;                    
+                _y = ls.Point.Y + moveY;
+                ls.Point = new Point(_x, _y);
+            }
+        }
+
+        private void MovePlace(double x, double y, double moveX, double moveY, Entity v)
+        {
+            Place place = v as Place;
+            if (!place.IsMovable) return;
+
+            PathGeometry pg = v.UI.Data as PathGeometry;
+            Point p = pg.Figures[0].StartPoint;
+            double _x = p.X + moveX;
+            double _y = p.Y + moveY;
+            pg.Figures[0].StartPoint = new Point(_x, _y);
+
+            int count = pg.Figures[0].Segments.Count;
+            for (int i = 0; i < count; ++i)
+            {
+                LineSegment ls = pg.Figures[0].Segments[i] as LineSegment;
+                _x = ls.Point.X + moveX;
+                _y = ls.Point.Y + moveY;
+                ls.Point = new Point(_x, _y);
+            }                
         }
     }    
 }

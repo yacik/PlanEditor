@@ -20,6 +20,7 @@ namespace PlanEditor.Entities
             Ppl = 0;
             MaxPeople = 0;
             Name = "";
+            IsMovable = true;
         }        
 
         public int CountNodes { get; set; }	        // Количество узлов сетки, принадлежащих помещению 
@@ -31,6 +32,8 @@ namespace PlanEditor.Entities
         public double DifHRoom { get; set; }	    // разность высот пола, равная нулю при горизонтальном его расположении, м	
         public int MainType { get; set; }
         public int SubType { get; set; }
+
+        public bool IsMovable { get; set; }
 
         public void CreateUI()
         {
