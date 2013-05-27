@@ -1,56 +1,83 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using PlanEditor.Helpers;
 
 namespace PlanEditor.RegGrid
 {
     public class RecognizeGrid
     {
-        private Grid m_grid;
-        private Entities.Building m_building;
+        private readonly Grid _grid;
+        private readonly Entities.Building _building;
 
         public RecognizeGrid(Grid grid, Entities.Building building)
         {
-            m_grid = grid;
-            m_building = building;
+            _grid = grid;
+            _building = building;
+        }
+
+        public Grid Grid
+        {
+            get { return _grid; }
         }
 
         public void Recognize()
         {
-            for (int i = 0; i < m_building.Stages; ++i)
+            for (int i = 0; i < _building.Stages; ++i)
             {
-                foreach (var portal in m_building.Portals[i])
+                if (_building.Portals.Count > i)
                 {
-                    foreach (var cell in m_grid.Cells[i])
+                    foreach (var portal in _building.Portals[i])
                     {
-                        if (cell.Owner != -1) continue;
-
-                        if (MyMath.Geometry.IsCollide(cell.PosX, cell.PosY, portal.PointsX, portal.PointsY))
+                        if (_grid.Cells.Count > i)
                         {
-                            portal.Cells.Add(cell);
-                            cell.Owner = portal.ID;
+                            foreach (var cell in _grid.Cells[i].Where(cell => cell.Owner == null))
+                            {
+                                if (MyMath.Helper.IsCollide(cell.PosX, cell.PosY, portal.PointsX, portal.PointsY))
+                                {
+                                    if (portal.Cells == null)
+                                        portal.Cells = new List<Cell>();
+
+                                    portal.Cells.Add(cell);
+                                    cell.Owner = portal;
+                                }
+                            }
                         }
                     }
                 }
 
-                foreach (var place in m_building.Places[i])
+                if (_building.Places.Count > i)
                 {
-                    foreach (var cell in m_grid.Cells[i])
+                    foreach (var place in _building.Places[i])
                     {
-                        if (cell.Owner != -1 ) continue;
-
-                        if (MyMath.Geometry.IsCollide(cell.PosX, cell.PosY, place.PointsX, place.PointsY))
+                        if (_grid.Cells.Count > i)
                         {
-                            ++place.CountNodes;
-                            cell.Owner = place.ID;
-                            ++m_building.PplCell;
+                            foreach (var cell in _grid.Cells[i].Where(cell => cell.Owner == null).Where(cell => MyMath.Helper.IsCollide(cell.PosX, cell.PosY, place.PointsX, place.PointsY)))
+                            {
+                                ++place.CountNodes;
+                                cell.Owner = place;
+                                ++_building.PplCell;
+                            }
                         }
                     }
                 }
             }
+
+            foreach (var stairway in _building.Mines)
+            {
+                int start = (int)stairway.StageFrom - 1;
+                int end = (int)stairway.StageTo;
+                for (int i = start; i < end; ++i)
+                {
+                    foreach (var cell in _grid.Cells[i].Where(cell => cell.Owner == null) .Where(cell => MyMath.Helper.IsCollide(cell.PosX, cell.PosY, stairway.PointsX, stairway.PointsY)))
+                    {
+                        cell.Owner = stairway;
+                        if (stairway.Cells == null) stairway.Cells = new List<Cell>();
+                        stairway.Cells.Add(cell);
+                    }
+                }
+            }
+
         }
     }
 }

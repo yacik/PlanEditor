@@ -1,44 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PlanEditor.IO
+namespace PlanEditor.Helpers.IO
 {
     public class LoadFile
     {
-        private string m_fileName;
-        private Entities.Building m_Building;
+        private readonly string _fileName;
 
         public LoadFile(string fileName, Entities.Building building)
         {
-            m_fileName = fileName;
-            m_Building = building;
+            _fileName = fileName;
+            Building = building;
         }
 
         public void Load()
         {
-            using (FileStream fs = new FileStream(m_fileName, FileMode.Open, FileAccess.Read))
+            using (var fs = new FileStream(_fileName, FileMode.Open, FileAccess.Read))
             {
-                BinaryFormatter bf = new BinaryFormatter();
-                m_Building = bf.Deserialize(fs) as Entities.Building;
+                var bf = new BinaryFormatter();
+                Building = bf.Deserialize(fs) as Entities.Building;
                 fs.Close();
             }
-                        
-            for (int i = 0; i < m_Building.Stages + 1; ++i)
+
+            if (Building == null) return;
+            
+            for (int i = 0; i < Building.Stages; ++i)
             {
-                Debug.WriteLine(m_Building.Places[i].Count);
-                foreach (var p in m_Building.Places[i])
-                {
-                    p.CreateUI();
-                }
+                if (Building.Places.Count > i)
+                    foreach (var p in Building.Places[i])
+                        p.LoadUI();
+                if (Building.Portals.Count > i)
+                    foreach (var v in Building.Portals[i])
+                        v.LoadUI();
             }
+
+            foreach (var v in Building.Mines)
+                v.LoadUI();
         }
 
-        public Entities.Building GetBuilding { get { return m_Building; } }
+        public Entities.Building Building { get; private set; }
     }
 }

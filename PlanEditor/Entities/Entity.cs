@@ -6,22 +6,57 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using PlanEditor.Helpers;
 
 namespace PlanEditor.Entities
 {
     [Serializable]
     public class Entity
     {
-        public Entity()
+        protected Entity()
         {
-            ID = curID;
-            ++curID;
+            ID = Data.CurID;
+            ++Data.CurID;
         }
         
         public int ID { get; private set; }
-        public enum EntityType { Place, Portal }
+        public enum EntityType { Place, Portal, Stairway, Halfway, Lift }
         public EntityType Type { get; set; }
-        private static int curID = 0;
+
+        public void LoadUI()
+        {
+            var pg = new PathGeometry { FillRule = FillRule.Nonzero };
+
+            var pf = new PathFigure();
+            pg.Figures.Add(pf);
+
+            pf.StartPoint = new Point(ExportX[0], ExportY[0]);
+
+            for (int i = 1, j = 1; i < ExportX.Count && j < ExportY.Count; ++i, ++j)
+            {
+                var ls = new LineSegment { Point = new Point(ExportX[i], ExportY[j]) };
+                pf.Segments.Add(ls);
+            }
+
+            var p = new Path { StrokeThickness = 2, Stroke = Colours.Black, Data = pg };
+            UI = p;
+
+            switch (Type)
+            {
+                case EntityType.Place:
+                    p.Fill = Colours.Indigo;
+                    break;
+                case EntityType.Halfway:
+                    p.Fill = Colours.Green;
+                    break;
+                case EntityType.Stairway:
+                    p.Fill = Colours.Violet;
+                    break;
+                case EntityType.Portal:
+                    p.Fill = Colours.LightGray;
+                    break;
+            }
+        }
 
         [NonSerialized]
         public Path UI;
@@ -39,16 +74,13 @@ namespace PlanEditor.Entities
         { 
             get 
             {
-                PathGeometry pg = (PathGeometry)UI.Data;
-                List<double> lst = new List<double>();                
-                foreach (PathFigure pf in pg.Figures)
+                var pg = (PathGeometry)UI.Data;
+                var lst = new List<double>();                
+                foreach (var pf in pg.Figures)
                 {
                     lst.Add(pf.StartPoint.X);
-                                        
-                    foreach (LineSegment ls in pf.Segments)
-                    {
-                        lst.Add(ls.Point.X);
-                    }                    
+                    
+                    lst.AddRange(from LineSegment ls in pf.Segments select ls.Point.X);
                 }
 
                 return lst;

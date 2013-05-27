@@ -32,3 +32,5 @@ C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\PlanEditor.csproj.GenerateResource.Cache
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\GridConverter.exe
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\GridConverter.pdb
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\Door.baml
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\Door.g.cs

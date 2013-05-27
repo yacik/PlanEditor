@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using PlanEditor.Helpers;
 
 namespace PlanEditor.Entities
 {
@@ -14,14 +15,13 @@ namespace PlanEditor.Entities
 
         public Place()
         {
-            Type = EntityType.Place;
             MainType = -1;
             SubType = -1;
             Ppl = 0;
             MaxPeople = 0;
             Name = "";
             IsMovable = true;
-        }        
+        }
 
         public int CountNodes { get; set; }	        // Количество узлов сетки, принадлежащих помещению 
         public int Ppl { get; set; }	            // Количество людей в помещении (фактическое наличие)
@@ -35,32 +35,6 @@ namespace PlanEditor.Entities
 
         public bool IsMovable { get; set; }
 
-        public void CreateUI()
-        {
-            var pg = new PathGeometry();
-            pg.FillRule = FillRule.Nonzero;
-
-            var pf = new PathFigure();
-            pg.Figures.Add(pf);
-
-            pf.StartPoint = new Point(ExportX[0], ExportY[0]);
-            Point startPoint = pf.StartPoint;
-
-            for (int i = 1, j = 1; i < ExportX.Count && j < ExportY.Count; ++i, ++j)
-            {
-                LineSegment ls = new LineSegment();
-                ls.Point = new Point(ExportX[i], ExportY[j]);
-                pf.Segments.Add(ls);
-            }
-
-            Path p = new Path();
-            p.Fill = Colours.Indigo;
-            p.StrokeThickness = 2;
-            p.Stroke = Colours.Black;
-            p.Data = pg;
-            UI = p;
-        }
-        
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -85,23 +59,19 @@ namespace PlanEditor.Entities
         { 
             get 
             {
-                List<Line> lst = new List<Line>();
-                List<double> x = PointsX;
-                List<double> y = PointsY;
+                var lst = new List<Line>();
+                var x = PointsX;
+                var y = PointsY;
                 for (int i = 1, j = 1; i < x.Count && j < y.Count; ++i, ++j)
                 {
-                    Line l = new Line();
-                    l.X1 = x[i - 1];
-                    l.Y1 = y[j - 1];
-                    l.X2 = x[i];
-                    l.Y2 = y[j];
+                    var l = new Line { X1 = x[i - 1], Y1 = y[j - 1], X2 = x[i], Y2 = y[j] };
                     lst.Add(l);                
                 }
                 
                 return lst;
             }         
         }
-        
+
         [NonSerialized]
         public List<Portal> Exits = new List<Portal>();
 

@@ -1,4 +1,5 @@
-﻿using PlanEditor.RegGrid;
+﻿using PlanEditor.Helpers;
+using PlanEditor.RegGrid;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -20,101 +21,37 @@ namespace PlanEditor.Entities
 
         public Place RoomB { get; set; }
         public Place RoomA { get; set; }
-
-        public double Min()
-        {
-            if (Orientation == PortalOrient.Horizontal)
-            {
-                return Math.Min(ParentWall.X1, ParentWall.X2);
-            }
-            else 
-            {
-                return Math.Min(ParentWall.Y1, ParentWall.Y2);
-            }
-        }
-        public double Max()
-        {
-            if (Orientation == PortalOrient.Horizontal)
-            {
-                return Math.Max(ParentWall.X1, ParentWall.X2);
-            }
-            else
-            {
-                return Math.Max(ParentWall.Y1, ParentWall.Y2);
-            }
-        }
-        public double Wide
-        {
-            get 
-            {
-                return 1 / Data.Sigma;
-            }
-        }
-
-        public Line ParentWall { get; set; }    
+        public double Min { get; set; }
+        public double Max { get; set; }
+        public double Wide { get; set; }
 
         [NonSerialized]
         public List<Cell> Cells = new List<Cell>();
 
-        public void LoadUI()
+        public void CreateUI(double v) // Call this function when add new portal on canvas
         {
-            var pg = new PathGeometry();
-            pg.FillRule = FillRule.Nonzero;
+            var wide = Wide/Data.Sigma;
 
-            var pf = new PathFigure();
-            pg.Figures.Add(pf);
-
-            pf.StartPoint = new Point(ExportX[0], ExportY[0]);
-            Point startPoint = pf.StartPoint;
-
-            for (int i = 1, j = 1; i < ExportX.Count && j < ExportY.Count; ++i, ++j)
-            {
-                LineSegment ls = new LineSegment();
-                ls.Point = new Point(ExportX[i], ExportY[j]);
-                pf.Segments.Add(ls);
-            }
-
-            Path p = new Path();
-            p.Fill = Colours.LightGray;
-            p.StrokeThickness = 2;
-            p.Stroke = Colours.Green;
-            p.Data = pg;
-            UI = p;
-        } 
-        
-        public void SetUI()
-        {
-            double shiftX = Data.GridStep;
-            double shiftY = Data.GridStep;
-            double v = 0.00;
+            var shiftX = Data.GridStep;
+            var shiftY = Data.GridStep;
             
             if (Orientation == PortalOrient.Horizontal)
-            {
-                shiftX = Wide;
-                v = ParentWall.Y1;
-            }
+                shiftX = wide;
             else
-            {
-                shiftY = Wide;
-                v = ParentWall.X1;
-            }
+                shiftY = wide;
 
-            var pg = new PathGeometry();
-            pg.FillRule = FillRule.Nonzero;
+            var pg = new PathGeometry {FillRule = FillRule.Nonzero};
 
             var pf = new PathFigure();
             pg.Figures.Add(pf);
 
-            if (Orientation == PortalOrient.Horizontal)
-                pf.StartPoint = new Point(Min(), v - Data.GridStep/2);
-            else
-                pf.StartPoint = new Point(v - Data.GridStep / 2, Min());
+            pf.StartPoint = Orientation == PortalOrient.Horizontal ? new Point(Min, v - Data.GridStep/2) : new Point(v - Data.GridStep / 2, Min);
 
-            Point startPoint = pf.StartPoint;
+            var startPoint = pf.StartPoint;
 
             for (int i = 0; i < 4; ++i)
             {
-                LineSegment ls = new LineSegment();
+                var ls = new LineSegment();
 
                 switch (i)
                 {
@@ -134,11 +71,7 @@ namespace PlanEditor.Entities
                 pf.Segments.Add(ls);
             }
 
-            Path p = new Path();
-            p.Fill = Colours.Red;
-            p.StrokeThickness = 2;
-            p.Stroke = Colours.Yellow;
-            p.Data = pg;
+            var p = new Path {Fill = Colours.LightGray, StrokeThickness = 2, Stroke = Colours.Black, Data = pg};
             UI = p;
         }
     }

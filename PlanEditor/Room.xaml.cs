@@ -1,75 +1,108 @@
-﻿using PlanEditor.Entities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+using PlanEditor.Entities;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using PlanEditor.Helpers;
 
 namespace PlanEditor
 {
     public partial class Room : Window
     {
-        private Place place;
+        public Entity Entity { get; private set; }
 
-        bool isMore = false;
-        bool isNew = true;
-        private List<string> m_lstType = new List<string>();
-        private List<List<string>> m_subList = new List<List<string>>();
-        private List<string> m_lst2 = new List<string>();
-        private List<string> m_lst3 = new List<string>();
-        private List<string> m_lst4 = new List<string>();        
-        private List<string> m_lst6 = new List<string>();
-        
+        private Place _place;
+        private List<Place> _places;
+        private List<string> _lstType = new List<string>();
+        private List<List<string>> _subList = new List<List<string>>();
+        private List<string> _lst2 = new List<string>();
+        private List<string> _lst3 = new List<string>();
+        private List<string> _lst4 = new List<string>();
+        private List<string> _lst6 = new List<string>();
+        private bool _isMore = false;
+
         public Room(Place place)
         {
             InitializeComponent();
-            this.place = place;
+            _place = place;
+
+            Title = _place.Name;
+
+            InitializeCombo();
             Initialize();
         }
 
-        private void Initialize()
+       
+
+        public Room(List<Place> places)
+        {
+            InitializeComponent();
+            InitializeCombo();
+
+            Title = "Помещения";
+
+            name.IsEnabled = false;
+            Wide.IsEnabled = false;
+            Height.IsEnabled = false;
+            Leng.IsEnabled = false;
+
+            Stairway.Visibility = Visibility.Hidden;
+
+            _places = places;
+        }   
+
+        public Room()
+        {
+            InitializeComponent();
+            InitializeCombo();
+
+            Title = "Новое помещение";
+
+            Stairway.Visibility = Visibility.Hidden;
+        }
+
+        private void InitializeCombo()
         {
             FillTypes();
             FillSubTypes();
             type.SelectionChanged += type_SelectionChanged;
+        }
 
-            if (place.UI != null)
+        private void Initialize()
+        {            
+
+            if (_place.UI != null)
             {
-                isNew = false;
-                PathGeometry pg = place.UI.Data as PathGeometry;
+                var pg = _place.UI.Data as PathGeometry;
                 if (pg.Figures[0].Segments.Count > 4)
                 {
                     Wide.IsEnabled = false;
                     Leng.IsEnabled = false;
-                    isMore = true;
+                    _isMore = true;
                 }
             }           
             
-            name.Text = place.Name;
-            people.Text = place.Ppl.ToString();                
-            Height.Text = place.Height.ToString();
+            name.Text = _place.Name;
+            people.Text = _place.Ppl.ToString(CultureInfo.InvariantCulture);
+            Height.Text = _place.Height.ToString(CultureInfo.InvariantCulture);
 
-            if (!isMore && !isNew)
+            if (!_isMore)
             {
-                Wide.Text = place.Wide.ToString();
-                Leng.Text = place.Length.ToString();
+                Wide.Text = _place.Wide.ToString(CultureInfo.InvariantCulture);
+                Leng.Text = _place.Length.ToString(CultureInfo.InvariantCulture);
             }            
 
             int selected = -1;
-            if (place.MainType != -1)
+            if (_place.MainType != -1)
             {
-                type.SelectedIndex = place.MainType;
+                type.SelectedIndex = _place.MainType;
 
-                switch (place.MainType)
+                switch (_place.MainType)
                 {
                     case 1:
                         selected = 0;
@@ -90,18 +123,34 @@ namespace PlanEditor
             {
                 subType.IsEnabled = true;
                 subType.Items.Clear();
-                foreach (var v in m_subList[selected])
+                foreach (var v in _subList[selected])
                 {
-                    ComboBoxItem item = new ComboBoxItem();
-                    item.Content = v;
-                    subType.Items.Add(v);
+                    var item = new ComboBoxItem { Content = v };
+                    subType.Items.Add(item);
                 }
 
-                subType.SelectedIndex = place.SubType;
+                subType.SelectedIndex = _place.SubType;
             }
             else
             { 
                 subType.IsEnabled = false;
+            }
+
+            if (_place.Type == Entity.EntityType.Stairway)
+            {
+                Stairway.Visibility = Visibility.Visible;
+                type.IsEnabled = false;
+                subType.IsEnabled = false;
+                var s = _place as Stairway;
+                if (s != null)
+                {
+                    StageFrom.Text = s.StageFrom.ToString();
+                    StageTo.Text = s.StageTo.ToString();
+                }
+            }
+            else 
+            {
+                Stairway.Visibility = Visibility.Hidden;
             }
             
         }
@@ -110,7 +159,7 @@ namespace PlanEditor
         {
             subType.Items.Clear();
             int selected = -1;
-
+            
             switch (type.SelectedIndex)
             { 
                 case 1:
@@ -134,148 +183,131 @@ namespace PlanEditor
             else
             {
                 subType.IsEnabled = true;
-                foreach (var v in m_subList[selected])
+                foreach (var v in _subList[selected])
                 {
-                    ComboBoxItem item = new ComboBoxItem();
-                    item.Content = v;
-                    subType.Items.Add(v);
+                    var item = new ComboBoxItem {Content = v};
+                    subType.Items.Add(item);
                 }
             }
+
+            Stairway.Visibility = type.SelectedIndex == type.Items.Count - 1 ? Visibility.Visible : Visibility.Hidden;
         }
                
 
         private void Click_OK(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = true;
+            DialogResult = true;
 
-            place.Name = name.Text;
-            place.Ppl = int.Parse(people.Text);    
-            place.Height = double.Parse(Height.Text);
-            place.MainType = type.SelectedIndex;
-            place.SubType = subType.SelectedIndex;
-
-
-            if (isMore)
-                return;
-
-            double _wide = double.Parse(Wide.Text);
-            double _len = double.Parse(Leng.Text);
-            
-            double w = _wide / Data.Sigma;
-            double l = _len / Data.Sigma;
-
-            if (isNew)
+            if (_places != null && _place == null)
             {
-                CreateNew(w, l);
+                Places();
+                return;
             }
+
+            if (_place != null)
+            {
+                PlaceNotNull();
+            } 
             else
-            {                
-                PathGeometry pg = place.UI.Data as PathGeometry;
-                if (pg.Figures[0].Segments.Count < 5)
-                {
-                    EditPlace(w, l);
-                }
+            {
+                PlaceNull();
             }
         }
 
         private void FillTypes()
         {
-            m_lstType.Add("Учебные аудитории");
-            m_lstType.Add("Специализированные помещения");
-            m_lstType.Add("Спортивные помещения");
-            m_lstType.Add("Раздевалка (молодежная одежда)");
-            m_lstType.Add("Помещения специализированных лабораторий");
-            m_lstType.Add("Помещения залов");
-            m_lstType.Add("Зал книг");
-            m_lstType.Add("Препараторская, медицинский пункт");
-            m_lstType.Add("Офисные помещения");
-            m_lstType.Add("Научно-исследовательское помещение ");
-            m_lstType.Add("Помещения с техникой");
-            m_lstType.Add("Бойлерная,  венткамера");
-            m_lstType.Add("Столовая, буфет, зал ресторана");
-            m_lstType.Add("Коридор, лестничная клетка, холл, санузел");
-            m_lstType.Add("Котельная (нефть)");
-            m_lstType.Add("Подсобное помещение");
-            m_lstType.Add("Бытовые помещения");
-            m_lstType.Add("Производственное помещение");
-            m_lstType.Add("Склад (по типу назначения)");
-            m_lstType.Add("Магазины");
-            m_lstType.Add("Стоянки легковых a\\м");
-            m_lstType.Add("Стоянки легковых а\\м (с двухуровневым хранением)");
+            _lstType.Add("Учебные аудитории");
+            _lstType.Add("Специализированные помещения");
+            _lstType.Add("Спортивные помещения");
+            _lstType.Add("Раздевалка (молодежная одежда)");
+            _lstType.Add("Помещения специализированных лабораторий");
+            _lstType.Add("Помещения залов");
+            _lstType.Add("Зал книг");
+            _lstType.Add("Препараторская, медицинский пункт");
+            _lstType.Add("Офисные помещения");
+            _lstType.Add("Научно-исследовательское помещение ");
+            _lstType.Add("Помещения с техникой");
+            _lstType.Add("Бойлерная,  венткамера");
+            _lstType.Add("Столовая, буфет, зал ресторана");
+            _lstType.Add("Коридор, холл, санузел");
+            _lstType.Add("Котельная (нефть)");
+            _lstType.Add("Подсобное помещение");
+            _lstType.Add("Бытовые помещения");
+            _lstType.Add("Производственное помещение");
+            _lstType.Add("Склад (по типу назначения)");
+            _lstType.Add("Магазины");
+            _lstType.Add("Стоянки легковых a\\м");
+            _lstType.Add("Стоянки легковых а\\м (с двухуровневым хранением)");
+            _lstType.Add("Лестница");
 
-            for (int i = 0; i < m_lstType.Count; ++i)
-            {
-                var item = new ComboBoxItem();
-                item.Content = m_lstType[i];
+            foreach (var item in _lstType.Select(t => new ComboBoxItem {Content = t}))
                 type.Items.Add(item);
-            }
         }
 
         private void FillSubTypes()
         {
-            m_lst2.Add("Серверная");
-            m_lst2.Add("Лингафонный кабинет");
+            _lst2.Add("Серверная");
+            _lst2.Add("Лингафонный кабинет");
 
-            m_lst3.Add("Большие спортзалы");
-            m_lst3.Add("Стадионы");
+            _lst3.Add("Большие спортзалы");
+            _lst3.Add("Стадионы");
 
-            m_lst4.Add("Гардероб");
+            _lst4.Add("Гардероб");
 
-            m_lst6.Add("Жилые помещения гостиниц, общежитий");
+            _lst6.Add("Жилые помещения гостиниц, общежитий");
 
-            m_subList.Add(m_lst2);
-            m_subList.Add(m_lst3);
-            m_subList.Add(m_lst4);
-            m_subList.Add(m_lst6);
+            _subList.Add(_lst2);
+            _subList.Add(_lst3);
+            _subList.Add(_lst4);
+            _subList.Add(_lst6);
         }
 
         private void EditPlace(double w, double l)
         {
-            PathGeometry pg = place.UI.Data as PathGeometry;
-            Point startPoint = pg.Figures[0].StartPoint;
+            var pg = _place.UI.Data as PathGeometry;
+            var startPoint = pg.Figures[0].StartPoint;
 
             int count = pg.Figures[0].Segments.Count;
 
             for (int i = 0; i < count; ++i)
             {
-                LineSegment ls = pg.Figures[0].Segments[i] as LineSegment;
-                double _x = ls.Point.X;
-                double _y = ls.Point.Y;
+                var ls = pg.Figures[0].Segments[i] as LineSegment;
+                double x = ls.Point.X;
+                double y = ls.Point.Y;
                 switch (i)
                 {
                     case 0:
                     //case 1:
-                        _x = startPoint.X + w;
+                        x = startPoint.X + w;
                         break;
                     case 1:
                     //case 3:
-                        _x = startPoint.X + w;
-                        _y = startPoint.Y + l;
+                        x = startPoint.X + w;
+                        y = startPoint.Y + l;
                         break;
                     case 2:
                     //case 5:
-                        _y = startPoint.Y + l;
+                        y = startPoint.Y + l;
                         break;
                 }
 
-                ls.Point = new Point(_x, _y);
+                ls.Point = new Point(x, y);
             }
         }
 
-        private void CreateNew(double w, double l)
+        private Path CreateNew(double w, double l)
         {
-            var pg = new PathGeometry();
-            pg.FillRule = FillRule.Nonzero;
+            var pg = new PathGeometry {FillRule = FillRule.Nonzero};
 
             var pf = new PathFigure();
             pg.Figures.Add(pf);
 
             pf.StartPoint = new Point(100, 100);
-            Point startPoint = pf.StartPoint;
+            var startPoint = pf.StartPoint;
 
             for (int i = 0; i < 4; ++i)
             {
-                LineSegment ls = new LineSegment();
+                var ls = new LineSegment();
 
                 switch (i)
                 {
@@ -298,12 +330,114 @@ namespace PlanEditor
                 pf.Segments.Add(ls);
             }
 
-            Path p = new Path();
-            p.Fill = Colours.Indigo;
-            p.StrokeThickness = 2;
-            p.Stroke = Colours.Black;
-            p.Data = pg;
-            place.UI = p;
+            var p = new Path {StrokeThickness = 2, Stroke = Colours.Black, Data = pg};
+
+            return p;
+        }
+    
+        private void PlaceNotNull()
+        {
+            _place.Name = name.Text;
+            _place.Ppl = int.Parse(people.Text);
+            _place.Height = double.Parse(Height.Text);
+            if (_place.Type != Entity.EntityType.Stairway)
+            {
+                _place.MainType = type.SelectedIndex;
+                _place.SubType = subType.SelectedIndex;
+            }
+            else
+            {
+                var s = _place as Stairway;
+                s.StageFrom = int.Parse(StageFrom.Text);
+                s.StageTo = int.Parse(StageTo.Text);
+            }
+
+
+            if (_isMore) return;
+
+            double wide = double.Parse(Wide.Text);
+            double len = double.Parse(Leng.Text);
+
+            double w = wide / Data.Sigma;
+            double l = len / Data.Sigma;
+
+            var pg = _place.UI.Data as PathGeometry;
+            if (pg != null && pg.Figures[0].Segments.Count < 5)
+            {
+                EditPlace(w, l);
+            }
+        }
+       
+        private void PlaceNull()
+        {
+            double wide = double.Parse(Wide.Text);
+            double len = double.Parse(Leng.Text);
+
+            double w = wide / Data.Sigma;
+            double l = len / Data.Sigma;
+
+            if (type.SelectedIndex == type.Items.Count - 1)
+            {
+                var stairway = new Stairway
+                {
+                    Name = name.Text,
+                    Ppl = int.Parse(people.Text),
+                    Height = double.Parse(Height.Text),
+                    StageFrom = int.Parse(StageFrom.Text),
+                    StageTo = int.Parse(StageTo.Text),
+                    UI = CreateNew(w, l)
+                };
+
+                stairway.UI.Fill = Colours.Violet;
+                Entity = stairway;
+            }
+            else
+            {
+                var p = new Place
+                {
+                    Name = name.Text,
+                    Ppl = int.Parse(people.Text),
+                    Height = double.Parse(Height.Text),
+                    MainType = type.SelectedIndex,
+                    SubType = subType.SelectedIndex,
+                    UI = CreateNew(w, l)
+                };
+
+                if (type.SelectedIndex == 13)
+                {
+                    p.UI.Fill = Colours.Green;
+                    p.Type = Entity.EntityType.Halfway;
+                }
+                else
+                {
+                    p.UI.Fill = Colours.Indigo;
+                }
+                Entity = p;
+            }
+        }
+    
+        private void Places()
+        {
+            foreach (var plc in _places)
+            {
+                plc.MainType = type.SelectedIndex;
+                plc.SubType = subType.SelectedIndex;
+                plc.Ppl = int.Parse(people.Text);
+            }    
+        }
+
+        private void Text_ChangedDouble(object sender, TextChangedEventArgs e)
+        {
+            var textBox = e.Source as TextBox;
+            if (textBox == null) return;
+            double i;
+            BtnOk.IsEnabled = double.TryParse(textBox.Text, out i);
+        }
+
+        private void Text_ChangedPeople(object sender, TextChangedEventArgs e)
+        {
+            int d;
+            BtnOk.IsEnabled = int.TryParse(people.Text, out d);
         }
     }
 }

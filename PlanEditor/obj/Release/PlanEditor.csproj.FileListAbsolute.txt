@@ -1,0 +1,16 @@
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Release\GridConverter.exe.config
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Release\GridConverter.exe
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Release\GridConverter.pdb
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\Building.baml
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\MainWindow.baml
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\Room.baml
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\Building.g.cs
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\MainWindow.g.cs
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\Room.g.cs
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\App.g.cs
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\GridConverter_MarkupCompile.cache
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\GridConverter.g.resources
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\PlanEditor.Properties.Resources.resources
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\PlanEditor.csproj.GenerateResource.Cache
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\GridConverter.exe
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\GridConverter.pdb

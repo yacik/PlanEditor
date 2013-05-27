@@ -1,31 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Collections.Generic;
+using PlanEditor.Entities;
 
 namespace PlanEditor.RegGrid
 {
     public class Cell
     {
-        public Cell(double x, double y, int m, int n)
+        public Cell(double x, double y, int m, int n, int k)
         {
             PosX = x;
             PosY = y;
 
             M = m;
             N = n;
+            K = k;
 
-            Owner = -1;
+            Owner = null;
         }
 
         public int M  { get; private set; }
         public int N { get; private set; }
-        public double PosX { get; private set; }
-        public double PosY { get; private set; }
-        public int ID { get; set; }       
+        public int K { get; private set; }
+        public double PosX { get; set; }
+        public double PosY { get; set; }
+
         public List<Cell> Neigh = new List<Cell>();
-        public int Owner;
+        public Entity Owner;
+
+        public override string ToString()
+        {
+            return "M: " + M + " N: " + N + " K: " + K + " owner: " + Owner.ID;
+        }
     }
 }

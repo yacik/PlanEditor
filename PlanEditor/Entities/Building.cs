@@ -9,6 +9,7 @@ namespace PlanEditor.Entities
     [Serializable]
     public class Building
     {
+        // Users data
         public string Name { get; set; }
         public string Address { get; set; }
         public int Functionality { get; set; }
@@ -18,15 +19,19 @@ namespace PlanEditor.Entities
         public int FireSignal { get; set; } // 1 - 3
         public int Notification { get; set; } // 1 - 3
         public int AntiFog { get; set; } // 1 - 3
-        public string Insurance { get; set; }
-        public int Stages { get; set; }
-        public int NumNodes {get; set; }    // Характерное число узлов (входной параметр)         
+        public int Insurance { get; set; }
+        public int Stages { get; set; }        
+        public string Addition { get; set; }        
+        public double Lx { get; set; }      // Размеры проекции здания по Х, метры 
+        public double Ly { get; set; }      // Размеры проекции здания по Y, метры               
+        public double HeightStage { get; set; } 
+
+        // Computing data
         public int Row { get; set; }
         public int Col { get; set; }
         public double xMax { get; set; }
         public double yMax { get; set; }
-        public double Lx { get; set; }      // Размеры проекции здания по Х, метры 
-        public double Ly { get; set; }      // Размеры проекции здания по Y, метры       
+        public int NumNodes { get; set; }    // Характерное число узлов (входной параметр)    
         public int PplCell { get; set; }    // Расчет Количество ячеек сетки в здании, где могут находиться люди 
 
         public int GetNumPlaces
@@ -57,18 +62,13 @@ namespace PlanEditor.Entities
         {
             get 
             {
-                int num = 0;
-
-                foreach (var v in Mines)
-                    num += v.Count;
-
-                return num;
+                return Mines.Count;
             }
         }
 
-        public List<List<Place>> Places = new List<List<Place>>();      // NB кол-во помещений
-        public List<List<Place>> Mines = new List<List<Place>>();       // NB кол-во шахт
-        public List<List<Portal>> Portals = new List<List<Portal>>();   // NB кол-во порталов
+        public List<List<Place>> Places = new List<List<Place>>();       
+        public List<Stairway> Mines = new List<Stairway>();  
+        public List<List<Portal>> Portals = new List<List<Portal>>();    
 
         public override string ToString()
         {
@@ -92,6 +92,9 @@ namespace PlanEditor.Entities
             sb.Append(yMax + " ");
             sb.Append(Lx + " ");
             sb.Append(Ly + " ");
+            sb.Append(HeightStage + " ");
+            sb.Append(Addition + " ");
+            sb.Append(Stages + " ");
             sb.Append(PplCell);
 
             return sb.ToString();
@@ -99,13 +102,19 @@ namespace PlanEditor.Entities
 
         public void PrepareForExport()
         {
-            for (int i = 0; i < Places.Count; ++i)
+            for (int i = 0; i < Stages; ++i)
             {
-                foreach (var v in Places[i])
-                {
-                    v.PrepareForSave();
-                }
+                if (Places.Count > i)
+                    foreach (var v in Places[i])
+                        v.PrepareForSave();
+
+                if (Portals.Count > i)
+                    foreach (var v in Portals[i])
+                        v.PrepareForSave();
             }
+
+            foreach (var v in Mines)
+                v.PrepareForSave();
         }
     }
 }

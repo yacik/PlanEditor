@@ -9,7 +9,9 @@
         </ContextMenu>
     </Window.ContextMenu>
     <Grid x:Name="GridField">
-        <Canvas Name="ContentPanel" Background="Gray" Height="Auto" Margin="0,21,0,0"/>
+        <Canvas x:Name="ContentPanel" Background="Gray" Height="Auto">
+            <TextBlock x:Name="Stage" Canvas.Left="10" Canvas.Top="21" FontSize="22"/>
+        </Canvas>
         <DockPanel Height="319" VerticalAlignment="Top" HorizontalAlignment="Stretch">
             <Menu DockPanel.Dock="Top" Height="20" VerticalAlignment="Top">
                 <MenuItem Header="Файл">
@@ -19,22 +21,20 @@
                     <MenuItem Header="Экспортировать" Click="Click_Export"/>
                     <MenuItem Header="Редактировать" Click="Click_EditBuilding"/>
                 </MenuItem>
-                <MenuItem Header="Инструменты">
-                    <MenuItem Header="Увеличить" Click="Click_ZoomIn"/>
-                    <MenuItem Header="Уменьшить" Click="Click_ZoomOut"/>
+                <MenuItem Header="Инструменты" x:Name="MenuTools">
+                    <!--<MenuItem Header="Увеличить" Click="Click_ZoomIn"/>
+                    <MenuItem Header="Уменьшить" Click="Click_ZoomOut"/>-->
                     <MenuItem Header="Выбрать" Click="Click_SelectTool" />
                     <MenuItem Header="Перемещение" Click="Click_MoveTool" />
-                    <MenuItem Header="Сетка" Click="Click_Grid" />
+                    <!--<MenuItem Header="Сетка" Click="Click_Grid" />-->
                     <Separator/>
                     <MenuItem Header="Этаж выше" Click="Click_NextStage"/>
                     <MenuItem Header="Этаж ниже" Click="Click_PrevStage"/>
                 </MenuItem>
-                <MenuItem Header="Добавить">
+                <MenuItem Header="Добавить" x:Name="MenuAdd">
                     <MenuItem Header="Помещение" Click="Click_AddRoom" />
-                    <MenuItem Header="Произвольное помещение" Click="Click_Path" />
+                    <!--<MenuItem Header="Произвольное помещение" Click="Click_Path" />-->
                     <MenuItem Header="Дверь" Click="Click_AddDoor" />
-                    <MenuItem Header="Лестницу" Click="Click_AddMine" />
-                    <MenuItem Header="Этаж" Click="Click_AddStage" />
                 </MenuItem>
             </Menu>
         </DockPanel>        

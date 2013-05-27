@@ -36,6 +36,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -56,11 +57,18 @@
     <Compile Include="Building.xaml.cs">
       <DependentUpon>Building.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ConvertStrings.cs" />
+    <Compile Include="Door.xaml.cs">
+      <DependentUpon>Door.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\Stairway.cs" />
     <Compile Include="Helpers\Colours.cs" />
     <Compile Include="Entities\Building.cs" />
     <Compile Include="Helpers\IO\LoadFile.cs" />
     <Compile Include="Helpers\IO\LoadIntdFile.cs" />
+    <Compile Include="Helpers\IO\LoadSVGFile.cs" />
     <Compile Include="Helpers\IO\SaveFile.cs" />
+    <Compile Include="Helpers\IO\SaveToXML.cs" />
     <Compile Include="RegGrid\RecognizeGrid.cs" />
     <Compile Include="Room.xaml.cs">
       <DependentUpon>Room.xaml</DependentUpon>
@@ -74,6 +82,10 @@
     <Compile Include="Helpers\Data.cs" />
     <Compile Include="SVGConverter\ConvertStrings.cs" />
     <Page Include="Building.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Door.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -99,8 +111,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Math\Geometry.cs" />
-    <Compile Include="Math\Line.cs" />
+    <Compile Include="Math\MyMath.cs" />
     <Compile Include="Entities\Place.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
