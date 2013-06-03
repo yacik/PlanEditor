@@ -12,8 +12,8 @@ namespace PlanEditor.Entities
             Type = EntityType.Stairway;
         }
         
-        public decimal StageFrom { get; set; }
-        public decimal StageTo { get; set; }
+        public int StageFrom { get; set; }
+        public int StageTo { get; set; }
         
         [NonSerialized] public List<Cell> StartPoints = new List<Cell>();
         [NonSerialized] public List<Cell> EndPoints = new List<Cell>();

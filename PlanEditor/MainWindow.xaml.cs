@@ -35,11 +35,11 @@ namespace PlanEditor
         private double _lastPosY;
         private Line _line;
         private Entities.Building _building;
-        private bool _firstClick = false;
-        private int _curStage = 0;
+        private bool _firstClick;
+        private int _curStage;
         private bool _isConnected = true;
-        private Place _place1 = null;
-        private Place _place2 = null;
+        private Place _place1;
+        private Place _place2;
         private RegGrid.Grid _grid;
         private readonly List<Entity> _selected = new List<Entity>();
         private readonly List<Line> _lines = new List<Line>();
@@ -68,7 +68,7 @@ namespace PlanEditor
             _grid = new RegGrid.Grid(_building);
 
             Stage.SetValue(Panel.ZIndexProperty, 100);
-            _mode = CanvasMode.Move;
+            _mode = CanvasMode.Select;
 
             #region MouseEvents
 
@@ -78,7 +78,7 @@ namespace PlanEditor
             ContentPanel.MouseLeftButtonDown += GridField_MouseLeftButtonDown;
             ContentPanel.MouseDown += GridField_MouseDown;
             ContentPanel.MouseLeave += GridField_MouseLeave;
-            ContentPanel.MouseWheel += GridField_MouseWheel;
+            ContentPanel.MouseDown += GridField_MouseDown;
             ContentPanel.KeyDown += GridField_KeyDown;
             ContentPanel.KeyUp += GridField_KeyUp;
             ContentPanel.Focusable = true;
@@ -109,12 +109,7 @@ namespace PlanEditor
         {
             _shiftPressed = (Key.LeftShift != e.Key);
         }
-
-        private void GridField_MouseWheel(object sender, MouseEventArgs e)
-        {
-
-        }
-
+        
         private void GridField_MouseLeave(object sender, MouseEventArgs e)
         {
 
@@ -122,7 +117,11 @@ namespace PlanEditor
 
         private void GridField_MouseDown(object sender, MouseEventArgs e)
         {
-
+            if (e.MiddleButton == MouseButtonState.Pressed)
+            {
+                _lastPosX = e.GetPosition(null).X;
+                _lastPosY = e.GetPosition(null).Y;
+            }
         }
 
         /*private void GridField_MouseRightButtonDown(object sender, MouseEventArgs e)
@@ -135,27 +134,35 @@ namespace PlanEditor
             double x = e.GetPosition(null).X;
             double y = e.GetPosition(null).Y;
 
-            switch (_mode)
+            if (e.MiddleButton == MouseButtonState.Pressed)
             {
-                case CanvasMode.Path:
-                    MovePath(x, y);
-                    break;
+                Move(x, y);
+            }
+            else
+            {
+                switch (_mode)
+                {
+                    case CanvasMode.Path:
+                        MovePath(x, y);
+                        break;
 
-                case CanvasMode.Move:
-                    if (e.LeftButton == MouseButtonState.Pressed)
-                        Move(x, y);
-                    break;
+                    case CanvasMode.Move:
+                        if (e.LeftButton == MouseButtonState.Pressed)
+                            Move(x, y);
+                        break;
 
-                case CanvasMode.Select:
-                    if (e.LeftButton == MouseButtonState.Pressed)
-                        MoveSelected(x, y);
-                    break;
+                    case CanvasMode.Select:
+                        if (e.LeftButton == MouseButtonState.Pressed)
+                            MoveSelected(x, y);
+                        break;
+                }
             }
         }
 
         private void GridField_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-
+            _lastPosX = e.GetPosition(null).X;
+            _lastPosY = e.GetPosition(null).Y;
         }
 
         private void GridField_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -163,16 +170,15 @@ namespace PlanEditor
             double x = e.GetPosition(null).X - _translation.X;
             double y = e.GetPosition(null).Y - _translation.Y;
 
-            x /= _scale.ScaleX;
-            y /= _scale.ScaleY;
+            //x /= _scale.ScaleX;
+            //y /= _scale.ScaleY;
 
             if (e.ClickCount >= 2)
             {
                 DeselectAll();
             }
-
-            switch (_mode)
-            {
+           switch (_mode)
+           {
                 case CanvasMode.Path:
                     if (e.ClickCount >= 2)
                     {
@@ -201,7 +207,7 @@ namespace PlanEditor
                     _lastPosY = e.GetPosition(null).Y;
                     break;
 
-                case CanvasMode.Select:                 
+                case CanvasMode.Select:
                     _lastPosX = e.GetPosition(null).X;
                     _lastPosY = e.GetPosition(null).Y;
                     SelectObjects(x, y);
@@ -265,7 +271,7 @@ namespace PlanEditor
 
         private void Click_New(object sender, RoutedEventArgs e)
         {
-            var bldg = new Building(_building, Building.Mode.New);
+            var bldg = new WinBuilding(_building, WinBuilding.Mode.New);
             var isOk = bldg.ShowDialog();
             if (isOk == null) return;
 
@@ -309,60 +315,66 @@ namespace PlanEditor
 
             if (result == true)
             {
-                LoadBinary(dlg.FileName);
-            }
-
-            ContentPanel.Children.Clear();
-            _curStage = 0;
-
-            _transformGroup = new TransformGroup();
-            _translation = new TranslateTransform();
-            _scale = new ScaleTransform();
-            _transformGroup.Children.Add(_translation);
-            _transformGroup.Children.Add(_scale);
-
-            CreateNewProject();
-
-            for (int i = 0; i < _building.Stages; ++i)
-            {
-                if (_building.Places.Count > i)
-                    foreach (var v in _building.Places[i])
-                    {
-                        ContentPanel.Children.Add(v.UI);
-                        v.UI.RenderTransform = _transformGroup;
-                        if (i != _curStage)
-                            v.UI.Visibility = Visibility.Hidden;
-                    }
-                
-                int s = _curStage + 1;
-                foreach (var v in _building.Mines.Where(v => !ContentPanel.Children.Contains(v.UI)))
+                if (LoadBinary(dlg.FileName))
                 {
-                    ContentPanel.Children.Add(v.UI);
-                    v.UI.RenderTransform = _transformGroup;
-                    if (s <= v.StageFrom && s >= v.StageTo)
-                        v.UI.Visibility = Visibility.Hidden;
-                }
+                    ContentPanel.Children.Clear();
+                    _curStage = 0;
 
-                if (_building.Portals.Count > i)
-                    foreach (var v in _building.Portals[i])
+                    _transformGroup = new TransformGroup();
+                    _translation = new TranslateTransform();
+                    _scale = new ScaleTransform();
+                    _transformGroup.Children.Add(_translation);
+                    _transformGroup.Children.Add(_scale);
+
+                    CreateNewProject();
+
+                    for (int i = 0; i < _building.Stages; ++i)
                     {
-                        ContentPanel.Children.Add(v.UI);
-                        v.UI.RenderTransform = _transformGroup;
-                        if (i != _curStage)
-                            v.UI.Visibility = Visibility.Hidden;
-                    }
-            }
+                        if (_building.Places.Count > i)
+                            foreach (var v in _building.Places[i])
+                            {
+                                ContentPanel.Children.Add(v.UI);
+                                v.UI.RenderTransform = _transformGroup;
+                                if (i != _curStage)
+                                    v.UI.Visibility = Visibility.Hidden;
+                            }
 
-            DrawPlan();
-            ChangeStageName();
+                        int s = _curStage + 1;
+                        foreach (var v in _building.Mines.Where(v => !ContentPanel.Children.Contains(v.UI)))
+                        {
+                            ContentPanel.Children.Add(v.UI);
+                            v.UI.RenderTransform = _transformGroup;
+                            if (s <= v.StageFrom && s >= v.StageTo)
+                                v.UI.Visibility = Visibility.Hidden;
+                        }
+
+                        if (_building.Portals.Count > i)
+                            foreach (var v in _building.Portals[i])
+                            {
+                                ContentPanel.Children.Add(v.UI);
+                                v.UI.RenderTransform = _transformGroup;
+                                if (i != _curStage)
+                                    v.UI.Visibility = Visibility.Hidden;
+                            }
+                    }
+
+                    DrawPlan();
+                    ChangeStageName();
+                }
+                else MessageBox.Show("Ошибка в чтении файла");
+            }
         }
 
-        private void LoadBinary(string fileName)
+        private bool LoadBinary(string fileName)
         {
             _building = new Entities.Building();
             var lf = new LoadFile(fileName, _building);
-            lf.Load();
-            _building = lf.Building;
+            if (lf.Load())
+            {
+                _building = lf.Building;
+                return true;
+            }
+            return false;
         }
 
         private void CreateNewProject()        
@@ -403,7 +415,7 @@ namespace PlanEditor
         
         private void Click_AddRoom(object sender, RoutedEventArgs e)
         {            
-            var r = new Room {Owner = this};
+            var r = new WinRoom {Owner = this};
             var isOk = r.ShowDialog();
 
             if (isOk == null || isOk == false)
@@ -441,7 +453,7 @@ namespace PlanEditor
             double lx = _building.Lx;
             double ly = _building.Ly;
 
-            var bld = new Building(_building, Building.Mode.Edit);
+            var bld = new WinBuilding(_building, WinBuilding.Mode.Edit);
             var isOk = bld.ShowDialog();
 
             if (isOk != null && isOk == true)
@@ -684,10 +696,7 @@ namespace PlanEditor
                     case Entity.EntityType.Portal:
                         MovePortal(moveX, moveY, v);
                         break;
-                    case Entity.EntityType.Place:
-                    case Entity.EntityType.Stairway:
-                    case Entity.EntityType.Halfway:
-                    case Entity.EntityType.Lift:
+                    default:
                         MovePlace(moveX, moveY, v);
                         break;
                 }
@@ -696,7 +705,7 @@ namespace PlanEditor
 
         private void Click_Property(object sender, RoutedEventArgs e)
         {
-            /*Room room;
+            /*WinRoom room;
             switch (_selected.Count)
             {
                 case 0:
@@ -704,12 +713,12 @@ namespace PlanEditor
                 case 1:
                     var place = _selected[0] as Place;
                     if (place==null) return;
-                    room = new Room(place);
+                    room = new WinRoom(place);
                     room.ShowDialog();
                     break;
                 default:
                     var lst = _selected.Where(entity => entity.Type == Entity.EntityType.Place).OfType<Place>().ToList();
-                    room = new Room(lst);
+                    room = new WinRoom(lst);
                     room.ShowDialog();
                     break;
             }*/
@@ -719,7 +728,7 @@ namespace PlanEditor
                 case Entity.EntityType.Portal:
                     var portal = _selected[0] as Portal;
                     if (portal == null) return;
-                    var door = new Door(portal);
+                    var door = new WinPortal(portal);
                     var isOK = door.ShowDialog();
                     //if (isOK != null && isOK == true)
                     //    portal.CreateUI(door.Wide);
@@ -727,7 +736,7 @@ namespace PlanEditor
                 default:
                     var place = _selected[0] as Place;
                     if (place==null) return;
-                    var room = new Room(place);
+                    var room = new WinRoom(place);
                     room.ShowDialog();
                     break;
             }
@@ -843,10 +852,8 @@ namespace PlanEditor
                                 isDoor = true;
                             else if (p.RoomA == place || p.RoomB == place)
                             {
-                                if (p.RoomA != place)
-                                    p.RoomA.IsMovable = true;
-                                else
-                                    p.RoomB.IsMovable = true;
+                                if (p.RoomA != place) p.RoomA.IsMovable = true;
+                                else p.RoomB.IsMovable = true;
 
                                 isDoor = true;
                             }
@@ -887,7 +894,7 @@ namespace PlanEditor
                         break;
                 }
             }
-
+            
             _selected.Clear();
         }
 
@@ -909,7 +916,6 @@ namespace PlanEditor
             var min = double.MaxValue;
             var lines = place.Lines;
             Line line = null;
-
 
             foreach (var v in lines)
             {
@@ -1005,7 +1011,7 @@ namespace PlanEditor
                     return;
                 }
 
-                var door = new Door {Owner = this};
+                var door = new WinPortal {Owner = this};
                 var isOk = door.ShowDialog();
 
                 if (isOk != null && isOk == true)
@@ -1266,6 +1272,8 @@ namespace PlanEditor
                 double _x = x;
                 double _y = y;
                 var ls = pg.Figures[0].Segments[i] as LineSegment;
+                if (ls == null) continue;
+
                 _x = ls.Point.X + moveX;                    
                 _y = ls.Point.Y + moveY;
                 ls.Point = new Point(_x, _y);

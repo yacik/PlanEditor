@@ -171,7 +171,7 @@ namespace PlanEditor {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/GridConverter;component/building.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/Plan Editor;component/building.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\Building.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

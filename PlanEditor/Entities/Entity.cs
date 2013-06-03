@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -13,13 +11,6 @@ namespace PlanEditor.Entities
     [Serializable]
     public class Entity
     {
-        protected Entity()
-        {
-            ID = Data.CurID;
-            ++Data.CurID;
-        }
-        
-        public int ID { get; private set; }
         public enum EntityType { Place, Portal, Stairway, Halfway, Lift }
         public EntityType Type { get; set; }
 

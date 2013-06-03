@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using PlanEditor.Helpers;
+using PlanEditor.Entities;
 
 namespace PlanEditor.RegGrid
 {
     public class RecognizeGrid
     {
         private readonly Grid _grid;
-        private readonly Entities.Building _building;
+        private readonly Building _building;
 
-        public RecognizeGrid(Grid grid, Entities.Building building)
+        public RecognizeGrid(Grid grid, Building building)
         {
             _grid = grid;
             _building = building;
@@ -52,7 +52,10 @@ namespace PlanEditor.RegGrid
                     {
                         if (_grid.Cells.Count > i)
                         {
-                            foreach (var cell in _grid.Cells[i].Where(cell => cell.Owner == null).Where(cell => MyMath.Helper.IsCollide(cell.PosX, cell.PosY, place.PointsX, place.PointsY)))
+                            var pointsX = place.PointsX;
+                            var pointsY = place.PointsY;
+
+                            foreach (var cell in _grid.Cells[i].Where(cell => cell.Owner == null).Where(cell => MyMath.Helper.IsCollide(cell.PosX, cell.PosY, pointsX, pointsY)))
                             {
                                 ++place.CountNodes;
                                 cell.Owner = place;
@@ -62,22 +65,47 @@ namespace PlanEditor.RegGrid
                     }
                 }
             }
-
+            
             foreach (var stairway in _building.Mines)
             {
-                int start = (int)stairway.StageFrom - 1;
-                int end = (int)stairway.StageTo;
+                int start = stairway.StageFrom - 1;
+                int end = stairway.StageTo;
                 for (int i = start; i < end; ++i)
                 {
-                    foreach (var cell in _grid.Cells[i].Where(cell => cell.Owner == null) .Where(cell => MyMath.Helper.IsCollide(cell.PosX, cell.PosY, stairway.PointsX, stairway.PointsY)))
+                    var pointsX = stairway.PointsX;
+                    var pointsY = stairway.PointsY;
+                    foreach (var cell in _grid.Cells[i].Where(cell => cell.Owner == null) .Where(cell => MyMath.Helper.IsCollide(cell.PosX, cell.PosY, pointsX, pointsY)))
                     {
                         cell.Owner = stairway;
                         if (stairway.Cells == null) stairway.Cells = new List<Cell>();
                         stairway.Cells.Add(cell);
+                        ++stairway.CountNodes;
+                    }
+                }
+               stairway.CountNodes /= 2;
+            }
+        }
+
+        public static void DefineStairways(List<List<Stairway>> stairways, Grid grid)
+        {
+            for (int i = 0; i < stairways.Count; ++i)
+            {
+                foreach (var stairway in stairways[i])
+                {
+                    if (grid.Cells.Count > i) 
+                    {
+                        var pointsX = stairway.PointsX;
+                        var pointsY = stairway.PointsY;
+                        foreach (var cell in grid.Cells[i].Where(cell => cell.Owner == null || cell.Owner.Type == Entity.EntityType.Stairway).Where(cell => MyMath.Helper.IsCollide(cell.PosX, cell.PosY, pointsX, pointsY)))
+                        {
+                            cell.Owner = stairway;
+                              if (stairway.Cells == null) stairway.Cells = new List<Cell>();
+                            stairway.Cells.Add(cell);
+                            //++stairway.CountNodes;
+                        }
                     }
                 }
             }
-
         }
     }
 }

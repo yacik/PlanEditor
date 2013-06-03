@@ -15,22 +15,22 @@ C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverte
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\Room.baml
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\Room.g.cs
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverter\obj\Debug\PlanEditor.csprojResolveAssemblyReference.cache
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\GridConverter.exe.config
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\GridConverter.exe
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\GridConverter.pdb
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\Plan Editor.exe.config
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\Plan Editor.exe
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\Plan Editor.pdb
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\PlanEditor.csprojResolveAssemblyReference.cache
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\Building.baml
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\WinBuilding.baml
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\WinPortal.baml
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\MainWindow.baml
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\Room.baml
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\Building.g.cs
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\WinRoom.baml
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\WinBuilding.g.cs
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\WinPortal.g.cs
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\MainWindow.g.cs
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\Room.g.cs
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\WinRoom.g.cs
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\App.g.cs
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\GridConverter_MarkupCompile.cache
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\GridConverter.g.resources
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\Plan Editor_MarkupCompile.cache
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\Plan Editor.g.resources
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\PlanEditor.Properties.Resources.resources
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\PlanEditor.csproj.GenerateResource.Cache
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\GridConverter.exe
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\GridConverter.pdb
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\Door.baml
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\Door.g.cs
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\Plan Editor.exe
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\Plan Editor.pdb

@@ -9,6 +9,7 @@ namespace PlanEditor.Entities
     [Serializable]
     public class Building
     {
+        public static int CurID = 0;
         // Users data
         public string Name { get; set; }
         public string Address { get; set; }

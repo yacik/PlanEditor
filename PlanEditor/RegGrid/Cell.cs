@@ -28,7 +28,7 @@ namespace PlanEditor.RegGrid
 
         public override string ToString()
         {
-            return "M: " + M + " N: " + N + " K: " + K + " owner: " + Owner.ID;
+            return "M: " + M + " N: " + N + " K: " + K + " owner: ";
         }
     }
 }

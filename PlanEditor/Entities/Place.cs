@@ -30,6 +30,7 @@ namespace PlanEditor.Entities
         public double Height { get; set; }		    // высота помещения, м        
         public double SHeigthRoom { get; set; }     // высота  площадки,  на  которой  находятся  люди, над полом, м
         public double DifHRoom { get; set; }	    // разность высот пола, равная нулю при горизонтальном его расположении, м	
+        public double EvacWide { get; set; }
         public int MainType { get; set; }
         public int SubType { get; set; }
 
@@ -38,8 +39,7 @@ namespace PlanEditor.Entities
         public override string ToString()
         {
             var sb = new StringBuilder();
-
-            sb.Append(ID + " ");
+            
             sb.Append(CountNodes + " ");
             sb.Append(Ppl + " ");
             sb.Append(MaxPeople + " ");

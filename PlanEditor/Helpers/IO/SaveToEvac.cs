@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using System.Text;
 using PlanEditor.Entities;
 
 namespace PlanEditor.Helpers.IO
@@ -12,9 +14,9 @@ namespace PlanEditor.Helpers.IO
     [DataContract]
     internal struct Room
     {
-        public Room(Place place)
+        public Room(Place place, int id)
         {
-            ID = place.ID;
+            ID = id;
             CountNodes = place.CountNodes;
             Ppl = place.Ppl;
             MaxPeople = place.MaxPeople;
@@ -104,11 +106,11 @@ namespace PlanEditor.Helpers.IO
     [DataContract]
     internal struct Door
     {
-        public Door(Portal portal)
+        public Door(Portal portal, int id)
         {
             Wide = portal.Wide;
-            Code = (portal.RoomA == null && portal.RoomB == null) ? 2 : 1;
-            ID = portal.ID;
+            Code = (portal.RoomB == null) ? 1 : 2;
+            ID = id;
             Cells = new List<int>();
             if (portal.Cells != null)
             {
@@ -132,8 +134,8 @@ namespace PlanEditor.Helpers.IO
     {
         public Mine(int from, int to, RegGrid.Cell startCell, RegGrid.Cell endCell)
         {
-            StageFrom = from;
-            StageTo = to;
+            StageFrom = from - 1;
+            StageTo = to - 1;
             ID = _ID;
             ++_ID;
             StartPoints = new [] { startCell.M, startCell.N };
@@ -163,30 +165,63 @@ namespace PlanEditor.Helpers.IO
 
     public class SaveToEvac
     {
+        private static readonly List<Entity> Entities = new List<Entity>();
+        private static readonly List<List<Stairway>> Stairways = new List<List<Stairway>>();
         public static void Save(string fileName, RegGrid.Grid grid, Entities.Building building)
         {
             var sw = new StreamWriter(fileName);
             var _building = new Building(building);
-
+            
             for (int i = 0; i < building.Stages; ++i)
             {
+                var list = new List<Stairway>();
+                Stairways.Add(list);
+            }
+            
+            foreach (var v in building.Mines)
+            {
+                for (int i = v.StageFrom - 1; i < v.StageTo; ++i)
+                {
+                    var stair = CreateStairway(v);
+                    Stairways[i].Add(stair);
+
+                    int id = GenerateId(stair);
+                    var room = new Room(stair, id);
+                    _building.Rooms.Add(room);
+                }
+                int start = v.StageFrom - 1;
+                DefineMineEnter(v, building.Portals[start], true);
+
+                int end = v.StageTo - 1;
+                DefineMineEnter(v, building.Portals[end], false);
+
+                for (int i = 0; i < v.StartPoints.Count; ++i)
+                {
+                    if (i % 2 != 0) continue;
+
+                    var mine = new Mine(v.StageFrom, v.StageTo, v.StartPoints[i], v.EndPoints[i]);
+                    _building.Mines.Add(mine);
+                }
+            }
+            
+            RegGrid.RecognizeGrid.DefineStairways(Stairways, grid);
+            
+            for (int curStage = 0; curStage < building.Stages; ++curStage)
+            {
+                #region grid
                 /*
                     -1; // outside of computational domain
                     +1; // внешняя дверь (выход из опасной зоны)
                     +2; // внутренняя дверь
                     +5; // внутренняя ячейка горизонтальной поверхности
-                    +6; // внутренняя ячейка горизонтальной поверхности cо
-		                    // ступеньками
-                    +7; // внутренняя ячейка шахты (не принадлежит слою и не
-		                    // имеет соседей в горизонтальной плоскости)
-                    +9; // код узла шахты не подлежащий расчету эвакуации
-		                    // (проекция на уровень layer лестничного проема
-	                10; // код узла лестничного перехода, относящийся к шахте
-						                    // >=10 (узел принадлежит уровню layer)
+                    +6; // внутренняя ячейка горизонтальной поверхности cо ступеньками
+                    +7; // внутренняя ячейка шахты (не принадлежит слою и не имеет соседей в горизонтальной плоскости)
+                    +9; // код узла шахты не подлежащий расчету эвакуации (проекция на уровень layer лестничного проема
+	                10; // код узла лестничного перехода, относящийся к шахте >=10 (узел принадлежит уровню layer)
                 */
-                if (grid.Cells.Count > i)
+                if (grid.Cells.Count > curStage)
                 {
-                    foreach (var cell in grid.Cells[i])
+                    foreach (var cell in grid.Cells[curStage])
                     {
                         int code = -1;
                         int ownerId = -1;
@@ -204,74 +239,125 @@ namespace PlanEditor.Helpers.IO
                                     if (portal != null) code = (portal.RoomA != null && portal.RoomB != null) ? 2 : 1;
                                     break;
                             }
-                            ownerId = cell.Owner.ID;
+
+                            ownerId = GenerateId(cell.Owner);
                         }
 
-                        _building.Grid.Add(new Cell {m = cell.M,n = cell.N,code = code,ParentID = ownerId,k = cell.K});
+                        _building.Grid.Add(new Cell { m = cell.M,n = cell.N,code = code,ParentID = ownerId,k = cell.K });
                     }
                 }
+                #endregion
 
-                if (building.Places.Count > i)
+                #region places
+                if (building.Places.Count > curStage)
                 {
-                    foreach (var place in building.Places[i])
+                    foreach (var place in building.Places[curStage])
                     {
-                        var room = new Room(place);
-
-                        foreach (var portal in building.Portals[i])
-                        {
-                            if (portal.RoomA == place)
-                            {
-                                if (portal.RoomB != null)
-                                    room.Neigh.Add(portal.RoomB.ID);
-                            }
-                            else if (portal.RoomB == place)
-                            {
-                                if (portal.RoomA != null)
-                                    room.Neigh.Add(portal.RoomA.ID);
-                            }
-                        }
+                        int id = GetIdByEntity(place);
+                        var room = new Room(place, id);
                         _building.Rooms.Add(room);
                     }
-                }
-               
-                if (building.Portals.Count > i)
-                {
-                    foreach (var p in building.Portals[i])
+
+                    foreach (var place in building.Places[curStage])
                     {
-                        var portal = new Door(p);
+                        int id = GetIdByEntity(place);
+                        foreach (var room in _building.Rooms)
+                        {
+                            if (room.ID != id) continue;
+
+                            foreach (var portal in building.Portals[curStage])
+                            {
+                                if (portal.RoomA == place && portal.RoomB != null)  DefineStairway(portal.RoomB, room, curStage);
+                                else if (portal.RoomB == place && portal.RoomA != null) DefineStairway(portal.RoomA, room, curStage);
+                            }
+                        }
+                    }
+                }
+                #endregion
+
+                #region stairways
+
+                foreach (var p in building.Portals[curStage])
+                {
+                    if (p.RoomA == null || p.RoomB == null) continue;
+
+                    Place place = null;
+                    Place stair = null;
+
+                    if (p.RoomA.Type == Entity.EntityType.Stairway)
+                    {
+                        place = p.RoomB;
+                        stair = p.RoomA;
+                    } else if (p.RoomB.Type == Entity.EntityType.Stairway)
+                    {
+                        place = p.RoomA;
+                        stair = p.RoomB;
+                    }
+
+                    if (place == null || stair == null) continue;
+
+                    int idR = GetIdByEntity(place);
+                    foreach (var s in Stairways[curStage])
+                    {
+                        if (s.UI.Equals(stair.UI))
+                        {
+                            int id = GetIdByEntity(s);
+                            foreach (var r in _building.Rooms)
+                            {
+                                if (r.ID != id) continue;
+                                r.Neigh.Add(idR);
+                            }
+                        }
+                    }
+                }
+                #endregion
+
+                #region portals
+                if (building.Portals.Count > curStage)
+                {
+                    foreach (var p in building.Portals[curStage])
+                    {
+                        int id = GetIdByEntity(p);
+                        var portal = new Door(p, id);
                         _building.Portals.Add(portal);
                     }
                 }
+                #endregion
             }
 
-            foreach (var v in building.Mines)
-            {
-                int start = (int)v.StageFrom - 1;
-                DefineMineEnter(v, building.Portals[start], true);
-
-                int end = (int)v.StageTo - 1;
-                DefineMineEnter(v, building.Portals[end], false);
-
-                for (int i = 0; i < v.StartPoints.Count; ++i)
-                {
-                    if (i%2 != 0) continue;
-
-                    var mine = new Mine((int)v.StageFrom, (int)v.StageTo, v.StartPoints[i], v.EndPoints[i]);
-                    _building.Mines.Add(mine);
-                }
-            }
             _building.NumMines = _building.Mines.Count;
-        
+            _building.NumPlaces += Stairways.Sum(sum => sum.Count);
+
             var stream = new MemoryStream();
             var ser = new DataContractJsonSerializer(typeof(List<Building>));
             ser.WriteObject(stream, _building);
             stream.Position = 0;
-            var sr = new StreamReader(stream);
+            var sr = new StreamReader(stream, Encoding.UTF8);
             string read = sr.ReadToEnd();
             sw.Write(read);
             sw.Close();
         }
 
+        private static void DefineStairway(Place place, Room room, int curStage)
+        {
+            if (place.Type == Entity.EntityType.Stairway)
+            {
+                foreach (var stairway in Stairways[curStage])
+                {
+                    if (stairway.UI.Equals(place.UI))
+                    {
+                        int idR = GetIdByEntity(stairway);
+                        if (idR != -1) room.Neigh.Add(idR);
+                    }
+                }
+            }
+            else
+            {
+                int idR = GetIdByEntity(place);
+                if (idR != -1) room.Neigh.Add(idR);
+            }
+        }
+        
         private static void DefineMineEnter(Stairway mine, List<Portal> portals, bool isFirst)
         {
             if (mine.EndPoints == null) mine.EndPoints = new List<RegGrid.Cell>();
@@ -330,6 +416,47 @@ namespace PlanEditor.Helpers.IO
                     }
                 }
             }
+        }
+    
+        private static int GetIdByEntity(Entity entity)
+        {
+            for (int i = 0; i < Entities.Count; ++i)
+            {
+                if (Entities[i] == entity)
+                    return i;
+            }
+            return -1;
+        }
+
+        private static int GenerateId(Entity entity)
+        {
+            for (int i = 0; i < Entities.Count; ++i)
+            {
+                if (Entities[i] == entity)
+                    return i;
+            }
+            Entities.Add(entity);
+            return Entities.Count - 1;
+        }
+
+        private static Stairway CreateStairway(Stairway stair)
+        {
+            var stairway = new Stairway
+                {
+                    CountNodes = stair.CountNodes,
+                    Ppl = stair.Ppl,
+                    MaxPeople = stair.MaxPeople,
+                    Name = stair.Name,
+                    Height = stair.Height,
+                    SHeigthRoom = stair.SHeigthRoom,
+                    DifHRoom = stair.DifHRoom,
+                    EvacWide = stair.EvacWide,
+                    MainType = stair.MainType,
+                    SubType = stair.SubType,
+                    UI = stair.UI,
+                };
+            
+            return stairway;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace PlanEditor.Helpers.IO
@@ -13,16 +15,25 @@ namespace PlanEditor.Helpers.IO
             Building = building;
         }
 
-        public void Load()
+        public bool Load()
         {
             using (var fs = new FileStream(_fileName, FileMode.Open, FileAccess.Read))
             {
-                var bf = new BinaryFormatter();
-                Building = bf.Deserialize(fs) as Entities.Building;
-                fs.Close();
+                try
+                {
+                    var bf = new BinaryFormatter();
+                    Building = bf.Deserialize(fs) as Entities.Building;
+                    fs.Close();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    return false;
+                }
+                
             }
 
-            if (Building == null) return;
+            if (Building == null) return false;
             
             for (int i = 0; i < Building.Stages; ++i)
             {
@@ -36,6 +47,8 @@ namespace PlanEditor.Helpers.IO
 
             foreach (var v in Building.Mines)
                 v.LoadUI();
+
+            return true;
         }
 
         public Entities.Building Building { get; private set; }

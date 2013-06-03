@@ -19,8 +19,8 @@ namespace PlanEditor.Entities
         public enum PortalOrient { Vertical, Horizontal }
         public PortalOrient Orientation { get; set; }
 
-        public Place RoomB { get; set; }
         public Place RoomA { get; set; }
+        public Place RoomB { get; set; }
         public double Min { get; set; }
         public double Max { get; set; }
         public double Wide { get; set; }
