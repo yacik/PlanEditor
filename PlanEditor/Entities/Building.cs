@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PlanEditor.Entities
 {
@@ -21,7 +19,7 @@ namespace PlanEditor.Entities
         public int Notification { get; set; } // 1 - 3
         public int AntiFog { get; set; } // 1 - 3
         public int Insurance { get; set; }
-        public int Stages { get; set; }        
+        public int Stages { get; set; }         
         public string Addition { get; set; }        
         public double Lx { get; set; }      // Размеры проекции здания по Х, метры 
         public double Ly { get; set; }      // Размеры проекции здания по Y, метры               

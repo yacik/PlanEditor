@@ -15,18 +15,19 @@ namespace PlanEditor
     {
         public Entity Entity { get; private set; }
 
-        private Place _place;
-        private List<Place> _places;
-        private List<string> _lstType = new List<string>();
-        private List<List<string>> _subList = new List<List<string>>();
-        private List<string> _lst1 = new List<string>();
-        private List<string> _lst2 = new List<string>();
-        private List<string> _lst3 = new List<string>();
-        private List<string> _lst4 = new List<string>();
-        private List<string> _lst5 = new List<string>();
-        private List<string> _lst6 = new List<string>();
-        private List<string> _lst7 = new List<string>();
+        private readonly Place _place;
+        private readonly List<Place> _places;
+        private readonly List<string> _lstType = new List<string>();
+        private readonly List<List<string>> _subList = new List<List<string>>();
+        private readonly List<string> _lst1 = new List<string>();
+        private readonly List<string> _lst2 = new List<string>();
+        private readonly List<string> _lst3 = new List<string>();
+        private readonly List<string> _lst4 = new List<string>();
+        private readonly List<string> _lst5 = new List<string>();
+        private readonly List<string> _lst6 = new List<string>();
+        private readonly List<string> _lst7 = new List<string>();
         private readonly Dictionary<object, bool> _fields = new Dictionary<object, bool>();
+        private readonly Point _startPoint;
         private bool _isMore;
         private bool _isStairway;
 
@@ -57,7 +58,7 @@ namespace PlanEditor
             _places = places;
         }   
 
-        public WinRoom()
+        public WinRoom(Point point)
         {
             InitializeComponent();
             InitializeCombo();
@@ -66,6 +67,7 @@ namespace PlanEditor
             Title = "Новое помещение";
 
             Stairway.Visibility = Visibility.Hidden;
+            _startPoint = point;
         }
 
         private void InitializeCombo()
@@ -108,14 +110,14 @@ namespace PlanEditor
             }
             
             name.Text = _place.Name;
-            people.Text = _place.Ppl.ToString(CultureInfo.InvariantCulture);
-            Height.Text = _place.Height.ToString(CultureInfo.InvariantCulture);
-            EvacWide.Text = _place.EvacWide.ToString(CultureInfo.InvariantCulture);
+            people.Text = _place.Ppl.ToString();
+            Height.Text = _place.Height.ToString();
+            EvacWide.Text = _place.EvacWide.ToString();
 
             if (!_isMore)
             {
-                Wide.Text = _place.Wide.ToString(CultureInfo.InvariantCulture);
-                Leng.Text = _place.Length.ToString(CultureInfo.InvariantCulture);
+                Wide.Text = _place.Wide.ToString();
+                Leng.Text = _place.Length.ToString();
             }            
 
             int selected = -1;
@@ -342,8 +344,8 @@ namespace PlanEditor
             for (int i = 0; i < count; ++i)
             {
                 var ls = pg.Figures[0].Segments[i] as LineSegment;
-                double x = ls.Point.X;
-                double y = ls.Point.Y;
+                var x = ls.Point.X;
+                var y = ls.Point.Y;
                 switch (i)
                 {
                     case 0:
@@ -372,7 +374,7 @@ namespace PlanEditor
             var pf = new PathFigure();
             pg.Figures.Add(pf);
 
-            pf.StartPoint = new Point(100, 100);
+            pf.StartPoint = new Point(_startPoint.X, _startPoint.Y);
             var startPoint = pf.StartPoint;
 
             for (int i = 0; i < 4; ++i)
@@ -409,8 +411,8 @@ namespace PlanEditor
         {
             _place.Name = name.Text;
             _place.Ppl = int.Parse(people.Text);
-            _place.Height = double.Parse(Height.Text);
-            _place.EvacWide = double.Parse(EvacWide.Text);
+            _place.Height = double.Parse(Height.Text.ToString());
+            _place.EvacWide = double.Parse(EvacWide.Text.ToString());
 
             if (_place.Type != Entity.EntityType.Stairway)
             {
@@ -426,8 +428,8 @@ namespace PlanEditor
 
             if (_isMore) return;
 
-            double wide = double.Parse(Wide.Text);
-            double len = double.Parse(Leng.Text);
+            double wide = double.Parse(Wide.Text.ToString());
+            double len = double.Parse(Leng.Text.ToString());
 
             double w = wide / Data.Sigma;
             double l = len / Data.Sigma;
@@ -513,10 +515,6 @@ namespace PlanEditor
                 case "EvacWide":
                     min = 0.5;
                     break;
-                case "Wide":
-                case "Leng":
-                    min = 2;
-                    break;
             }
             _fields[textBox] = (isParsed && d > min);
 
@@ -546,7 +544,11 @@ namespace PlanEditor
             var isOk = true;
             foreach (var field in _fields)
             {
-                if (field.Value == false) isOk = false;
+                if (field.Value == false)
+                {
+                    isOk = false;
+                    break;
+                }
             }
 
             BtnOk.IsEnabled = (isOk && !_isStairway);

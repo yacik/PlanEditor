@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
-using System.Windows;
-using System.Windows.Media;
 using System.Windows.Shapes;
 using PlanEditor.Helpers;
 
@@ -89,6 +86,36 @@ namespace PlanEditor.Entities
             {
                 return distance(PointsX[0], PointsX);
             }
+        }
+
+        [NonSerialized]
+        private bool _isCollide;
+        public bool IsCollide { get { return _isCollide; } }
+        
+        public void Collide()
+        {
+            UI.Fill = Colours.Red;
+            _isCollide = true;
+        }
+
+        public void NonCollide()
+        {
+            switch (Type)
+            {
+                case EntityType.Place:
+                    UI.Fill = Colours.Indigo;
+                    break;
+                case EntityType.Halfway:
+                    UI.Fill = Colours.Green;
+                    break;
+                case EntityType.Stairway:
+                    UI.Fill = Colours.Violet;
+                    break;
+                case EntityType.Portal:
+                    UI.Fill = Colours.LightGray;
+                    break;
+            }
+            _isCollide = false;
         }
     }
 }

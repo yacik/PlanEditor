@@ -5,7 +5,7 @@ namespace PlanEditor.RegGrid
 {
     public class Grid
     {
-        private Entities.Building _building;
+        private readonly Entities.Building _building;
 
         public Grid(Entities.Building building)
         {

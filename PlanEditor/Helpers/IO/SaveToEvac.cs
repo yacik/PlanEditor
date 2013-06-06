@@ -121,12 +121,15 @@ namespace PlanEditor.Helpers.IO
                     Cells.Add(cell.K);
                 }
             }
+            // x - 1, y - 2
+            directAper = (portal.Orientation == Portal.PortalOrient.Vertical) ? 1 : 2;
         }
 
         [DataMember] public double Wide;
         [DataMember] public int Code;
         [DataMember] public int ID;
         [DataMember] public List<int> Cells;
+        [DataMember] public int directAper;
     }
 
     [DataContract]

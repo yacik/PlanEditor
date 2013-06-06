@@ -1,8 +1,8 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Win32;
 using PlanEditor.Helpers;
-using PlanEditor.Helpers.IO;
 using PlanEditor.MyMath;
 using PlanEditor.RegGrid;
 using System;
@@ -34,21 +34,21 @@ namespace PlanEditor
         private double _lastPosX;
         private double _lastPosY;
         private Line _line;
-        private Entities.Building _building;
+        private Building _building;
         private bool _firstClick;
         private int _curStage;
         private bool _isConnected = true;
         private Place _place1;
         private Place _place2;
+        private Point _clickOne;
+        private Point _clickTwo;
+        private Point _lastClick = new Point(100, 100);
         private RegGrid.Grid _grid;
         private readonly List<Entity> _selected = new List<Entity>();
         private readonly List<Line> _lines = new List<Line>();
         private readonly List<Line> _drawGrid = new List<Line>();
         private bool _shiftPressed;
-
-
-        private Point _clickOne;
-        private Point _clickTwo;
+        private bool _isChanged;
 
         public MainWindow()
         {
@@ -64,7 +64,7 @@ namespace PlanEditor
             MenuAdd.IsEnabled = false;
             MenuTools.IsEnabled = false;
 
-            _building = new Entities.Building();
+            _building = new Building();
             _grid = new RegGrid.Grid(_building);
 
             Stage.SetValue(Panel.ZIndexProperty, 100);
@@ -73,7 +73,6 @@ namespace PlanEditor
             #region MouseEvents
 
             ContentPanel.MouseMove += GridField_MouseMove;
-            //ContentPanel.MouseRightButtonDown += GridField_MouseRightButtonDown;
             ContentPanel.MouseLeftButtonUp += GridField_MouseLeftButtonUp;
             ContentPanel.MouseLeftButtonDown += GridField_MouseLeftButtonDown;
             ContentPanel.MouseDown += GridField_MouseDown;
@@ -88,6 +87,8 @@ namespace PlanEditor
 
             #endregion
         }
+
+        #region GridFields
 
         private void GridField_KeyDown(object sender, KeyEventArgs e)
         {
@@ -123,12 +124,7 @@ namespace PlanEditor
                 _lastPosY = e.GetPosition(null).Y;
             }
         }
-
-        /*private void GridField_MouseRightButtonDown(object sender, MouseEventArgs e)
-        {
-            
-        }*/
-
+        
         private void GridField_MouseMove(object sender, MouseEventArgs e)
         {
             double x = e.GetPosition(null).X;
@@ -170,9 +166,10 @@ namespace PlanEditor
             double x = e.GetPosition(null).X - _translation.X;
             double y = e.GetPosition(null).Y - _translation.Y;
 
-            //x /= _scale.ScaleX;
-            //y /= _scale.ScaleY;
-
+            _lastClick = (x < Data.GridStep || x > _building.xMax || y < Data.GridStep || y > _building.yMax)
+                             ? _lastClick
+                             : new Point(x, y);
+            
             if (e.ClickCount >= 2)
             {
                 DeselectAll();
@@ -218,56 +215,9 @@ namespace PlanEditor
             }
         }
 
-        public void DrawGrid()
-        {
-            _grid = new RegGrid.Grid(_building);
-            _grid.CreateGrid();
-
-            foreach (var v in _drawGrid)
-                ContentPanel.Children.Remove(v);
-
-            _drawGrid.Clear();
-            
-            for (int m = 0; m < _building.Row + 1; ++m)
-            {
-                var l = new Line
-                    {
-                        X1 = m*Data.GridStep,
-                        Y1 = 0,
-                        X2 = m*Data.GridStep,
-                        Y2 = _building.yMax,
-                        Stroke = Colours.LightGray,
-                        StrokeThickness = 1,
-                        RenderTransform = _transformGroup,
-                    };
-                    
-                Panel.SetZIndex(l, -1);
-
-                ContentPanel.Children.Add(l);
-
-                _drawGrid.Add(l);
-            }
-
-            for (int n = 0; n < _building.Col + 1; ++n)
-            {
-                var l = new Line
-                    {
-                        X1 = 0,
-                        Y1 = n*Data.GridStep,
-                        X2 = _building.xMax,
-                        Y2 = n*Data.GridStep,
-                        Stroke = Colours.LightGray,
-                        StrokeThickness = 1,
-                        RenderTransform = _transformGroup
-                    };
-
-                Panel.SetZIndex(l, -1);
-
-                ContentPanel.Children.Add(l);
-
-                _drawGrid.Add(l);
-            }
-        }
+        #endregion
+        
+        #region Click events
 
         private void Click_New(object sender, RoutedEventArgs e)
         {
@@ -275,26 +225,29 @@ namespace PlanEditor
             var isOk = bldg.ShowDialog();
             if (isOk == null) return;
 
-            if (isOk == true)
-            {
-                CreateNewProject();
-            }
+            if (isOk == true) CreateNewProject();
             ChangeStageName();
+
+            _isChanged = true;
         }
 
         private void Click_Save(object sender, RoutedEventArgs e)
         {
+            SaveProject();
+        }
 
-            var dlg = new SaveFileDialog { DefaultExt = ".rintd", Filter = "RINTD Files (*.rintd) |*rintd" };
+        private void SaveProject()
+        {
+            var dlg = new SaveFileDialog {DefaultExt = ".rintd", Filter = "RINTD Files (*.rintd) |*rintd"};
 
             var result = dlg.ShowDialog();
 
             if (result == true)
             {
-                SaveFile.Save(dlg.FileName, _building);
+                Helpers.IO.SaveFile.Save(dlg.FileName, _building);
             }
         }
-        
+
         private void Click_Export(object sender, RoutedEventArgs e)
         {
             var dlg = new SaveFileDialog { DefaultExt = ".txt", Filter = "Text Files (*.txt) |*txt" };
@@ -304,7 +257,7 @@ namespace PlanEditor
             {
                 var rg = new RecognizeGrid(_grid, _building);
                 rg.Recognize();
-                SaveToEvac.Save(dlg.FileName, rg.Grid, _building);
+                Helpers.IO.SaveToEvac.Save(dlg.FileName, rg.Grid, _building);
             }
         }
 
@@ -363,39 +316,10 @@ namespace PlanEditor
                 }
                 else MessageBox.Show("Ошибка в чтении файла");
             }
+
+            _isChanged = false;
         }
-
-        private bool LoadBinary(string fileName)
-        {
-            _building = new Entities.Building();
-            var lf = new LoadFile(fileName, _building);
-            if (lf.Load())
-            {
-                _building = lf.Building;
-                return true;
-            }
-            return false;
-        }
-
-        private void CreateNewProject()        
-        {
-            _curStage = 0;
-            ContentPanel.IsEnabled = true;
-            MenuAdd.IsEnabled = true;
-            MenuTools.IsEnabled = true;
-
-            _building.xMax = _building.Lx / Data.Sigma;
-            _building.yMax = _building.Ly / Data.Sigma;
-
-            _building.Row = (int)(_building.xMax / Data.GridStep);
-            _building.Col = (int)(_building.yMax / Data.GridStep);
-
-            DrawGrid();
-
-            if (!ContentPanel.Children.Contains(Stage))
-                ContentPanel.Children.Add(Stage);
-        }
-
+        
         private void Click_Path(object sender, RoutedEventArgs e)
         {
             _mode = CanvasMode.Path;
@@ -415,7 +339,7 @@ namespace PlanEditor
         
         private void Click_AddRoom(object sender, RoutedEventArgs e)
         {            
-            var r = new WinRoom {Owner = this};
+            var r = new WinRoom(_lastClick) {Owner = this};
             var isOk = r.ShowDialog();
 
             if (isOk == null || isOk == false)
@@ -424,6 +348,8 @@ namespace PlanEditor
             }
             else if (isOk == true)
             {
+                _isChanged = true;
+
                 var entity = r.Entity;         
                 entity.UI.RenderTransform = _transformGroup;
                 ContentPanel.Children.Add(entity.UI);
@@ -490,7 +416,685 @@ namespace PlanEditor
             SetVisible();
             ChangeStageName();
         }
+        
+        private void Click_Remove(object sender, RoutedEventArgs e)
+        {
+            foreach (var v in _selected)
+            {
+                switch (v.Type)
+                {
+                    case Entity.EntityType.Portal:
+                        RemovePortal(v);
+                        break;
+                    case Entity.EntityType.Stairway:
+                        var stairway = v as Stairway;
+                        if (stairway == null) continue;
+                        ContentPanel.Children.Remove(stairway.UI);
+                        _building.Mines.Remove(stairway);
+                        
+                        break;
+                    default:
+                        var place = v as Place;
+                        if (place == null) continue;
+                        var toDelete = new List<Portal>();
+                        foreach (var p in _building.Portals[_curStage])
+                        {
+                            bool isDoor = false;
+                            if (p.RoomA == null && p.RoomB == place)
+                                isDoor = true;
+                            else if (p.RoomB == null && p.RoomA == place)
+                                isDoor = true;
+                            else if (p.RoomA == place || p.RoomB == place)
+                            {
+                                if (p.RoomA != place) p.RoomA.IsMovable = true;
+                                else p.RoomB.IsMovable = true;
 
+                                isDoor = true;
+                            }
+
+                            if (isDoor)
+                            {
+                                ContentPanel.Children.Remove(p.UI);
+                                toDelete.Add(p);
+                            }
+                        }
+
+                        ContentPanel.Children.Remove(place.UI);
+                        _building.Places[_curStage].Remove(place);
+
+                        foreach (var p in toDelete)
+                            _building.Portals[_curStage].Remove(p);
+
+                        toDelete.Clear();
+
+                        break;
+                }
+            }
+            
+            _selected.Clear();
+        }
+
+        private void RemovePortal(Entity v)
+        {
+            var portal = v as Portal;
+            if (portal == null) return;
+
+            ContentPanel.Children.Remove(portal.UI);
+            _building.Portals[_curStage].Remove(portal);
+
+            int delete1 = 1;
+            int delete2 = 1;
+
+            for (int i = 0; i < _building.Portals.Count; ++i)
+            {
+                if (_building.Portals[i] == null) continue;
+
+                foreach (var ptl in _building.Portals[i])
+                {
+                    if (portal.RoomA != null)
+                    {
+                        if (ptl.RoomA == portal.RoomA) ++delete1;
+                        else if (ptl.RoomB == portal.RoomA) ++delete1;
+                    }
+                    if (portal.RoomB != null)
+                    {
+                        if (ptl.RoomA == portal.RoomB) ++delete2;
+                        else if (ptl.RoomB == portal.RoomB) ++delete2;
+                    }
+                }
+            }
+
+            if (portal.RoomA != null) portal.RoomA.IsMovable = (delete1 == 1);
+            if (portal.RoomB != null) portal.RoomB.IsMovable = (delete2 == 1);
+        }
+
+        private void Click_Property(object sender, RoutedEventArgs e)
+        {
+            /*WinRoom room;
+            switch (_selected.Count)
+            {
+                case 0:
+                    return;
+                case 1:
+                    var place = _selected[0] as Place;
+                    if (place==null) return;
+                    room = new WinRoom(place);
+                    room.ShowDialog();
+                    break;
+                default:
+                    var lst = _selected.Where(entity => entity.Type == Entity.EntityType.Place).OfType<Place>().ToList();
+                    room = new WinRoom(lst);
+                    room.ShowDialog();
+                    break;
+            }*/
+
+            if (_selected.Count != 1) return;
+
+            switch (_selected[0].Type)
+            {
+                case Entity.EntityType.Portal:
+                    var portal = (Portal)_selected[0];                    
+                    var door = new WinPortal(portal);
+                    door.ShowDialog();
+                    break;
+                default:
+                    var place = (Place)_selected[0];
+                    var room = new WinRoom(place);
+                    room.ShowDialog();
+                    break;
+            }
+
+        }
+        
+        #endregion
+        
+        #region Connect portals
+
+        private void ConnectOutsidePortal(double wide)
+        {
+            var place = _place1 ?? _place2;
+            var portal = new Portal
+                {
+                    RoomA = place,
+                    RoomB = null,
+                    Wide = wide
+                };
+            
+            portal.RoomA.IsMovable = false;
+
+            var min = double.MaxValue;
+            var lines = place.Lines;
+            Line line = null;
+
+            foreach (var v in lines)
+            {
+                var d = Helper.IsHorizontal(v.X1, v.Y1, v.X2, v.Y2) ? Helper.Tan(_lastPosY, v.Y1) : Helper.Tan(_lastPosX, v.X1);
+
+                if (d > min) continue;
+
+                min = d;
+                line = v;
+            }
+            
+            if (line == null) return;
+
+            if (Helper.IsHorizontal(line.X1, line.Y1, line.X2, line.Y2))
+            {
+                portal.Orientation = Portal.PortalOrient.Horizontal;                
+                portal.Min = Math.Min(line.X1, line.X2);
+                portal.Max = Math.Max(line.X1, line.X2);
+                portal.CreateUI(line.Y2);
+            }
+            else
+            {
+                portal.Orientation = Portal.PortalOrient.Vertical;
+                portal.Min = Math.Min(line.Y1, line.Y2);
+                portal.Max = Math.Max(line.Y1, line.Y2);
+                portal.CreateUI(line.X1);
+            }
+
+            portal.UI.RenderTransform = _transformGroup;
+            ContentPanel.Children.Add(portal.UI);
+            _building.Portals[_curStage].Add(portal);
+
+            _place1 = null;
+            _place2 = null;
+        }
+        
+        private void ConncetInnerPortal(double wide)
+        {
+            double compWide = wide/Data.Sigma;
+            double dX = Helper.Tan(_clickOne.X, _clickTwo.X);
+            double dY = Helper.Tan(_clickOne.Y, _clickTwo.Y);
+
+            if (dX > dY)
+            {
+                if (_clickOne.X > _clickTwo.X)
+                {
+                    var tmp = _place2;
+                    _place2 = _place1;
+                    _place1 = tmp;
+                }
+            }
+            else
+            {
+                if (_clickOne.Y > _clickTwo.Y)
+                {
+                    var tmp = _place2;
+                    _place2 = _place1;
+                    _place1 = tmp;
+                }
+            }
+
+            var lines1 = _place1.Lines;
+            var lines2 = _place2.Lines;
+
+            _selected.Clear();
+
+            _place1.Select();
+            _place2.Select();
+            _selected.Add(_place1);
+            _selected.Add(_place2);
+
+            var isVerNeigh = DefineNeighRooms(_place1, _place2);
+
+            var max = 0.00;
+            var startPoint = 0.00;
+            var min = 0.00;
+            var orient = Portal.PortalOrient.Vertical;
+            var isFound = false;
+
+            foreach (var line1 in lines1)
+            {
+                var isHor1 = Helper.IsHorizontal(line1.X1, line1.Y1, line1.X2, line1.Y2);
+
+                foreach (var line2 in lines2)
+                {
+                    var isHor2 = Helper.IsHorizontal(line2.X1, line2.Y1, line2.X2, line2.Y2);
+
+                    if (isHor1 && isHor2 && isVerNeigh)
+                    {
+                        if (!IsNearest(line1.Y1, line1.Y2, line2.Y1, line2.Y2)) continue;
+
+                        var mas1 = GetMinMax(line1.X1, line1.X2);
+                        var mas2 = GetMinMax(line2.X1, line2.X2);
+
+                        min = Math.Max(mas1[0], mas2[0]);
+                        max = Math.Min(mas1[1], mas2[1]);
+
+                        var d = max - min;
+
+                        if (d < compWide)
+                        {
+                            MessageBox.Show("Ширина двери превышает размеры стен");
+                            continue;
+                        }
+
+                        double dist = Helper.Tan(line1.Y1, line2.Y1)/2;
+                        startPoint = line1.Y1 + dist;
+
+                        orient = Portal.PortalOrient.Horizontal;
+
+                        isFound = true;
+                    }
+                    else if (!isHor1 && !isHor2 && !isVerNeigh)
+                    {
+                        if (!IsNearest(line1.X1, line1.X2, line2.X1, line2.X2)) continue;
+
+                        var mas1 = GetMinMax(line1.Y1, line1.Y2);
+                        var mas2 = GetMinMax(line2.Y1, line2.Y2);
+
+                        min = Math.Max(mas1[0], mas2[0]);
+                        max = Math.Min(mas1[1], mas2[1]);
+
+                        var d = max - min;
+
+                        if (d < compWide)
+                        {
+                            MessageBox.Show("Ширина двери превышает размеры стен");
+                            continue;
+                        }
+
+                        double dist = Helper.Tan(line1.X1, line2.X1)/2;
+                        startPoint = line1.X1 + dist;
+
+                        orient = Portal.PortalOrient.Vertical;
+
+                        isFound = true;
+                    }
+                }
+            }
+
+            if (isFound)
+                CreatePortal(min, max, _place1, _place2, orient, startPoint, wide);
+
+            _place1 = null;
+            _place2 = null;
+        }
+
+        private void ConnectPlaces(double x, double y)
+        {
+            if (_isConnected)
+            {
+                _clickOne = new Point(x, y);
+
+                _isConnected = !_isConnected;
+
+                foreach (var p in _building.Places[_curStage])
+                {
+                    if (Helper.IsCollide(x, y, p.PointsX, p.PointsY))
+                    {
+                        _place1 = p;
+                        break;
+                    }
+                }
+
+                foreach (var p in _building.Mines)
+                {
+                    if (Helper.IsCollide(x, y, p.PointsX, p.PointsY))
+                    {
+                        _place1 = p;
+                        break;
+                    }
+                }
+            }
+            else if (!_isConnected)
+            {
+                _clickTwo = new Point(x, y);
+
+                _isConnected = !_isConnected;
+
+                foreach (
+                    var p in
+                        _building.Places[_curStage].Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY))
+                                                   .Where(p => _place1 != p))
+                {
+                    _place2 = p;
+                    break;
+                }
+
+                foreach (
+                    var p in
+                        _building.Mines.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY))
+                                 .Where(p => _place1 != p))
+                {
+                    _place2 = p;
+                    break;
+                }
+
+                _lastPosX = x;
+                _lastPosY = y;
+
+                if (_place1 == null && _place2 == null)
+                {
+                    MessageBox.Show("Помещения не выбраны");
+                    return;
+                }
+
+                if ((_place1 != null && _place1.IsCollide) || (_place2 != null && _place2.IsCollide))
+                {
+                    MessageBox.Show("Помещения пересекаются, невозможно соединить");
+                    return;
+                }
+
+                var door = new WinPortal { Owner = this };
+                var isOk = door.ShowDialog();
+
+                if (isOk != null && isOk == true)
+                {
+                    var wide = door.Wide;
+                    if (wide == -1) MessageBox.Show("Ширина задана не верно");
+                    else
+                    {
+                        if (_place1 == null || _place2 == null)
+                            ConnectOutsidePortal(wide);
+                        if (_place1 != null && _place2 != null)
+                            ConncetInnerPortal(wide);
+                    }
+                }
+            }
+        }
+
+        public bool IsNearest(double a1, double a2, double b1, double b2)
+        {
+            var v1 = Helper.Tan(a1, b1);
+            var v2 = Helper.Tan(a1, b2);
+            var v3 = Helper.Tan(a2, b1);
+            var v4 = Helper.Tan(a2, b2);
+
+            var mas = new[] {v1, v2, v3, v4};
+            var min = mas.Concat(new[] {double.MaxValue}).Min();
+
+            return min < Data.GridStep;
+        }
+
+        private bool DefineNeighRooms(Place place1, Place place2)
+        {
+            var mas1 = new[] {double.MaxValue, double.MinValue, double.MaxValue, double.MinValue};
+            var mas2 = new[] {double.MaxValue, double.MinValue, double.MaxValue, double.MinValue};
+
+            foreach (var line in place1.Lines)
+            {
+                var x1 = Math.Min(line.X1, line.X2);
+                var x2 = Math.Max(line.X1, line.X2);
+                var y1 = Math.Min(line.Y1, line.Y2);
+                var y2 = Math.Max(line.Y1, line.Y2);
+
+                if (mas1[0] > x1) mas1[0] = x1;
+                if (mas1[1] < x2) mas1[1] = x2;
+                if (mas1[2] > y1) mas1[2] = y1;
+                if (mas1[3] < y2) mas1[3] = y2;
+            }
+
+            foreach (var line in place2.Lines)
+            {
+                var x1 = Math.Min(line.X1, line.X2);
+                var x2 = Math.Max(line.X1, line.X2);
+                var y1 = Math.Min(line.Y1, line.Y2);
+                var y2 = Math.Max(line.Y1, line.Y2);
+
+                if (mas2[0] > x1) mas2[0] = x1;
+                if (mas2[1] < x2) mas2[1] = x2;
+                if (mas2[2] > y1) mas2[2] = y1;
+                if (mas2[3] < y2) mas2[3] = y2;
+            }
+
+            var ay = mas1[3] - mas2[2];
+            var by = mas2[2] - mas1[3];
+
+            var tmpY = Math.Min(ay, by);
+            var y = Math.Sqrt(tmpY*tmpY);
+
+            var ax = mas1[1] - mas2[0];
+            var bx = mas2[0] - mas1[1];
+
+            var tmpX = Math.Min(ax, bx);
+            var x = Math.Sqrt(tmpX*tmpX);
+
+            return x > y;
+        }
+
+        private void CreatePortal(double min, double max, Place place1, Place place2, Portal.PortalOrient orientation,
+                                  double pos, double wide)
+        {
+            _isChanged = true;
+
+            var portal = new Portal
+                {
+                    RoomA = place1,
+                    RoomB = place2,
+                    Min = min,
+                    Max = max,
+                    Orientation = orientation,
+                    Wide = wide,
+                };
+
+            portal.RoomA.IsMovable = false;
+            portal.RoomB.IsMovable = false;
+
+            _building.Portals[_curStage].Add(portal);
+
+            portal.CreateUI(pos);
+            portal.UI.RenderTransform = _transformGroup;
+            ContentPanel.Children.Add(portal.UI);
+        }
+
+        private double[] GetMinMax(double x1, double x2)
+        {
+            return x1 < x2 ? new [] { x1, x2 } : new [] { x2, x1 };
+        }
+
+        #endregion
+
+        #region Move
+
+        private void Move(double x, double y)
+        {
+            double dX = Helper.Tan(x, _lastPosX);
+            double dY = Helper.Tan(y, _lastPosY);
+
+            dX /= _scale.ScaleX;
+            dY /= _scale.ScaleY;
+
+            if (x > _lastPosX)
+                _translation.X += dX;
+            else
+                _translation.X -= dX;
+
+            if (y > _lastPosY)
+                _translation.Y += dY;
+            else
+                _translation.Y -= dY;
+
+            _lastPosX = x;
+            _lastPosY = y;
+        }
+        
+        private void MovePortal(double moveX, double moveY, Entity v)
+        {
+            _isChanged = true;
+
+            var portal = (Portal)v;
+
+            var pg = v.UI.Data as PathGeometry;
+            var p = pg.Figures[0].StartPoint;
+            double x = p.X;
+            double y = p.Y;
+
+            if (portal.Orientation == Portal.PortalOrient.Horizontal)
+            {                
+                x = p.X + moveX;
+                y = p.Y;
+                moveY = 0;
+                
+                if (x < portal.Min) return;
+                double d = Helper.Tan(x, portal.Max);
+                double wide = portal.Wide/Data.Sigma;
+                if (d <= wide) return;
+            }
+            else
+            {
+                x = p.X;
+                y = p.Y + moveY;
+                moveX = 0;
+                if (y < portal.Min) return;
+
+                double d = Helper.Tan(y, portal.Max);
+                double wide = portal.Wide / Data.Sigma;
+                if (d <= wide)
+                    return;
+            }
+
+            pg.Figures[0].StartPoint = new Point(x, y);
+
+            int count = pg.Figures[0].Segments.Count;
+            for (int i = 0; i < count; ++i)
+            {
+                double _x = x;
+                double _y = y;
+                var ls = pg.Figures[0].Segments[i] as LineSegment;
+                if (ls == null) continue;
+
+                _x = ls.Point.X + moveX;                    
+                _y = ls.Point.Y + moveY;
+                ls.Point = new Point(_x, _y);
+            }
+        }
+
+        private void MovePlace(double moveX, double moveY, Entity v)
+        {
+            _isChanged = true;
+
+            var place = v as Place;
+            if (place == null || !place.IsMovable) return;
+
+            var pg = v.UI.Data as PathGeometry;
+            var p = pg.Figures[0].StartPoint;
+            double x = p.X + moveX;
+            double y = p.Y + moveY;
+
+            // Check for leaving canvas zone
+            double wide = x + place.Wide / Data.Sigma;
+            double height = y + place.Length / Data.Sigma;
+            if (x < Data.GridStep || wide > _building.xMax - Data.GridStep) return;
+            if (y < Data.GridStep || height > _building.yMax - Data.GridStep) return;
+
+            pg.Figures[0].StartPoint = new Point(x, y);
+
+            int count = pg.Figures[0].Segments.Count;
+            for (int i = 0; i < count; ++i)
+            {
+                var ls = pg.Figures[0].Segments[i] as LineSegment;
+                if (ls != null)
+                {
+                    x = ls.Point.X + moveX;
+                    y = ls.Point.Y + moveY;
+
+                    ls.Point = new Point(x, y);
+                }
+            }
+
+            CollidePlaces(place, _building.Places[_curStage]);
+        }
+
+
+        private void CollidePlaces(Place place, List<Place> places)
+        {
+            var px1 = place.PointsX;
+            var py1 = place.PointsY;
+
+            foreach (var pl in places)
+            {
+                if (Equals(pl, place)) continue;
+
+                var px2 = pl.PointsX;
+                var py2 = pl.PointsY;
+
+                bool isCollide = false;
+                for (int i = 0; i < px1.Count; ++i)
+                {
+                    double x = px1[i];
+                    double y = py1[i];
+
+                    if (Helper.IsCollide(x, y, px2, py2)) isCollide = true;
+
+                    x = px2[i];
+                    y = py2[i];
+
+                    if (Helper.IsCollide(x, y, px1, py1)) isCollide = true;
+                }
+
+                if (isCollide)
+                {
+                    place.Collide();
+                    pl.Collide();
+                }
+                else
+                {
+                    place.NonCollide();
+                    pl.NonCollide();
+                }
+            }
+        }
+        
+        private void MovePath(double x, double y)
+        {
+            if (!_firstClick && _line == null) return;
+
+            x = x - _translation.X;
+            y = y - _translation.Y;
+
+            x /= _scale.ScaleX;
+            y /= _scale.ScaleY;
+
+            _line.X2 = x;
+            _line.Y2 = y;
+        }
+
+        private void MoveSelected(double x, double y)
+        {
+            _isChanged = true;
+
+            double dX = Helper.Tan(x, _lastPosX);
+            double dY = Helper.Tan(y, _lastPosY);
+
+            dX /= _scale.ScaleX;
+            dY /= _scale.ScaleY;
+
+            double moveX = 0;
+            double moveY = 0;
+
+            if (x > _lastPosX) moveX += dX;
+            else moveX -= dX;
+
+            if (y > _lastPosY) moveY += dY;
+            else moveY -= dY;
+
+            _lastPosX = x;
+            _lastPosY = y;
+
+            foreach (var v in _selected)
+            {
+                switch (v.Type)
+                {
+                    case Entity.EntityType.Portal:
+                        MovePortal(moveX, moveY, v);
+                        break;
+                    default:
+                        MovePlace(moveX, moveY, v);
+                        break;
+                }
+            }
+        }
+
+        #endregion
+
+        private void ChangeStageName()
+        {
+            int s = _curStage + 1;                            
+            Stage.Text = "Этаж " + s;
+        }
+        
         private void SetHidden()
         {
             if (_building.Places.Count > _curStage)
@@ -547,6 +1151,37 @@ namespace PlanEditor
             }
         }
 
+        private bool LoadBinary(string fileName)
+        {
+            _building = new Building();
+            var lf = new Helpers.IO.LoadFile(fileName, _building);
+            if (lf.Load())
+            {
+                _building = lf.Building;
+                return true;
+            }
+            return false;
+        }
+
+        private void CreateNewProject()
+        {
+            _curStage = 0;
+            ContentPanel.IsEnabled = true;
+            MenuAdd.IsEnabled = true;
+            MenuTools.IsEnabled = true;
+
+            _building.xMax = _building.Lx / Data.Sigma;
+            _building.yMax = _building.Ly / Data.Sigma;
+
+            _building.Row = (int)(_building.xMax / Data.GridStep);
+            _building.Col = (int)(_building.yMax / Data.GridStep);
+
+            DrawGrid();
+
+            if (!ContentPanel.Children.Contains(Stage))
+                ContentPanel.Children.Add(Stage);
+        }
+
         private void AddNewLine(double x, double y)
         {
             _line = new Line
@@ -563,21 +1198,7 @@ namespace PlanEditor
             ContentPanel.Children.Add(_line);
             _lines.Add(_line);
         }
-
-        private void MovePath(double x, double y)
-        {
-            if (!_firstClick && _line == null) return;
-
-            x = x - _translation.X;
-            y = y - _translation.Y;
-
-            x /= _scale.ScaleX;
-            y /= _scale.ScaleY;
-
-            _line.X2 = x;
-            _line.Y2 = y;
-        }
-
+        
         private void DrawPlan()
         {
             if (_building.Places.Count > _curStage)
@@ -597,29 +1218,58 @@ namespace PlanEditor
                     v.UI.Visibility = Visibility.Hidden;
             }
         }
-
-        private void Move(double x, double y)
+        
+        private void DrawGrid()
         {
-            double dX = Helper.Tan(x, _lastPosX);
-            double dY = Helper.Tan(y, _lastPosY);
+            _grid = new RegGrid.Grid(_building);
+            _grid.CreateGrid();
 
-            dX /= _scale.ScaleX;
-            dY /= _scale.ScaleY;
+            foreach (var v in _drawGrid)
+                ContentPanel.Children.Remove(v);
 
-            if (x > _lastPosX) 
-                _translation.X += dX;
-            else
-                _translation.X -= dX;
+            _drawGrid.Clear();
+            
+            for (int m = 0; m < _building.Row + 1; ++m)
+            {
+                var l = new Line
+                    {
+                        X1 = m*Data.GridStep,
+                        Y1 = 0,
+                        X2 = m*Data.GridStep,
+                        Y2 = _building.yMax,
+                        Stroke = Colours.LightGray,
+                        StrokeThickness = 1,
+                        RenderTransform = _transformGroup,
+                    };
+                    
+                Panel.SetZIndex(l, -1);
 
-            if (y > _lastPosY)
-                _translation.Y += dY;
-            else
-                _translation.Y -= dY;
+                ContentPanel.Children.Add(l);
 
-            _lastPosX = x;
-            _lastPosY = y;
+                _drawGrid.Add(l);
+            }
+
+            for (int n = 0; n < _building.Col + 1; ++n)
+            {
+                var l = new Line
+                    {
+                        X1 = 0,
+                        Y1 = n*Data.GridStep,
+                        X2 = _building.xMax,
+                        Y2 = n*Data.GridStep,
+                        Stroke = Colours.LightGray,
+                        StrokeThickness = 1,
+                        RenderTransform = _transformGroup
+                    };
+
+                Panel.SetZIndex(l, -1);
+
+                ContentPanel.Children.Add(l);
+
+                _drawGrid.Add(l);
+            }
         }
-
+        
         private void MouseRightButtonDownPath()
         {
             if (_lines.Count == 0) return;
@@ -665,84 +1315,6 @@ namespace PlanEditor
             _line = null;
         }
         
-        private void MoveSelected(double x, double y)
-        {
-            double dX = Helper.Tan(x, _lastPosX);
-            double dY = Helper.Tan(y, _lastPosY);
-
-            dX /= _scale.ScaleX;
-            dY /= _scale.ScaleY;
-
-            double moveX = 0;
-            double moveY = 0;
-
-            if (x > _lastPosX)
-                moveX += dX;
-            else
-                moveX -= dX;
-
-            if (y > _lastPosY)
-                moveY += dY;
-            else
-                moveY -= dY;
-
-            _lastPosX = x;
-            _lastPosY = y;
-
-            foreach (var v in _selected)
-            {
-                switch(v.Type)
-                {
-                    case Entity.EntityType.Portal:
-                        MovePortal(moveX, moveY, v);
-                        break;
-                    default:
-                        MovePlace(moveX, moveY, v);
-                        break;
-                }
-            }
-        }
-
-        private void Click_Property(object sender, RoutedEventArgs e)
-        {
-            /*WinRoom room;
-            switch (_selected.Count)
-            {
-                case 0:
-                    return;
-                case 1:
-                    var place = _selected[0] as Place;
-                    if (place==null) return;
-                    room = new WinRoom(place);
-                    room.ShowDialog();
-                    break;
-                default:
-                    var lst = _selected.Where(entity => entity.Type == Entity.EntityType.Place).OfType<Place>().ToList();
-                    room = new WinRoom(lst);
-                    room.ShowDialog();
-                    break;
-            }*/
-            if (_selected.Count != 1) return;
-            switch (_selected[0].Type)
-            {
-                case Entity.EntityType.Portal:
-                    var portal = _selected[0] as Portal;
-                    if (portal == null) return;
-                    var door = new WinPortal(portal);
-                    var isOK = door.ShowDialog();
-                    //if (isOK != null && isOK == true)
-                    //    portal.CreateUI(door.Wide);
-                    break;
-                default:
-                    var place = _selected[0] as Place;
-                    if (place==null) return;
-                    var room = new WinRoom(place);
-                    room.ShowDialog();
-                    break;
-            }
-
-        }
-
         private void SelectObjects(double x, double y)
         {
             if (_building.Places.Count > _curStage)
@@ -832,481 +1404,13 @@ namespace PlanEditor
             _selected.Clear();
         }
 
-        private void Click_Remove(object sender, RoutedEventArgs e)
+        private void MainWindow_OnClosing(object sender, CancelEventArgs e)
         {
-            foreach (var v in _selected)
+            if (_isChanged)
             {
-                switch (v.Type)
-                {
-                    case Entity.EntityType.Place:
-                    case Entity.EntityType.Halfway:
-                        var place = v as Place;
-                        if (place == null) continue;
-                        var toDelete = new List<Portal>();
-                        foreach (var p in _building.Portals[_curStage])
-                        {
-                            bool isDoor = false;
-                            if (p.RoomA == null && p.RoomB == place)
-                                isDoor = true;
-                            else if (p.RoomB == null && p.RoomA == place)
-                                isDoor = true;
-                            else if (p.RoomA == place || p.RoomB == place)
-                            {
-                                if (p.RoomA != place) p.RoomA.IsMovable = true;
-                                else p.RoomB.IsMovable = true;
-
-                                isDoor = true;
-                            }
-
-                            if (isDoor)
-                            {
-                                ContentPanel.Children.Remove(p.UI);
-                                toDelete.Add(p);
-                            }
-                        }
-
-                        ContentPanel.Children.Remove(place.UI);
-                        _building.Places[_curStage].Remove(place);
-
-                        foreach (var p in toDelete)
-                            _building.Portals[_curStage].Remove(p);
-
-                        toDelete.Clear();
-
-                        break;
-                    case Entity.EntityType.Portal:
-                        var portal = v as Portal;
-                        if (portal == null) continue;
-                        ContentPanel.Children.Remove(portal.UI);
-                        
-                        if (portal.RoomA != null)
-                            portal.RoomA.IsMovable = true;
-                        if (portal.RoomB != null)
-                            portal.RoomB.IsMovable = true;
-
-                        _building.Portals[_curStage].Remove(portal);
-                        break;
-                    case Entity.EntityType.Stairway:
-                        var stairway = v as Stairway;
-                        if (stairway == null) continue;
-                        ContentPanel.Children.Remove(stairway.UI);
-                        _building.Mines.Remove(stairway);
-                        break;
-                }
+                var result = MessageBox.Show("Сохранить данные?", "Есть не сохраненные данные", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.Yes) SaveProject();
             }
-            
-            _selected.Clear();
-        }
-
-        #region Connect portals
-
-        private void ConnectOutsidePortal(double wide)
-        {
-            var place = _place1 ?? _place2;
-
-            var portal = new Portal
-                {
-                    RoomA = place,
-                    RoomB = null,
-                    Wide = wide
-                };
-            
-            portal.RoomA.IsMovable = false;
-
-            var min = double.MaxValue;
-            var lines = place.Lines;
-            Line line = null;
-
-            foreach (var v in lines)
-            {
-                var d = Helper.IsHorizontal(v.X1, v.Y1, v.X2, v.Y2) ? Helper.Tan(_lastPosY, v.Y1) : Helper.Tan(_lastPosX, v.X1);
-
-                if (d > min) continue;
-
-                min = d;
-                line = v;
-            }
-            
-            if (line == null) return;
-
-            if (Helper.IsHorizontal(line.X1, line.Y1, line.X2, line.Y2))
-            {
-                portal.Orientation = Portal.PortalOrient.Horizontal;                
-                portal.Min = Math.Min(line.X1, line.X2);
-                portal.Max = Math.Max(line.X1, line.X2);
-                portal.CreateUI(line.Y2);
-            }
-            else
-            {
-                portal.Orientation = Portal.PortalOrient.Vertical;
-                portal.Min = Math.Min(line.Y1, line.Y2);
-                portal.Max = Math.Max(line.Y1, line.Y2);
-                portal.CreateUI(line.X1);
-            }
-
-            portal.UI.RenderTransform = _transformGroup;
-            ContentPanel.Children.Add(portal.UI);
-            _building.Portals[_curStage].Add(portal);
-
-            _place1 = null;
-            _place2 = null;
-        }
-        
-        private void ConnectPlaces(double x, double y)
-        {
-            if (_isConnected)
-            {
-                _clickOne = new Point(x, y);
-
-                _isConnected = !_isConnected;
-
-                foreach (var p in _building.Places[_curStage])
-                {
-                    if (Helper.IsCollide(x, y, p.PointsX, p.PointsY))
-                    {
-                        _place1 = p;
-                        break;
-                    }
-                }
-
-                foreach (var p in _building.Mines)
-                {
-                    if (Helper.IsCollide(x, y, p.PointsX, p.PointsY))
-                    {
-                        _place1 = p;
-                        break;
-                    }
-                }
-            }
-            else if (!_isConnected)
-            {
-                _clickTwo = new Point(x, y);
-
-                _isConnected = !_isConnected;
-
-                foreach (
-                    var p in
-                        _building.Places[_curStage].Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY))
-                                                   .Where(p => _place1 != p))
-                {
-                    _place2 = p;
-                    break;
-                }
-
-                foreach (
-                    var p in
-                        _building.Mines.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY))
-                                 .Where(p => _place1 != p))
-                {
-                    _place2 = p;
-                    break;
-                }
-
-                _lastPosX = x;
-                _lastPosY = y;
-
-                if (_place1 == null && _place2 == null)
-                {
-                    MessageBox.Show("Помещения не выбраны");
-                    return;
-                }
-
-                var door = new WinPortal {Owner = this};
-                var isOk = door.ShowDialog();
-
-                if (isOk != null && isOk == true)
-                {
-                    var wide = door.Wide;
-                    if (wide == -1) MessageBox.Show("Ширина задана не верно");
-                    else
-                    {
-                        if (_place1 == null || _place2 == null)
-                            ConnectOutsidePortal(wide);
-                        if (_place1 != null && _place2 != null)
-                            ConncetInnerPortal(wide);
-                    }
-                }
-            }
-        }
-
-        private void ConncetInnerPortal(double wide)
-        {
-            double compWide = wide/Data.Sigma;
-            double dX = Helper.Tan(_clickOne.X, _clickTwo.X);
-            double dY = Helper.Tan(_clickOne.Y, _clickTwo.Y);
-
-            if (dX > dY)
-            {
-                if (_clickOne.X > _clickTwo.X)
-                {
-                    var tmp = _place2;
-                    _place2 = _place1;
-                    _place1 = tmp;
-                }
-            }
-            else
-            {
-                if (_clickOne.Y > _clickTwo.Y)
-                {
-                    var tmp = _place2;
-                    _place2 = _place1;
-                    _place1 = tmp;
-                }
-            }
-
-            var lines1 = _place1.Lines;
-            var lines2 = _place2.Lines;
-
-            _selected.Clear();
-
-            _place1.Select();
-            _place2.Select();
-            _selected.Add(_place1);
-            _selected.Add(_place2);
-
-            var isVerNeigh = DefineNeighRooms(_place1, _place2);
-
-            var max = 0.00;
-            var startPoint = 0.00;
-            var min = 0.00;
-            var orient = Portal.PortalOrient.Vertical;
-            var isFound = false;
-
-            foreach (var line1 in lines1)
-            {
-                var isHor1 = Helper.IsHorizontal(line1.X1, line1.Y1, line1.X2, line1.Y2);
-
-                foreach (var line2 in lines2)
-                {
-                    var isHor2 = Helper.IsHorizontal(line2.X1, line2.Y1, line2.X2, line2.Y2);
-
-                    if (isHor1 && isHor2 && isVerNeigh)
-                    {
-                        if (!IsNearest(line1.Y1, line1.Y2, line2.Y1, line2.Y2)) continue;
-
-                        var mas1 = GetMinMax(line1.X1, line1.X2);
-                        var mas2 = GetMinMax(line2.X1, line2.X2);
-
-                        min = Math.Max(mas1[0], mas2[0]);
-                        max = Math.Min(mas1[1], mas2[1]);
-
-                        var d = max - min;
-
-                        if (d < compWide)
-                        {
-                            MessageBox.Show("Ширина двери привышает размеры стен");
-                            continue;
-                        }
-
-                        double dist = Helper.Tan(line1.Y1, line2.Y1)/2;
-                        startPoint = line1.Y1 + dist;
-
-                        orient = Portal.PortalOrient.Horizontal;
-
-                        isFound = true;
-                    }
-                    else if (!isHor1 && !isHor2 && !isVerNeigh)
-                    {
-                        if (!IsNearest(line1.X1, line1.X2, line2.X1, line2.X2)) continue;
-
-                        var mas1 = GetMinMax(line1.Y1, line1.Y2);
-                        var mas2 = GetMinMax(line2.Y1, line2.Y2);
-
-                        min = Math.Max(mas1[0], mas2[0]);
-                        max = Math.Min(mas1[1], mas2[1]);
-
-                        var d = max - min;
-
-                        if (d < compWide)
-                        {
-                            MessageBox.Show("Ширина двери привышает размеры стен");
-                            continue;
-                        }
-
-                        double dist = Helper.Tan(line1.X1, line2.X1)/2;
-                        startPoint = line1.X1 + dist;
-
-                        orient = Portal.PortalOrient.Vertical;
-
-                        isFound = true;
-                    }
-                }
-            }
-
-            if (isFound)
-                CreatePortal(min, max, _place1, _place2, orient, startPoint, wide);
-
-            _place1 = null;
-            _place2 = null;
-        }
-
-        public bool IsNearest(double a1, double a2, double b1, double b2)
-        {
-            var v1 = Helper.Tan(a1, b1);
-            var v2 = Helper.Tan(a1, b2);
-            var v3 = Helper.Tan(a2, b1);
-            var v4 = Helper.Tan(a2, b2);
-
-            var mas = new[] {v1, v2, v3, v4};
-            var min = mas.Concat(new[] {double.MaxValue}).Min();
-
-            return min < Data.GridStep;
-        }
-
-        private bool DefineNeighRooms(Place place1, Place place2)
-        {
-            var mas1 = new[] {double.MaxValue, double.MinValue, double.MaxValue, double.MinValue};
-            var mas2 = new[] {double.MaxValue, double.MinValue, double.MaxValue, double.MinValue};
-
-            foreach (var line in place1.Lines)
-            {
-                var x1 = Math.Min(line.X1, line.X2);
-                var x2 = Math.Max(line.X1, line.X2);
-                var y1 = Math.Min(line.Y1, line.Y2);
-                var y2 = Math.Max(line.Y1, line.Y2);
-
-                if (mas1[0] > x1) mas1[0] = x1;
-                if (mas1[1] < x2) mas1[1] = x2;
-                if (mas1[2] > y1) mas1[2] = y1;
-                if (mas1[3] < y2) mas1[3] = y2;
-            }
-
-            foreach (var line in place2.Lines)
-            {
-                var x1 = Math.Min(line.X1, line.X2);
-                var x2 = Math.Max(line.X1, line.X2);
-                var y1 = Math.Min(line.Y1, line.Y2);
-                var y2 = Math.Max(line.Y1, line.Y2);
-
-                if (mas2[0] > x1) mas2[0] = x1;
-                if (mas2[1] < x2) mas2[1] = x2;
-                if (mas2[2] > y1) mas2[2] = y1;
-                if (mas2[3] < y2) mas2[3] = y2;
-            }
-
-            var ay = mas1[3] - mas2[2];
-            var by = mas2[2] - mas1[3];
-
-            var tmpY = Math.Min(ay, by);
-            var y = Math.Sqrt(tmpY*tmpY);
-
-            var ax = mas1[1] - mas2[0];
-            var bx = mas2[0] - mas1[1];
-
-            var tmpX = Math.Min(ax, bx);
-            var x = Math.Sqrt(tmpX*tmpX);
-
-            return x > y;
-        }
-
-        private void CreatePortal(double min, double max, Place place1, Place place2, Portal.PortalOrient orientation,
-                                  double pos, double wide)
-        {
-            var portal = new Portal
-                {
-                    RoomA = place1,
-                    RoomB = place2,
-                    Min = min,
-                    Max = max,
-                    Orientation = orientation,
-                    Wide = wide,
-                };
-
-            portal.RoomA.IsMovable = false;
-            portal.RoomB.IsMovable = false;
-
-            _building.Portals[_curStage].Add(portal);
-
-            portal.CreateUI(pos);
-            portal.UI.RenderTransform = _transformGroup;
-            ContentPanel.Children.Add(portal.UI);
-        }
-
-        private double[] GetMinMax(double x1, double x2)
-        {
-            return x1 < x2 ? new [] { x1, x2 } : new [] { x2, x1 };
-        }
-
-        #endregion
-        
-        private void MovePortal(double moveX, double moveY, Entity v)
-        {
-            var portal = v as Portal;
-            if (portal == null) return;
-
-            var pg = v.UI.Data as PathGeometry;
-            var p = pg.Figures[0].StartPoint;
-            double x = p.X;
-            double y = p.Y;
-
-            if (portal.Orientation == Portal.PortalOrient.Horizontal)
-            {                
-                x = p.X + moveX;
-                y = p.Y;
-                moveY = 0;
-                
-                if (x < portal.Min) return;
-                double d = Helper.Tan(x, portal.Max);
-                double wide = portal.Wide/Data.Sigma;
-                if (d <= wide)
-                    return;
-            }
-            else
-            {
-                x = p.X;
-                y = p.Y + moveY;
-                moveX = 0;
-                if (y < portal.Min) return;
-
-                double d = Helper.Tan(y, portal.Max);
-                double wide = portal.Wide / Data.Sigma;
-                if (d <= wide)
-                    return;
-            }
-
-            pg.Figures[0].StartPoint = new Point(x, y);
-
-            int count = pg.Figures[0].Segments.Count;
-            for (int i = 0; i < count; ++i)
-            {
-                double _x = x;
-                double _y = y;
-                var ls = pg.Figures[0].Segments[i] as LineSegment;
-                if (ls == null) continue;
-
-                _x = ls.Point.X + moveX;                    
-                _y = ls.Point.Y + moveY;
-                ls.Point = new Point(_x, _y);
-            }
-        }
-
-        private void MovePlace(double moveX, double moveY, Entity v)
-        {
-            var place = v as Place;
-            if (place == null || !place.IsMovable) return;
-
-            var pg = v.UI.Data as PathGeometry;
-            var p = pg.Figures[0].StartPoint;
-            double x = p.X + moveX;
-            double y = p.Y + moveY;
-            pg.Figures[0].StartPoint = new Point(x, y);
-
-            int count = pg.Figures[0].Segments.Count;
-            for (int i = 0; i < count; ++i)
-            {
-                var ls = pg.Figures[0].Segments[i] as LineSegment;
-                if (ls != null)
-                {
-                    x = ls.Point.X + moveX;
-                    y = ls.Point.Y + moveY;
-                    ls.Point = new Point(x, y);
-                }
-            }                
-        }
-        private void ChangeStageName()
-        {
-            int s = _curStage + 1;                            
-            Stage.Text = "Этаж " + s;
         }
     }    
 }
