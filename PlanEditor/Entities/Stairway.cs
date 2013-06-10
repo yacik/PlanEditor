@@ -17,6 +17,6 @@ namespace PlanEditor.Entities
         
         [NonSerialized] public List<Cell> StartPoints = new List<Cell>();
         [NonSerialized] public List<Cell> EndPoints = new List<Cell>();
-        [NonSerialized] public List<Cell> Cells;
+        [NonSerialized] public List<Cell> Cells = new List<Cell>();
     }
 }

@@ -201,7 +201,7 @@ namespace PlanEditor.Helpers.IO
                 for (int i = 0; i < v.StartPoints.Count; ++i)
                 {
                     if (i % 2 != 0) continue;
-
+                    
                     var mine = new Mine(v.StageFrom, v.StageTo, v.StartPoints[i], v.EndPoints[i]);
                     _building.Mines.Add(mine);
                 }
@@ -235,11 +235,27 @@ namespace PlanEditor.Helpers.IO
                                 case Entity.EntityType.Place:
                                 case Entity.EntityType.Halfway:
                                 case Entity.EntityType.Stairway:
-                                    code = 5;
+                                    var place = cell.Owner as Place;
+                                    if (place == null) continue;
+
+                                    if (place.Obstacles.Count == 0)
+                                    {
+                                        code = 5;
+                                    }
+                                    else
+                                    {
+                                        foreach (var obst in place.Obstacles)
+                                        {
+                                            code = MyMath.Helper.IsCollide(cell.CenterX, cell.CenterY, obst.PointsX, obst.PointsY) ? 9 : 5;
+
+                                            if (code == 9) break;
+                                        }
+                                    }
                                     break;
                                 case Entity.EntityType.Portal:
                                     var portal = cell.Owner as Portal;
                                     if (portal != null) code = (portal.RoomA != null && portal.RoomB != null) ? 2 : 1;
+                                    
                                     break;
                             }
 
@@ -374,7 +390,6 @@ namespace PlanEditor.Helpers.IO
                     var isHor = (portal.Orientation == Portal.PortalOrient.Horizontal);
                     foreach (var cell in portal.Cells)
                     {
-                        //int pos = (isHor) ? cell.N : cell.M;
                         int index = (isHor) ? cell.M : cell.N;
 
                         int min = int.MaxValue;

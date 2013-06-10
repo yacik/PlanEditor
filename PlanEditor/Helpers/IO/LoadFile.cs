@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using PlanEditor.Entities;
 
 namespace PlanEditor.Helpers.IO
 {
@@ -38,15 +40,28 @@ namespace PlanEditor.Helpers.IO
             for (int i = 0; i < Building.Stages; ++i)
             {
                 if (Building.Places.Count > i)
+                {
                     foreach (var p in Building.Places[i])
+                    {
                         p.LoadUI();
+                        p.Collisions = new List<Entity>();
+                        if (p.Obstacles == null) p.Obstacles = new List<Obstacle>();
+                        else
+                        {
+                            foreach (var obstacle in p.Obstacles) obstacle.LoadUI();
+                        }
+                    }
+                }
                 if (Building.Portals.Count > i)
                     foreach (var v in Building.Portals[i])
                         v.LoadUI();
             }
 
             foreach (var v in Building.Mines)
+            {
+                v.Collisions = new List<Entity>();
                 v.LoadUI();
+            }
 
             return true;
         }

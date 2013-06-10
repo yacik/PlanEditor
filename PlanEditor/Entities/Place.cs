@@ -52,6 +52,28 @@ namespace PlanEditor.Entities
             return sb.ToString();
         }
 
+        public void HideObstacles()
+        {
+            if (Obstacles != null)
+            {
+                foreach (var obstacle in Obstacles)
+                {
+                    obstacle.Hide();
+                }
+            }
+        }
+
+        public void ShowObstacles()
+        {
+            if (Obstacles != null)
+            {
+                foreach (var obstacle in Obstacles)
+                {
+                    obstacle.Show();
+                }
+            }
+        }
+
         public List<Line> Lines 
         { 
             get 
@@ -71,22 +93,6 @@ namespace PlanEditor.Entities
 
         [NonSerialized]
         public List<Portal> Exits = new List<Portal>();
-
-        public double Length // длина помещения, м	
-        {
-            get
-            {
-                return distance(PointsY[0], PointsY);
-            }
-        }
-
-        public double Wide	// ширина
-        {
-            get
-            {
-                return distance(PointsX[0], PointsX);
-            }
-        }
 
         [NonSerialized]
         private bool _isCollide;
@@ -117,5 +123,7 @@ namespace PlanEditor.Entities
             }
             _isCollide = false;
         }
+
+        public List<Obstacle> Obstacles = new List<Obstacle>();
     }
 }

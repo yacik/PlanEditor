@@ -1,14 +1,6 @@
-﻿using PlanEditor.Entities;
-using PlanEditor.Graph;
-using PlanEditor.RegGrid;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PlanEditor.Graph;
 
-namespace PlanEditor
+namespace PlanEditor.RegGrid
 {
     public class ConverteGridToGraph
     {
@@ -42,7 +34,7 @@ namespace PlanEditor
                     foreach (Cell c in place.Cells)
                     {
                         int id = c.ID + i * a;
-                        Vertex ver = new Vertex(id, c.PosX, c.PosY);
+                        Vertex ver = new Vertex(id, c.CenterX, c.CenterY);
                         graph.Vertices.Add(ver);
                     }
                 }

@@ -25,17 +25,18 @@
                 <MenuItem Header="Инструменты" x:Name="MenuTools">
                     <!--<MenuItem Header="Увеличить" Click="Click_ZoomIn"/>
                     <MenuItem Header="Уменьшить" Click="Click_ZoomOut"/>-->
-                    <MenuItem Header="Выбрать" Click="Click_SelectTool" />
-                    <MenuItem Header="Перемещение" Click="Click_MoveTool" />
+                    <MenuItem Header="Выбрать" x:Name="SelectTool" Click="Click_SelectTool" />
+                    <MenuItem Header="Перемещение" x:Name="MoveTool" Click="Click_MoveTool" />
                     <!--<MenuItem Header="Сетка" Click="Click_Grid" />-->
                     <Separator/>
-                    <MenuItem Header="Этаж выше" Click="Click_NextStage"/>
-                    <MenuItem Header="Этаж ниже" Click="Click_PrevStage"/>
+                    <MenuItem Header="Этаж выше" x:Name="StageNext" Click="Click_NextStage"/>
+                    <MenuItem Header="Этаж ниже" x:Name="StageTo" Click="Click_PrevStage"/>
                 </MenuItem>
                 <MenuItem Header="Добавить" x:Name="MenuAdd">
-                    <MenuItem Header="Помещение" Click="Click_AddRoom" />
+                    <MenuItem Header="Помещение" x:Name="AddPlace" Click="Click_AddRoom" />
                     <!--<MenuItem Header="Произвольное помещение" Click="Click_Path" />-->
-                    <MenuItem Header="Дверь" Click="Click_AddDoor" />
+                    <MenuItem Header="Дверь" x:Name="AddDoor" Click="Click_AddDoor" />
+                    <MenuItem Header="Преграда" x:Name="AddObstacle" Click="Click_AddObstacle" IsEnabled="False"/>
                 </MenuItem>
             </Menu>
         </DockPanel>        

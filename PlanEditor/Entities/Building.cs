@@ -105,7 +105,12 @@ namespace PlanEditor.Entities
             {
                 if (Places.Count > i)
                     foreach (var v in Places[i])
+                    {
                         v.PrepareForSave();
+                        if (v.Obstacles == null) continue;
+
+                        foreach (var obstacle in v.Obstacles) obstacle.PrepareForSave();
+                    }
 
                 if (Portals.Count > i)
                     foreach (var v in Portals[i])

@@ -1,14 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using PlanEditor.Entities;
 using PlanEditor.Helpers;
 
 namespace PlanEditor
 {
-    /// <summary>
-    /// Interaction logic for WinPortal.xaml
-    /// </summary>
     public partial class WinPortal : Window
     {
         public double Wide { get; private set; }
@@ -47,11 +45,11 @@ namespace PlanEditor
             else
             {
                 Wide = double.Parse(WideText.Text);
-                _portal.Wide = Wide;
+                _portal.Width = Wide;
                 EditPlace();
             }
         }
-        private void Text_Changed(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void Text_Changed(object sender, TextChangedEventArgs e)
         {
             double d;
             var isParsed = double.TryParse(WideText.Text, out d);

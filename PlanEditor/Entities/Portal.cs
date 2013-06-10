@@ -23,14 +23,14 @@ namespace PlanEditor.Entities
         public Place RoomB { get; set; }
         public double Min { get; set; }
         public double Max { get; set; }
-        public double Wide { get; set; }
+        public double Width { get; set; }
 
         [NonSerialized]
         public List<Cell> Cells = new List<Cell>();
 
         public void CreateUI(double v) // Call this function when add new portal on canvas
         {
-            var wide = Wide/Data.Sigma;
+            var wide = Width / Data.Sigma;
 
             var shiftX = Data.GridStep;
             var shiftY = Data.GridStep;

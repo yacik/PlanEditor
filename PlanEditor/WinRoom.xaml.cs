@@ -422,6 +422,7 @@ namespace PlanEditor
             else
             {
                 var s = _place as Stairway;
+                if (s == null) return;
                 s.StageFrom = int.Parse(StageFrom.Text);
                 s.StageTo = int.Parse(StageTo.Text);
             }
@@ -505,7 +506,8 @@ namespace PlanEditor
         private void Text_ChangedDouble(object sender, TextChangedEventArgs e)
         {
             var textBox = e.Source as TextBox;
-           
+            if (textBox == null) return;
+
             double d;
             double min = 1.0;
             var isParsed = double.TryParse(textBox.Text, out d);

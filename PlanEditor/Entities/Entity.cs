@@ -11,8 +11,27 @@ namespace PlanEditor.Entities
     [Serializable]
     public class Entity
     {
-        public enum EntityType { Place, Portal, Stairway, Halfway, Lift }
+        public enum EntityType { Place, Portal, Stairway, Halfway, Lift, Obstacle }
         public EntityType Type { get; set; }
+
+        [NonSerialized] 
+        public List<Entity> Collisions = new List<Entity>();
+
+        public void Show()
+        {
+            if (UI != null)
+            {
+                UI.Visibility = Visibility.Visible;
+            }
+        }
+
+        public void Hide()
+        {
+            if (UI != null)
+            {
+                UI.Visibility = Visibility.Hidden;
+            }
+        }
 
         public void LoadUI()
         {
@@ -45,6 +64,10 @@ namespace PlanEditor.Entities
                     break;
                 case EntityType.Portal:
                     p.Fill = Colours.LightGray;
+                    break;
+                case EntityType.Obstacle:
+                    p.Stroke = Colours.LightGray;
+                    p.Fill = Colours.Gray;
                     break;
             }
         }
@@ -104,6 +127,7 @@ namespace PlanEditor.Entities
                 UI.Stroke = Colours.Red;
             }
         }
+       
         public void Deselect()
         {
             if (UI != null)
@@ -112,7 +136,23 @@ namespace PlanEditor.Entities
             }
         }
 
-        protected double distance(double a, List<double> list)
+        public double Length // длина помещения, м	
+        {
+            get
+            {
+                return distance(PointsY[0], PointsY);
+            }
+        }
+
+        public double Wide	// ширина
+        {
+            get
+            {
+                return distance(PointsX[0], PointsX);
+            }
+        }
+
+        private double distance(double a, List<double> list)
         {
             double a1 = list[0];
             double dist = 0;

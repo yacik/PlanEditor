@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\App.xaml
-41350224938
+5462212430
 
-36365004738
+381726341271
 131545538329
-WinBuilding.xaml;WinPortal.xaml;MainWindow.xaml;WinRoom.xaml;
+WinBuilding.xaml;WinObstacle.xaml;WinPortal.xaml;MainWindow.xaml;WinRoom.xaml;
 
 False
 

@@ -23,7 +23,8 @@ namespace PlanEditor
             Move,
             Path,
             Select,
-            Connect
+            Connect,
+            Edit
         }
 
         private CanvasMode _mode;
@@ -43,12 +44,15 @@ namespace PlanEditor
         private Point _clickOne;
         private Point _clickTwo;
         private Point _lastClick = new Point(100, 100);
+        private Point _curPosMouse;
         private RegGrid.Grid _grid;
-        private readonly List<Entity> _selected = new List<Entity>();
+        private readonly List<Entity> _selectedItems = new List<Entity>();
+        private readonly List<Obstacle> _obstacles = new List<Obstacle>();
         private readonly List<Line> _lines = new List<Line>();
         private readonly List<Line> _drawGrid = new List<Line>();
         private bool _shiftPressed;
         private bool _isChanged;
+        private Entity _selectedItem;
 
         public MainWindow()
         {
@@ -69,12 +73,13 @@ namespace PlanEditor
 
             Stage.SetValue(Panel.ZIndexProperty, 100);
             _mode = CanvasMode.Select;
-
+            
             #region MouseEvents
 
             ContentPanel.MouseMove += GridField_MouseMove;
             ContentPanel.MouseLeftButtonUp += GridField_MouseLeftButtonUp;
             ContentPanel.MouseLeftButtonDown += GridField_MouseLeftButtonDown;
+            ContentPanel.MouseRightButtonDown += GridField_MouseRightButtonDown;
             ContentPanel.MouseDown += GridField_MouseDown;
             ContentPanel.MouseLeave += GridField_MouseLeave;
             ContentPanel.MouseDown += GridField_MouseDown;
@@ -102,13 +107,31 @@ namespace PlanEditor
                         _lines.Clear();
                     }
                     break;
+                case CanvasMode.Edit:
+                    if (Key.Escape == e.Key)
+                    {
+                        SetVisible();
+                        SetVisibleStairways();
+
+                        foreach (var obstacle in _obstacles) obstacle.Deselect();
+                        _obstacles.Clear();
+                        
+                        if (_selectedItem != null)
+                            _selectedItem.Deselect();
+                        
+                        _mode = CanvasMode.Select;
+                        ActiveDeactiveMenu(true);
+                        AddObstacle.IsEnabled = false;
+                    }
+                    break;
             }
-            _shiftPressed = (Key.LeftShift == e.Key);
+
+            if (Key.LeftShift == e.Key) _shiftPressed = true;
         }
 
         private void GridField_KeyUp(object sender, KeyEventArgs e)
         {
-            _shiftPressed = (Key.LeftShift != e.Key);
+            if (Key.LeftShift == e.Key) _shiftPressed = false;
         }
         
         private void GridField_MouseLeave(object sender, MouseEventArgs e)
@@ -129,7 +152,7 @@ namespace PlanEditor
         {
             double x = e.GetPosition(null).X;
             double y = e.GetPosition(null).Y;
-
+            
             if (e.MiddleButton == MouseButtonState.Pressed)
             {
                 Move(x, y);
@@ -151,10 +174,17 @@ namespace PlanEditor
                         if (e.LeftButton == MouseButtonState.Pressed)
                             MoveSelected(x, y);
                         break;
+
+                    case CanvasMode.Edit:
+                        if (e.LeftButton == MouseButtonState.Pressed)
+                        {
+                            MoveSelected(x, y);
+                        }
+                        break;
                 }
             }
         }
-
+        
         private void GridField_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             _lastPosX = e.GetPosition(null).X;
@@ -165,17 +195,12 @@ namespace PlanEditor
         {
             double x = e.GetPosition(null).X - _translation.X;
             double y = e.GetPosition(null).Y - _translation.Y;
-
+            
             _lastClick = (x < Data.GridStep || x > _building.xMax || y < Data.GridStep || y > _building.yMax)
                              ? _lastClick
                              : new Point(x, y);
-            
-            if (e.ClickCount >= 2)
+            switch (_mode)
             {
-                DeselectAll();
-            }
-           switch (_mode)
-           {
                 case CanvasMode.Path:
                     if (e.ClickCount >= 2)
                     {
@@ -197,28 +222,106 @@ namespace PlanEditor
                             AddNewLine(x, y);
                         }
                     }
+
                     break;
 
                 case CanvasMode.Move:
+                    if (e.ClickCount >= 2) DeselectAll();
                     _lastPosX = e.GetPosition(null).X;
                     _lastPosY = e.GetPosition(null).Y;
                     break;
 
                 case CanvasMode.Select:
-                    _lastPosX = e.GetPosition(null).X;
-                    _lastPosY = e.GetPosition(null).Y;
-                    SelectObjects(x, y);
+                    if (e.ClickCount >= 2)
+                    {
+                        _selectedItem = SelectObject(x, y);
+                        if (_selectedItem == null)
+                        {
+                            DeselectAll();
+                            return;
+                        }
+
+                        if (_selectedItem.Type == Entity.EntityType.Lift ||
+                            _selectedItem.Type == Entity.EntityType.Portal) return;
+
+                        var pl = _selectedItem as Place;
+                        if (pl == null) return;
+
+                        ActiveDeactiveMenu(false);
+                        _mode = CanvasMode.Edit;
+
+                        AddObstacle.IsEnabled = true;
+
+                        SetHidden();
+                        SetHiddenStairways();
+                        pl.Show();
+                        pl.ShowObstacles();
+                        _obstacles.Clear();
+                    }
+                    else
+                    {
+                        _lastPosX = e.GetPosition(null).X;
+                        _lastPosY = e.GetPosition(null).Y;
+
+                        if (_shiftPressed)
+                            SelectObjects(x, y);
+                        else
+                        {
+                            DeselectAll();
+
+                            _selectedItem = SelectObject(x, y);
+                            if (_selectedItem != null) 
+                                _selectedItem.Select();
+                        }
+                    }
                     break;
+
                 case CanvasMode.Connect:
                     ConnectPlaces(x, y);
+                    break;
+
+                case CanvasMode.Edit:
+                    var place = _selectedItem as Place;
+                    if (place == null) return;
+
+                    foreach (var obstacle in place.Obstacles.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
+                    {
+                        if (_obstacles.Contains(obstacle)) continue;
+
+                        obstacle.Select();
+                        _obstacles.Add(obstacle);
+                    }
                     break;
             }
         }
 
+        private void GridField_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _curPosMouse = new Point(e.GetPosition(null).X, e.GetPosition(null).Y);           
+        }
+        
         #endregion
         
         #region Click events
+        
+        private void Click_AddObstacle(object sender, RoutedEventArgs e)
+        {
+            if (_selectedItem == null) return;
 
+            var owner = _selectedItem as Place;
+            if (owner == null) return;
+
+            var winObst = new WinObstacle(owner) {Owner = this};
+            var result = winObst.ShowDialog();
+            if (result == true)
+            {
+                int pos = owner.Obstacles.Count - 1;
+                var obstacle = owner.Obstacles[pos];
+                obstacle.UI.RenderTransform = _transformGroup;
+                ContentPanel.Children.Add(obstacle.UI);
+            }
+        }
+        
         private void Click_New(object sender, RoutedEventArgs e)
         {
             var bldg = new WinBuilding(_building, WinBuilding.Mode.New);
@@ -236,20 +339,16 @@ namespace PlanEditor
             SaveProject();
         }
 
-        private void SaveProject()
+        private void Click_EditTool(object sender, RoutedEventArgs e)
         {
-            var dlg = new SaveFileDialog {DefaultExt = ".rintd", Filter = "RINTD Files (*.rintd) |*rintd"};
-
-            var result = dlg.ShowDialog();
-
-            if (result == true)
-            {
-                Helpers.IO.SaveFile.Save(dlg.FileName, _building);
-            }
+            _mode = CanvasMode.Edit;
+            ActiveDeactiveMenu(false);
         }
 
         private void Click_Export(object sender, RoutedEventArgs e)
         {
+            if (_building == null) return;
+
             var dlg = new SaveFileDialog { DefaultExt = ".txt", Filter = "Text Files (*.txt) |*txt" };
             var result = dlg.ShowDialog();
 
@@ -288,8 +387,15 @@ namespace PlanEditor
                             {
                                 ContentPanel.Children.Add(v.UI);
                                 v.UI.RenderTransform = _transformGroup;
-                                if (i != _curStage)
-                                    v.UI.Visibility = Visibility.Hidden;
+                                
+                                if (i != _curStage) v.UI.Visibility = Visibility.Hidden;
+                                
+                                foreach (var obstacle in v.Obstacles)
+                                {
+                                    ContentPanel.Children.Add(obstacle.UI);
+                                    obstacle.UI.RenderTransform = _transformGroup;
+                                    if (i != _curStage) obstacle.UI.Visibility = Visibility.Hidden;
+                                }
                             }
 
                         int s = _curStage + 1;
@@ -297,8 +403,7 @@ namespace PlanEditor
                         {
                             ContentPanel.Children.Add(v.UI);
                             v.UI.RenderTransform = _transformGroup;
-                            if (s <= v.StageFrom && s >= v.StageTo)
-                                v.UI.Visibility = Visibility.Hidden;
+                            if (s <= v.StageFrom && s >= v.StageTo) v.UI.Visibility = Visibility.Hidden;
                         }
 
                         if (_building.Portals.Count > i)
@@ -306,9 +411,18 @@ namespace PlanEditor
                             {
                                 ContentPanel.Children.Add(v.UI);
                                 v.UI.RenderTransform = _transformGroup;
-                                if (i != _curStage)
-                                    v.UI.Visibility = Visibility.Hidden;
+                                if (i != _curStage) v.UI.Visibility = Visibility.Hidden;
                             }
+                    }
+                    
+                    for (int i = 0; i < _building.Stages; ++i)
+                    {
+                        if (_building.Places[i] == null) continue;
+                        var places = _building.Places[i];
+                        foreach (var place in _building.Places[i])
+                        {
+                            CollidePlacesAfterLoad(place, places);
+                        }
                     }
 
                     DrawPlan();
@@ -371,13 +485,14 @@ namespace PlanEditor
 
         private void Click_AddDoor(object sender, RoutedEventArgs e)
         {
-            _mode = CanvasMode.Connect;
+            if (_mode != CanvasMode.Edit)
+                _mode = CanvasMode.Connect;
         }
         
         private void Click_EditBuilding(object sender, RoutedEventArgs e)
         {
-            double lx = _building.Lx;
-            double ly = _building.Ly;
+            var lx = _building.Lx;
+            var ly = _building.Ly;
 
             var bld = new WinBuilding(_building, WinBuilding.Mode.Edit);
             var isOk = bld.ShowDialog();
@@ -419,59 +534,115 @@ namespace PlanEditor
         
         private void Click_Remove(object sender, RoutedEventArgs e)
         {
-            foreach (var v in _selected)
+            var result = MessageBox.Show("Удалить выбранные элементы?", "Подтверждение удаления", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.No) return;
+
+            if (_mode == CanvasMode.Edit)
             {
-                switch (v.Type)
+                if (_selectedItem == null) return;
+                var place = _selectedItem as Place;
+                if (place == null) return;
+
+                double x = _curPosMouse.X - _translation.X;
+                double y = _curPosMouse.Y - _translation.Y;
+                
+                Obstacle obst = null;
+                foreach (var obstacle in place.Obstacles.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
                 {
-                    case Entity.EntityType.Portal:
-                        RemovePortal(v);
-                        break;
-                    case Entity.EntityType.Stairway:
-                        var stairway = v as Stairway;
-                        if (stairway == null) continue;
-                        ContentPanel.Children.Remove(stairway.UI);
-                        _building.Mines.Remove(stairway);
-                        
-                        break;
-                    default:
-                        var place = v as Place;
-                        if (place == null) continue;
-                        var toDelete = new List<Portal>();
-                        foreach (var p in _building.Portals[_curStage])
-                        {
-                            bool isDoor = false;
-                            if (p.RoomA == null && p.RoomB == place)
-                                isDoor = true;
-                            else if (p.RoomB == null && p.RoomA == place)
-                                isDoor = true;
-                            else if (p.RoomA == place || p.RoomB == place)
-                            {
-                                if (p.RoomA != place) p.RoomA.IsMovable = true;
-                                else p.RoomB.IsMovable = true;
+                    obst = obstacle;
+                }
 
-                                isDoor = true;
-                            }
-
-                            if (isDoor)
-                            {
-                                ContentPanel.Children.Remove(p.UI);
-                                toDelete.Add(p);
-                            }
-                        }
-
-                        ContentPanel.Children.Remove(place.UI);
-                        _building.Places[_curStage].Remove(place);
-
-                        foreach (var p in toDelete)
-                            _building.Portals[_curStage].Remove(p);
-
-                        toDelete.Clear();
-
-                        break;
+                if (obst != null)
+                {
+                    place.Obstacles.Remove(obst);
+                    ContentPanel.Children.Remove(obst.UI);
                 }
             }
-            
-            _selected.Clear();
+            else
+            {
+                foreach (var v in _selectedItems) RemoveEntity(v);
+
+                _selectedItems.Clear();
+
+                if (_selectedItem != null)
+                    RemoveEntity(_selectedItem);
+
+                _selectedItem = null;
+            }
+        }
+
+        private void RemoveEntity(Entity v)
+        {
+            switch (v.Type)
+            {
+                case Entity.EntityType.Portal:
+                    RemovePortal(v);
+                    break;
+                case Entity.EntityType.Stairway:
+                    var stairway = v as Stairway;
+                    if (stairway == null) return;
+
+                    ContentPanel.Children.Remove(stairway.UI);
+                    _building.Mines.Remove(stairway);
+
+                    foreach (var obs in stairway.Obstacles)
+                        ContentPanel.Children.Remove(obs.UI);
+                    
+                     stairway.Obstacles.Clear();
+
+                    break;
+                default:
+                    var place = v as Place;
+                    if (place == null) return;
+                    var toDelete = new List<Portal>();
+                    foreach (var p in _building.Portals[_curStage])
+                    {
+                        bool isDoor = false;
+
+                        if (p.RoomA == null && p.RoomB == place) isDoor = true;
+                        else if (p.RoomB == null && p.RoomA == place) isDoor = true;
+                        else if (p.RoomA == place || p.RoomB == place)
+                        {
+                            if (p.RoomA != place) p.RoomA.IsMovable = true;
+                            else p.RoomB.IsMovable = true;
+
+                            isDoor = true;
+                        }
+
+                        if (isDoor)
+                        {
+                            ContentPanel.Children.Remove(p.UI);
+                            toDelete.Add(p);
+                        }
+                    }
+
+                    ContentPanel.Children.Remove(place.UI);
+                    _building.Places[_curStage].Remove(place);
+
+                    foreach (var p in toDelete)
+                        _building.Portals[_curStage].Remove(p);
+
+                    toDelete.Clear();
+
+                     foreach (var obs in place.Obstacles)
+                        ContentPanel.Children.Remove(obs.UI);
+                    
+                     place.Obstacles.Clear();
+
+                    break;
+            }
+        }
+
+        private void SaveProject()
+        {
+            var dlg = new SaveFileDialog { DefaultExt = ".rintd", Filter = "RINTD Files (*.rintd) |*rintd" };
+
+            var result = dlg.ShowDialog();
+
+            if (result == true)
+            {
+                Helpers.IO.SaveFile.Save(dlg.FileName, _building);
+            }
         }
 
         private void RemovePortal(Entity v)
@@ -510,40 +681,39 @@ namespace PlanEditor
 
         private void Click_Property(object sender, RoutedEventArgs e)
         {
-            /*WinRoom room;
-            switch (_selected.Count)
+            if (_mode == CanvasMode.Edit)
             {
-                case 0:
-                    return;
-                case 1:
-                    var place = _selected[0] as Place;
-                    if (place==null) return;
-                    room = new WinRoom(place);
-                    room.ShowDialog();
-                    break;
-                default:
-                    var lst = _selected.Where(entity => entity.Type == Entity.EntityType.Place).OfType<Place>().ToList();
-                    room = new WinRoom(lst);
-                    room.ShowDialog();
-                    break;
-            }*/
-
-            if (_selected.Count != 1) return;
-
-            switch (_selected[0].Type)
-            {
-                case Entity.EntityType.Portal:
-                    var portal = (Portal)_selected[0];                    
-                    var door = new WinPortal(portal);
-                    door.ShowDialog();
-                    break;
-                default:
-                    var place = (Place)_selected[0];
-                    var room = new WinRoom(place);
-                    room.ShowDialog();
-                    break;
+                    
             }
-
+            else
+            {
+                if (_selectedItem != null)
+                {
+                    switch (_selectedItem.Type)
+                    {
+                        case Entity.EntityType.Portal:
+                            var portal = _selectedItem as Portal;
+                            if (portal != null)
+                            {
+                                var door = new WinPortal(portal);
+                                door.ShowDialog();
+                            }
+                            break;
+                        default:
+                            var place = _selectedItem as Place;
+                            if (place != null)
+                            {
+                                var room = new WinRoom(place);
+                                room.ShowDialog();
+                            }
+                            break;
+                    }
+                }
+                else if (_selectedItems.Count > 0)
+                {
+                    // TODO: multiply select tool
+                }
+            }
         }
         
         #endregion
@@ -557,7 +727,7 @@ namespace PlanEditor
                 {
                     RoomA = place,
                     RoomB = null,
-                    Wide = wide
+                    Width = wide
                 };
             
             portal.RoomA.IsMovable = false;
@@ -583,6 +753,13 @@ namespace PlanEditor
                 portal.Orientation = Portal.PortalOrient.Horizontal;                
                 portal.Min = Math.Min(line.X1, line.X2);
                 portal.Max = Math.Max(line.X1, line.X2);
+
+                if (portal.Max < wide)
+                {
+                    MessageBox.Show("Ширина двери задана не верна");
+                    return;
+                }
+
                 portal.CreateUI(line.Y2);
             }
             else
@@ -590,6 +767,13 @@ namespace PlanEditor
                 portal.Orientation = Portal.PortalOrient.Vertical;
                 portal.Min = Math.Min(line.Y1, line.Y2);
                 portal.Max = Math.Max(line.Y1, line.Y2);
+
+                if (portal.Max < wide)
+                {
+                    MessageBox.Show("Ширина двери задана не верна");
+                    return;
+                }
+
                 portal.CreateUI(line.X1);
             }
 
@@ -629,12 +813,12 @@ namespace PlanEditor
             var lines1 = _place1.Lines;
             var lines2 = _place2.Lines;
 
-            _selected.Clear();
+            _selectedItems.Clear();
 
             _place1.Select();
             _place2.Select();
-            _selected.Add(_place1);
-            _selected.Add(_place2);
+            _selectedItems.Add(_place1);
+            _selectedItems.Add(_place2);
 
             var isVerNeigh = DefineNeighRooms(_place1, _place2);
 
@@ -707,6 +891,7 @@ namespace PlanEditor
 
             if (isFound)
                 CreatePortal(min, max, _place1, _place2, orient, startPoint, wide);
+
 
             _place1 = null;
             _place2 = null;
@@ -859,6 +1044,12 @@ namespace PlanEditor
         {
             _isChanged = true;
 
+            if (max < wide)
+            {
+                MessageBox.Show("Ширина двери задана не верна");
+                return;
+            }
+
             var portal = new Portal
                 {
                     RoomA = place1,
@@ -866,7 +1057,7 @@ namespace PlanEditor
                     Min = min,
                     Max = max,
                     Orientation = orientation,
-                    Wide = wide,
+                    Width = wide,
                 };
 
             portal.RoomA.IsMovable = false;
@@ -994,11 +1185,44 @@ namespace PlanEditor
                 }
             }
 
+            if (place.Obstacles != null)
+                foreach (var obstacle in place.Obstacles) MoveObstacle(moveX, moveY, obstacle);
+        
             CollidePlaces(place, _building.Places[_curStage]);
         }
 
+        private void MoveObstacle(double moveX, double moveY, Obstacle o)
+        {
+            var pg = o.UI.Data as PathGeometry;
+            if (pg == null) return;
 
-        private void CollidePlaces(Place place, List<Place> places)
+            var p = pg.Figures[0].StartPoint;
+            double x = p.X + moveX;
+            double y = p.Y + moveY;
+
+            // Check for leaving canvas zone
+            double wide = x + o.Wide / Data.Sigma;
+            double height = y + o.Length / Data.Sigma;
+            if (x < o.MinPoint.X || wide > o.MaxPoint.X) return;
+            if (y < o.MinPoint.Y || height > o.MaxPoint.Y) return;
+
+            pg.Figures[0].StartPoint = new Point(x, y);
+
+            int count = pg.Figures[0].Segments.Count;
+            for (int i = 0; i < count; ++i)
+            {
+                var ls = pg.Figures[0].Segments[i] as LineSegment;
+                if (ls != null)
+                {
+                    x = ls.Point.X + moveX;
+                    y = ls.Point.Y + moveY;
+
+                    ls.Point = new Point(x, y);
+                }
+            }
+        }
+
+        private void CollidePlacesAfterLoad(Place place, List<Place> places)
         {
             var px1 = place.PointsX;
             var py1 = place.PointsY;
@@ -1007,10 +1231,11 @@ namespace PlanEditor
             {
                 if (Equals(pl, place)) continue;
 
+                bool isCollide = false;
+
                 var px2 = pl.PointsX;
                 var py2 = pl.PointsY;
 
-                bool isCollide = false;
                 for (int i = 0; i < px1.Count; ++i)
                 {
                     double x = px1[i];
@@ -1028,13 +1253,139 @@ namespace PlanEditor
                 {
                     place.Collide();
                     pl.Collide();
+                    if (!pl.Collisions.Contains(place))
+                        pl.Collisions.Add(place);
+                }
+            }
+
+            foreach (var stairway in _building.Mines)
+            {
+                if (Equals(stairway, place)) continue;
+
+                bool isCollide = false;
+
+                var px2 = stairway.PointsX;
+                var py2 = stairway.PointsY;
+
+                for (int i = 0; i < px1.Count; ++i)
+                {
+                    double x = px1[i];
+                    double y = py1[i];
+
+                    if (Helper.IsCollide(x, y, px2, py2)) isCollide = true;
+
+                    x = px2[i];
+                    y = py2[i];
+
+                    if (Helper.IsCollide(x, y, px1, py1)) isCollide = true;
+                }
+
+                if (isCollide)
+                {
+                    place.Collide();
+                    stairway.Collide();
+                    if (!stairway.Collisions.Contains(place))
+                        stairway.Collisions.Add(place);
+                }
+            }
+        }
+
+        private void CollidePlaces(Place place, List<Place> places)
+        {
+            var px1 = place.PointsX;
+            var py1 = place.PointsY;
+
+            bool isInterscept = false;
+            foreach (var pl in places)
+            {
+                if (Equals(pl, place)) continue;
+
+                bool isCollide = false;
+
+                var px2 = pl.PointsX;
+                var py2 = pl.PointsY;
+                
+                for (int i = 0; i < px1.Count; ++i)
+                {
+                    double x = px1[i];
+                    double y = py1[i];
+
+                    if (Helper.IsCollide(x, y, px2, py2)) isCollide = true;
+
+                    x = px2[i];
+                    y = py2[i];
+
+                    if (Helper.IsCollide(x, y, px1, py1)) isCollide = true;
+                }
+
+                if (isCollide)
+                {
+                    place.Collide();
+                    if (!place.Collisions.Contains(pl))
+                        place.Collisions.Add(pl); 
+
+                    pl.Collide();
+                    if (!pl.Collisions.Contains(place))
+                        pl.Collisions.Add(place);
+
+                    isInterscept = true;
                 }
                 else
                 {
-                    place.NonCollide();
-                    pl.NonCollide();
+                    if (place.Collisions.Contains(pl))
+                        place.Collisions.Remove(pl);
+
+                    if (pl.Collisions.Contains(place))
+                        pl.Collisions.Remove(place);
+
+                    if (pl.Collisions.Count == 0)
+                        pl.NonCollide();
                 }
             }
+
+            foreach (var stairway in _building.Mines)
+            {
+                if (Equals(stairway, place)) continue;
+
+                bool isCollide = false;
+
+                var px2 = stairway.PointsX;
+                var py2 = stairway.PointsY;
+
+                for (int i = 0; i < px1.Count; ++i)
+                {
+                    double x = px1[i];
+                    double y = py1[i];
+
+                    if (Helper.IsCollide(x, y, px2, py2)) isCollide = true;
+
+                    x = px2[i];
+                    y = py2[i];
+
+                    if (Helper.IsCollide(x, y, px1, py1)) isCollide = true;
+                }
+
+
+                if (isCollide)
+                {
+                    place.Collide();
+                    stairway.Collide();
+                    if (!stairway.Collisions.Contains(place))
+                        stairway.Collisions.Add(place);
+
+                    isInterscept = true;
+                }
+                else
+                {
+                    if (stairway.Collisions.Contains(place))
+                        stairway.Collisions.Remove(place);
+
+                    if (stairway.Collisions.Count == 0)
+                        stairway.NonCollide();
+                }
+            }
+
+            if (!isInterscept) place.NonCollide();
         }
         
         private void MovePath(double x, double y)
@@ -1073,16 +1424,44 @@ namespace PlanEditor
             _lastPosX = x;
             _lastPosY = y;
 
-            foreach (var v in _selected)
+            if (_mode == CanvasMode.Edit)
             {
-                switch (v.Type)
+                if (_selectedItem == null) return;
+                var place = _selectedItem as Place;
+                if (place == null) return;
+                double _x = x - _translation.X;
+                double _y = y - _translation.Y;
+                foreach (var obstacle in place.Obstacles.Where(p => Helper.IsCollide(_x, _y, p.PointsX, p.PointsY)))
                 {
-                    case Entity.EntityType.Portal:
-                        MovePortal(moveX, moveY, v);
-                        break;
-                    default:
-                        MovePlace(moveX, moveY, v);
-                        break;
+                    MoveObstacle(moveX, moveY, obstacle);
+                }
+            }
+            else
+            {
+                foreach (var v in _selectedItems)
+                {
+                    switch (v.Type)
+                    {
+                        case Entity.EntityType.Portal:
+                            MovePortal(moveX, moveY, v);
+                            break;
+                        default:
+                            MovePlace(moveX, moveY, v);
+                            break;
+                    }
+                }
+
+                if (_selectedItem != null)
+                {
+                    switch (_selectedItem.Type)
+                    {
+                        case Entity.EntityType.Portal:
+                            MovePortal(moveX, moveY, _selectedItem);
+                            break;
+                        default:
+                            MovePlace(moveX, moveY, _selectedItem);
+                            break;
+                    }
                 }
             }
         }
@@ -1101,25 +1480,22 @@ namespace PlanEditor
             {
                 foreach (var v in _building.Places[_curStage])
                 {
-                    v.UI.Visibility = Visibility.Hidden;
+                    v.Hide();
+                    v.HideObstacles();
                 }
             }
 
             if (_building.Portals.Count > _curStage)
             {
                 foreach (var v in _building.Portals[_curStage])
-                {
-                    v.UI.Visibility = Visibility.Hidden;
-                }
+                 v.Hide();
             }
 
             int s = _curStage + 1;
             foreach (var v in _building.Mines)
             {
-                if (s >= v.StageFrom && s <= v.StageTo)
-                    v.UI.Visibility = Visibility.Visible;
-                else
-                    v.UI.Visibility = Visibility.Hidden;
+                if (s >= v.StageFrom && s <= v.StageTo) v.Show();
+                else v.Hide();
             }
         }
 
@@ -1129,25 +1505,24 @@ namespace PlanEditor
             {
                 foreach (var v in _building.Places[_curStage])
                 {
-                    v.UI.Visibility = Visibility.Visible;
+                    v.Show();
+                    v.ShowObstacles();
                 }
             }
 
             if (_building.Portals.Count > _curStage)
             {
                 foreach (var v in _building.Portals[_curStage])
-                {
-                    v.UI.Visibility = Visibility.Visible;
-                }
+                    v.Show();
             }
             
             int s = _curStage + 1;
             foreach (var v in _building.Mines)
             {
                 if (s >= v.StageFrom && s <= v.StageTo)
-                    v.UI.Visibility = Visibility.Visible;
+                    v.Show();
                 else
-                    v.UI.Visibility = Visibility.Hidden;
+                    v.Hide();
             }
         }
 
@@ -1203,19 +1578,19 @@ namespace PlanEditor
         {
             if (_building.Places.Count > _curStage)
                 foreach (var p in _building.Places[_curStage])
-                    p.UI.Visibility = Visibility.Visible;
+                    p.Show();
 
             if (_building.Portals.Count > _curStage)
                 foreach (var p in _building.Portals[_curStage])
-                    p.UI.Visibility = Visibility.Visible;
+                    p.Show();
 
             int s = _curStage + 1;
             foreach (var v in _building.Mines)
             {
                 if (s >= v.StageFrom && s <= v.StageTo)
-                    v.UI.Visibility = Visibility.Visible;
+                    v.Show();
                 else
-                    v.UI.Visibility = Visibility.Hidden;
+                    v.Hide();
             }
         }
         
@@ -1315,56 +1690,69 @@ namespace PlanEditor
             _line = null;
         }
         
+        private Entity SelectObject(double x, double y)
+        {
+            if (_selectedItem != null)
+            {
+                _selectedItem.Deselect();
+                _selectedItem = null;
+            }
+
+            Entity entity = null;
+            if (_building.Places.Count > _curStage)
+            {
+                foreach (var p in _building.Places[_curStage].Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
+                {
+                    entity = p;
+                }
+            }
+
+            foreach (var p in _building.Mines.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
+            {
+                entity = p;
+            }
+
+            if (_building.Portals.Count > _curStage)
+            {
+                foreach (var p in _building.Portals[_curStage].Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
+                {
+                    entity = p;
+                }
+            }
+
+            return entity;
+        }
+
         private void SelectObjects(double x, double y)
         {
             if (_building.Places.Count > _curStage)
             {
                 foreach (var p in _building.Places[_curStage].Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
                 {
-                    if (_shiftPressed)
+                    if (_selectedItems.Contains(p))
                     {
-                        if (_selected.Contains(p))
-                        {
-                            _selected.Remove(p);
-                            p.Deselect();
-                        }
-                        else
-                        {
-                            _selected.Add(p);
-                            p.Select();
-                        }
+                        _selectedItems.Remove(p);
+                        p.Deselect();
                     }
                     else
                     {
-                        foreach (var entity in _selected) entity.Deselect();
+                        _selectedItems.Add(p);
                         p.Select();
-                        _selected.Clear();
-                        _selected.Add(p);
                     }
                 }
             }
 
             foreach (var p in _building.Mines.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
             {
-                if (_shiftPressed)
+                if (_selectedItems.Contains(p))
                 {
-                    if (_selected.Contains(p))
-                    {
-                        _selected.Remove(p);
-                        p.Deselect();
-                    }
-                    else
-                    {
-                        _selected.Add(p);
-                        p.Select();
-                    }
+                    _selectedItems.Remove(p);
+                    p.Deselect();
                 }
                 else
                 {
-                    foreach (var entity in _selected) entity.Deselect();
+                    _selectedItems.Add(p);
                     p.Select();
-                    _selected.Clear();
-                    _selected.Add(p);
                 }
             }
 
@@ -1372,25 +1760,15 @@ namespace PlanEditor
             {
                 foreach (var p in _building.Portals[_curStage].Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
                 {
-                    if (_shiftPressed)
+                    if (_selectedItems.Contains(p))
                     {
-                        if (_selected.Contains(p))
-                        {
-                            _selected.Remove(p);
-                            p.Deselect();
-                        }
-                        else
-                        {
-                            _selected.Add(p);
-                            p.Select();
-                        }
+                        _selectedItems.Remove(p);
+                        p.Deselect();
                     }
                     else
                     {
-                        foreach (var entity in _selected) entity.Deselect();
+                        _selectedItems.Add(p);
                         p.Select();
-                        _selected.Clear();
-                        _selected.Add(p);
                     }
                 }
             }
@@ -1398,10 +1776,10 @@ namespace PlanEditor
         
         private void DeselectAll()
         {
-            foreach (var v in _selected)
+            foreach (var v in _selectedItems)
                 v.Deselect();
 
-            _selected.Clear();
+            _selectedItems.Clear();
         }
 
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)
@@ -1411,6 +1789,32 @@ namespace PlanEditor
                 var result = MessageBox.Show("Сохранить данные?", "Есть не сохраненные данные", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.Yes) SaveProject();
             }
+        }
+
+        private void SetHiddenStairways()
+        {
+            foreach (var stairway in _building.Mines)
+            {
+                stairway.UI.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void SetVisibleStairways()
+        {
+            foreach (var stairway in _building.Mines)
+            {
+                stairway.UI.Visibility = Visibility.Visible;
+            }
+        }
+       
+        private void ActiveDeactiveMenu(bool isEnabled)
+        {
+            SelectTool.IsEnabled = isEnabled;
+            MoveTool.IsEnabled = isEnabled;
+            StageNext.IsEnabled = isEnabled;
+            StageTo.IsEnabled = isEnabled;
+            AddPlace.IsEnabled = isEnabled;
+            AddDoor.IsEnabled = isEnabled;
         }
     }    
 }
