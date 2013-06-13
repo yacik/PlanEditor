@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using MahApps.Metro.Controls;
 using PlanEditor.Entities;
 using PlanEditor.Helpers;
 

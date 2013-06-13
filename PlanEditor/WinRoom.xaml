@@ -2,6 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Place" Height="368.083" Width="306" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+    
+    
     <Grid>    
         <TextBox x:Name="name" HorizontalAlignment="Left" Height="23" Margin="10,11,0,0" TextWrapping="Wrap" Text="Название помещения" VerticalAlignment="Top" Width="274" RenderTransformOrigin="0.5,-0.386"/>
         <ComboBox x:Name="type" HorizontalAlignment="Left" Margin="66,39,0,0" VerticalAlignment="Top" Width="218"/>

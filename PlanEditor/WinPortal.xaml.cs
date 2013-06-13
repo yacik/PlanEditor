@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using MahApps.Metro.Controls;
 using PlanEditor.Entities;
 using PlanEditor.Helpers;
 
@@ -11,6 +12,7 @@ namespace PlanEditor
     {
         public double Wide { get; private set; }
         private readonly Portal _portal;
+        private readonly bool isStairway;
 
         public WinPortal()
         {
@@ -26,11 +28,22 @@ namespace PlanEditor
         {
             InitializeComponent();
             
-            WideText.Text = portal.Wide.ToString();
+            WideText.Text = portal.Width.ToString();
 
             Title = "Редактирование двери";
 
             _portal = portal;
+            if (portal.RoomA != null && portal.RoomA.Type == Entity.EntityType.Stairway)
+            {
+                WideText.IsEnabled = false;
+                isStairway = true;
+            }
+
+            if (portal.RoomB != null && portal.RoomB.Type == Entity.EntityType.Stairway)
+            {
+                WideText.IsEnabled = false;
+                isStairway = true;
+            }
         }
 
 
@@ -44,9 +57,12 @@ namespace PlanEditor
             }
             else
             {
-                Wide = double.Parse(WideText.Text);
-                _portal.Width = Wide;
-                EditPlace();
+                if (!isStairway)
+                {
+                    Wide = double.Parse(WideText.Text);
+                    _portal.Width = Wide;
+                    EditPlace();
+                }
             }
         }
         private void Text_Changed(object sender, TextChangedEventArgs e)

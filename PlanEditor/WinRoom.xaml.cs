@@ -1,6 +1,5 @@
-﻿using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
+﻿using System.Linq;
+using MahApps.Metro.Controls;
 using PlanEditor.Entities;
 using System.Collections.Generic;
 using System.Windows;
@@ -36,6 +35,11 @@ namespace PlanEditor
             InitializeComponent();
             _place = place;
             Title = _place.Name;
+            if (!_place.IsMovable)
+            {
+                Wide.IsEnabled = false;
+                Leng.IsEnabled = false;
+            }
 
             InitializeCombo();
             Initialize();
@@ -427,8 +431,8 @@ namespace PlanEditor
                 s.StageTo = int.Parse(StageTo.Text);
             }
 
-            if (_isMore) return;
-
+            if (_isMore && !_place.IsMovable) return;
+            
             double wide = double.Parse(Wide.Text.ToString());
             double len = double.Parse(Leng.Text.ToString());
 

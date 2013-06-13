@@ -54,11 +54,14 @@ namespace PlanEditor.Helpers.IO
                 }
                 if (Building.Portals.Count > i)
                     foreach (var v in Building.Portals[i])
+                    {
                         v.LoadUI();
+                    }
             }
 
             foreach (var v in Building.Mines)
             {
+                if (v.Obstacles == null) v.Obstacles = new List<Obstacle>();
                 v.Collisions = new List<Entity>();
                 v.LoadUI();
             }

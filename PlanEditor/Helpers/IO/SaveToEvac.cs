@@ -177,8 +177,7 @@ namespace PlanEditor.Helpers.IO
             
             for (int i = 0; i < building.Stages; ++i)
             {
-                var list = new List<Stairway>();
-                Stairways.Add(list);
+                Stairways.Add(new List<Stairway>());
             }
             
             foreach (var v in building.Mines)
@@ -198,12 +197,17 @@ namespace PlanEditor.Helpers.IO
                 int end = v.StageTo - 1;
                 DefineMineEnter(v, building.Portals[end], false);
 
-                for (int i = 0; i < v.StartPoints.Count; ++i)
+                int size = v.StartPoints.Count > v.EndPoints.Count ? v.EndPoints.Count : v.StartPoints.Count;
+                //v.StartPoints.Count
+                int j = 0;
+                for (int i = 0; i < size/2; ++i)
                 {
-                    if (i % 2 != 0) continue;
                     
-                    var mine = new Mine(v.StageFrom, v.StageTo, v.StartPoints[i], v.EndPoints[i]);
+                    //if (i % 2 != 0) continue;
+                    
+                    var mine = new Mine(v.StageFrom, v.StageTo, v.StartPoints[j], v.EndPoints[j]);
                     _building.Mines.Add(mine);
+                    j = i + 2;
                 }
             }
             

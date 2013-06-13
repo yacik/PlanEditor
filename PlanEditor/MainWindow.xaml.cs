@@ -263,15 +263,12 @@ namespace PlanEditor
                         _lastPosX = e.GetPosition(null).X;
                         _lastPosY = e.GetPosition(null).Y;
 
-                        if (_shiftPressed)
-                            SelectObjects(x, y);
+                        if (_shiftPressed) SelectObjects(x, y);
                         else
                         {
                             DeselectAll();
-
                             _selectedItem = SelectObject(x, y);
-                            if (_selectedItem != null) 
-                                _selectedItem.Select();
+                            if (_selectedItem != null)  _selectedItem.Select();
                         }
                     }
                     break;
@@ -534,8 +531,8 @@ namespace PlanEditor
         
         private void Click_Remove(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show("Удалить выбранные элементы?", "Подтверждение удаления", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result == MessageBoxResult.No) return;
+            var mb = MessageBox.Show("Удалить выбранные элементы?", "Подтверждение удаления", MessageBoxButton.YesNo);
+            if (mb == MessageBoxResult.No) return;
 
             if (_mode == CanvasMode.Edit)
             {
@@ -731,6 +728,7 @@ namespace PlanEditor
                 };
             
             portal.RoomA.IsMovable = false;
+            place.Select();
 
             var min = double.MaxValue;
             var lines = place.Lines;
@@ -746,7 +744,11 @@ namespace PlanEditor
                 line = v;
             }
             
-            if (line == null) return;
+            if (line == null)
+            {
+                MessageBox.Show("Невозможно соединить помещение");
+                return;
+            }
 
             if (Helper.IsHorizontal(line.X1, line.Y1, line.X2, line.Y2))
             {
@@ -759,7 +761,7 @@ namespace PlanEditor
                     MessageBox.Show("Ширина двери задана не верна");
                     return;
                 }
-
+                
                 portal.CreateUI(line.Y2);
             }
             else
@@ -773,13 +775,18 @@ namespace PlanEditor
                     MessageBox.Show("Ширина двери задана не верна");
                     return;
                 }
-
+                
                 portal.CreateUI(line.X1);
             }
 
-            portal.UI.RenderTransform = _transformGroup;
-            ContentPanel.Children.Add(portal.UI);
-            _building.Portals[_curStage].Add(portal);
+            var mb = MessageBox.Show("Создать дверь, ведущую на улицу?", "Подтверждение", MessageBoxButton.YesNo);
+            if (mb == MessageBoxResult.Yes)
+            {
+                portal.UI.RenderTransform = _transformGroup;
+                ContentPanel.Children.Add(portal.UI);
+                _building.Portals[_curStage].Add(portal);
+            }
+            place.Deselect();
 
             _place1 = null;
             _place2 = null;
@@ -890,8 +897,51 @@ namespace PlanEditor
             }
 
             if (isFound)
-                CreatePortal(min, max, _place1, _place2, orient, startPoint, wide);
+            {
+                Portal door = null;
+                Place place = null;
+                if (_place1.Type == Entity.EntityType.Stairway) place = _place1;
+                if (_place2.Type == Entity.EntityType.Stairway) place = _place2;
+                if (place != null)
+                {
+                    for (int i = 0; i < _building.Stages; ++i)
+                    {
+                        if (_building.Portals[i] == null) continue;
+                        
+                        foreach (var portal in _building.Portals[i])
+                        {
+                            if (portal.RoomA != null)
+                            {
+                                if (portal.RoomA == place || portal.RoomA == place)
+                                {
+                                    door = portal;
+                                }
+                            } 
+                            if (portal.RoomB != null)
+                            {
+                                if (portal.RoomB == place || portal.RoomB == place)
+                                {
+                                    door = portal;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (door != null)
+                {
+                    if (door.Width != wide)
+                    {
+                        MessageBox.Show("Размер двери не сооответствует ранее установленной");
+                        wide = door.Width;
+                    }
+                }
+                var mb = MessageBox.Show("Соединить данные помещения?", "Подтверждение", MessageBoxButton.YesNo);
+                if (mb == MessageBoxResult.Yes)
+                    CreatePortal(min, max, _place1, _place2, orient, startPoint, wide);
+            }
 
+            _place1.Deselect();
+            _place2.Deselect();
 
             _place1 = null;
             _place2 = null;
@@ -1120,7 +1170,7 @@ namespace PlanEditor
                 
                 if (x < portal.Min) return;
                 double d = Helper.Tan(x, portal.Max);
-                double wide = portal.Wide/Data.Sigma;
+                double wide = portal.Width/Data.Sigma;
                 if (d <= wide) return;
             }
             else
@@ -1131,9 +1181,8 @@ namespace PlanEditor
                 if (y < portal.Min) return;
 
                 double d = Helper.Tan(y, portal.Max);
-                double wide = portal.Wide / Data.Sigma;
-                if (d <= wide)
-                    return;
+                double wide = portal.Width / Data.Sigma;
+                if (d <= wide) return;
             }
 
             pg.Figures[0].StartPoint = new Point(x, y);
@@ -1786,8 +1835,8 @@ namespace PlanEditor
         {
             if (_isChanged)
             {
-                var result = MessageBox.Show("Сохранить данные?", "Есть не сохраненные данные", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                if (result == MessageBoxResult.Yes) SaveProject();
+                var mb = MessageBox.Show("Имеются не сохраненные данные, сохранить?", "Подтверждение", MessageBoxButton.YesNo);
+                if (mb == MessageBoxResult.Yes) SaveProject();
             }
         }
 
@@ -1815,6 +1864,56 @@ namespace PlanEditor
             StageTo.IsEnabled = isEnabled;
             AddPlace.IsEnabled = isEnabled;
             AddDoor.IsEnabled = isEnabled;
+        }
+
+        private void Click_CheckEntity(object sender, RoutedEventArgs e)
+        {
+            if (_selectedItem == null) return;
+            
+            _selectedItems.Clear();
+
+            switch (_selectedItem.Type)
+            {
+                case Entity.EntityType.Portal:
+                    var portal = _selectedItem as Portal;
+                    if (portal != null)
+                    {
+                        if (portal.RoomA != null)
+                        {
+                            _selectedItems.Add(portal.RoomA);
+                            portal.RoomA.Select();
+                        }
+
+                        if (portal.RoomB != null)
+                        {
+                            _selectedItems.Add(portal.RoomB);
+                            portal.RoomB.Select();
+                        }
+                    }
+                    break;
+                default:
+                    var place = _selectedItem as Place;
+                    if (place != null)
+                    {
+                        if (_building.Portals.Count > _curStage)
+                        {
+                            foreach (var p in _building.Portals[_curStage])
+                            {
+                                if (p.RoomA != null && place.Equals(p.RoomA))
+                                {
+                                    _selectedItems.Add(p);
+                                    p.Select();
+                                }
+                                if (p.RoomB != null && place.Equals(p.RoomB))
+                                {
+                                    _selectedItems.Add(p);
+                                    p.Select();
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
         }
     }    
 }

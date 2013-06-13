@@ -5,7 +5,8 @@
     <Grid>
         <Label Content="Ширина" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="58"/>
         <Button x:Name="btnOk" Content="Ok" IsDefault="True" Click="Click_OK" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" Width="75"/>
-        <Button Content="Отмена" IsCancel="True" HorizontalAlignment="Left" Margin="90,49,0,0" VerticalAlignment="Top" Width="75"/>
+        <Button Content="Отмена" IsCancel="True" HorizontalAlignment="Left" Margin="90,50,0,0" VerticalAlignment="Top" Width="75"/>
         <TextBox x:Name="WideText" TextChanged="Text_Changed" HorizontalAlignment="Left" Margin="87,16,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="67"/>
     </Grid>
+    
 </Window>
