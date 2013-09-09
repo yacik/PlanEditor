@@ -139,7 +139,7 @@ namespace PlanEditor.Helpers.IO
         {
             StageFrom = from - 1;
             StageTo = to - 1;
-            ID = _ID;
+            ID = _ID;            
             ++_ID;
             StartPoints = new [] { startCell.M, startCell.N };
             EndPoints = new[] { endCell.M, endCell.N };
@@ -356,7 +356,7 @@ namespace PlanEditor.Helpers.IO
             ser.WriteObject(stream, _building);
             stream.Position = 0;
             var sr = new StreamReader(stream, Encoding.UTF8);
-            string read = sr.ReadToEnd();
+            var read = sr.ReadToEnd();
             sw.Write(read);
             sw.Close();
         }

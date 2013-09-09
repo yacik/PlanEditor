@@ -7,10 +7,10 @@
     Closing="MainWindow_OnClosing">
     
     <Window.ContextMenu>
-        <ContextMenu AllowDrop="True" AlternationCount="4">
-            <MenuItem Header="Редактировать" Click="Click_Property" />
-            <MenuItem Header="Прверить" Click="Click_CheckEntity"/>
-            <MenuItem Header="Удалить" Click="Click_Remove" />
+        <ContextMenu Opened="Click_Menu" AllowDrop="True" AlternationCount="4">
+            <MenuItem Header="Редактировать" x:Name="MouseMenuEdit" Click="Click_Property" />
+            <MenuItem Header="Прверить" x:Name="MouseMenuCheck" Click="Click_CheckEntity"/>
+            <MenuItem Header="Удалить" x:Name="MouseMenuRemove" Click="Click_Remove" />
         </ContextMenu>
     </Window.ContextMenu>
     

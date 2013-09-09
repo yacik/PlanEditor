@@ -127,6 +127,20 @@ namespace PlanEditor
             }
 
             if (Key.LeftShift == e.Key) _shiftPressed = true;
+
+            if (Key.C == e.Key)
+            {
+                foreach (var ptls in _building.Portals)
+                {
+                    foreach (var p in ptls)
+                    {
+                        if (p.RoomA == null || p.RoomB == null)
+                        {
+                            p.Select();
+                        }
+                    }
+                }
+            }
         }
 
         private void GridField_KeyUp(object sender, KeyEventArgs e)
@@ -447,7 +461,23 @@ namespace PlanEditor
             _mode = CanvasMode.Move;
             DeselectAll();
         }
-        
+
+        private void Click_Menu(object sender, RoutedEventArgs e)
+        {
+            if (_selectedItems.Count == 0 && _selectedItem == null)
+            {
+                MouseMenuEdit.IsEnabled = false;
+                MouseMenuCheck.IsEnabled = false;
+                MouseMenuRemove.IsEnabled = false;
+            }
+            else
+            {
+                MouseMenuEdit.IsEnabled = true;
+                MouseMenuCheck.IsEnabled = (_selectedItems.Count == 0);
+                MouseMenuRemove.IsEnabled = true;
+            }
+        }
+
         private void Click_AddRoom(object sender, RoutedEventArgs e)
         {            
             var r = new WinRoom(_lastClick) {Owner = this};
@@ -531,40 +561,47 @@ namespace PlanEditor
         
         private void Click_Remove(object sender, RoutedEventArgs e)
         {
-            var mb = MessageBox.Show("Удалить выбранные элементы?", "Подтверждение удаления", MessageBoxButton.YesNo);
-            if (mb == MessageBoxResult.No) return;
-
-            if (_mode == CanvasMode.Edit)
+            if (_selectedItems.Count > 0)
             {
-                if (_selectedItem == null) return;
-                var place = _selectedItem as Place;
-                if (place == null) return;
-
-                double x = _curPosMouse.X - _translation.X;
-                double y = _curPosMouse.Y - _translation.Y;
+                var mb = MessageBox.Show("Удалить выбранные элементы?", "Подтверждение удаления", MessageBoxButton.YesNo);
+                if (mb == MessageBoxResult.No) return;
                 
-                Obstacle obst = null;
-                foreach (var obstacle in place.Obstacles.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
-                {
-                    obst = obstacle;
-                }
-
-                if (obst != null)
-                {
-                    place.Obstacles.Remove(obst);
-                    ContentPanel.Children.Remove(obst.UI);
-                }
-            }
-            else
-            {
-                foreach (var v in _selectedItems) RemoveEntity(v);
-
-                _selectedItems.Clear();
-
-                if (_selectedItem != null)
-                    RemoveEntity(_selectedItem);
-
+                _selectedItems.Add(_selectedItem);
                 _selectedItem = null;
+
+                 foreach (var v in _selectedItems) RemoveEntity(v);
+                _selectedItems.Clear();
+            }
+            if (_selectedItem != null)
+            {
+                var mb = MessageBox.Show("Удалить выбранные элементы?", "Подтверждение удаления", MessageBoxButton.YesNo);
+                if (mb == MessageBoxResult.No) return;
+
+                if (_mode == CanvasMode.Edit)
+                {
+                    var place = _selectedItem as Place;
+                    if (place == null) return;
+
+                    double x = _curPosMouse.X - _translation.X;
+                    double y = _curPosMouse.Y - _translation.Y;
+
+                    Obstacle obst = null;
+                    foreach (var obstacle in place.Obstacles.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
+                    {
+                        obst = obstacle;
+                    }
+
+                    if (obst != null)
+                    {
+                        place.Obstacles.Remove(obst);
+                        ContentPanel.Children.Remove(obst.UI);
+                    }
+                } 
+                else
+                {
+                    RemoveEntity(_selectedItem);
+                    _selectedItem = null;
+                }
             }
         }
 
