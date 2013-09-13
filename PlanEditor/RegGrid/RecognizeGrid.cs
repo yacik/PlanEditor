@@ -66,7 +66,7 @@ namespace PlanEditor.RegGrid
                 }
             }
             
-            foreach (var stairway in _building.Mines)
+            foreach (var stairway in _building.Stairways)
             {
                 int start = stairway.StageFrom - 1;
                 int end = stairway.StageTo;
@@ -96,10 +96,11 @@ namespace PlanEditor.RegGrid
                     {
                         var pointsX = stairway.PointsX;
                         var pointsY = stairway.PointsY;
-                        foreach (var cell in grid.Cells[i].Where(cell => cell.Owner == null || cell.Owner.Type == Entity.EntityType.Stairway).Where(cell => MyMath.Helper.IsCollide(cell.CenterX, cell.CenterY, pointsX, pointsY)))
+                        foreach (var cell in grid.Cells[i].Where(cell => cell.Owner == null || cell.Owner.Type == Entity.EntityType.Stairway)
+                            .Where(cell => MyMath.Helper.IsCollide(cell.CenterX, cell.CenterY, pointsX, pointsY)))
                         {
                             cell.Owner = stairway;
-                              if (stairway.Cells == null) stairway.Cells = new List<Cell>();
+                            if (stairway.Cells == null) stairway.Cells = new List<Cell>();
                             stairway.Cells.Add(cell);
                             //++stairway.CountNodes;
                         }

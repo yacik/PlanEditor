@@ -53,19 +53,27 @@ namespace PlanEditor.Helpers.IO
                     }
                 }
                 if (Building.Portals.Count > i)
+                {
                     foreach (var v in Building.Portals[i])
                     {
                         v.LoadUI();
                     }
+                }
             }
 
-            foreach (var v in Building.Mines)
+            if (Building.Stairways != null)
             {
-                if (v.Obstacles == null) v.Obstacles = new List<Obstacle>();
-                v.Collisions = new List<Entity>();
-                v.LoadUI();
+                foreach (var v in Building.Stairways)
+                {
+                    if (v.Obstacles == null) v.Obstacles = new List<Obstacle>();
+                    v.Collisions = new List<Entity>();
+                    v.LoadUI();
+                }
             }
-
+            else
+            {
+                Building.Stairways = new List<Stairway>();
+            }
             return true;
         }
 

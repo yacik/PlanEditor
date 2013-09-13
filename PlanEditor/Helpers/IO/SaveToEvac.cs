@@ -170,49 +170,89 @@ namespace PlanEditor.Helpers.IO
     {
         private static readonly List<Entity> Entities = new List<Entity>();
         private static readonly List<List<Stairway>> Stairways = new List<List<Stairway>>();
+
         public static void Save(string fileName, RegGrid.Grid grid, Entities.Building building)
         {
-            var sw = new StreamWriter(fileName);
             var _building = new Building(building);
             
+            // Создаем список лестниц для последующий обработки (в зависимости от кол-ва этажей)
+            // потом для каждой лестнице на этаже определяем ячейки
             for (int i = 0; i < building.Stages; ++i)
             {
                 Stairways.Add(new List<Stairway>());
             }
-            
-            foreach (var v in building.Mines)
+
+            foreach (var strws in building.Stairways)
             {
-                for (int i = v.StageFrom - 1; i < v.StageTo; ++i)
+                int stageFrom = strws.StageFrom - 1;
+                int stageTo = strws.StageTo; 
+                for (int i = stageFrom; i < stageTo; ++i, ++stageFrom)
                 {
-                    var stair = CreateStairway(v);
+                    var stair = new Stairway
+                    {
+                        CountNodes = strws.CountNodes,
+                        Ppl = strws.Ppl,
+                        MaxPeople = strws.MaxPeople,
+                        Name = strws.Name,
+                        Height = strws.Height,
+                        SHeigthRoom = strws.SHeigthRoom,
+                        DifHRoom = strws.DifHRoom,
+                        EvacWide = strws.EvacWide,
+                        MainType = strws.MainType,
+                        SubType = strws.SubType,
+                        UI = strws.UI,
+                        StageFrom = stageFrom + 1,
+                    };
+
                     Stairways[i].Add(stair);
 
                     int id = GenerateId(stair);
                     var room = new Room(stair, id);
                     _building.Rooms.Add(room);
                 }
-                int start = v.StageFrom - 1;
-                DefineMineEnter(v, building.Portals[start], true);
-
-                int end = v.StageTo - 1;
-                DefineMineEnter(v, building.Portals[end], false);
-
-                int size = v.StartPoints.Count > v.EndPoints.Count ? v.EndPoints.Count : v.StartPoints.Count;
-                //v.StartPoints.Count
-                int j = 0;
-                for (int i = 0; i < size/2; ++i)
-                {
-                    
-                    //if (i % 2 != 0) continue;
-                    
-                    var mine = new Mine(v.StageFrom, v.StageTo, v.StartPoints[j], v.EndPoints[j]);
-                    _building.Mines.Add(mine);
-                    j = i + 2;
-                }
             }
             
-            RegGrid.RecognizeGrid.DefineStairways(Stairways, grid);
-            
+            RegGrid.RecognizeGrid.DefineStairways(Stairways, grid); // распознаем ячейки на лестницах
+
+            /*for (int i = 0; i < building.Stages; ++i)
+            {
+                Debug.WriteLine(i);
+
+                foreach (var stairway in Stairways[i])
+                {
+                    stairway.Print();
+                }
+            }*/
+
+            for (int i = 0; i < building.Stages - 1; ++i)
+            {
+                int stage = i + 1;
+                int node = (i%2 == 0) ? 1 : 2; 
+                foreach (var stairway in Stairways[i])
+                {
+                    if (stairway.StageFrom == i) continue;
+                    
+                    var start = stairway.Cells[node];
+                    RegGrid.Cell end = null;
+
+                    foreach (var nextStair in Stairways[i + 1].Where(s => s.UI.Equals(stairway.UI)))
+                    {
+                        end = nextStair.Cells[node];
+                    }
+
+                    if (end != null)
+                    {
+                        var mine = new Mine(stage, stage + 1, start, end);
+                        _building.Mines.Add(mine);
+                    }
+                }
+            }
+
+            /*foreach (var mine in _building.Mines)
+            {
+                Debug.WriteLine(mine.StageFrom + " " + mine.StageTo + " [" + mine.StartPoints[0] + ", " + mine.StartPoints[1] + "] [" + mine.EndPoints[0] + ", " + mine.EndPoints[1] + "]");
+            }//*/
+
             for (int curStage = 0; curStage < building.Stages; ++curStage)
             {
                 #region grid
@@ -299,7 +339,7 @@ namespace PlanEditor.Helpers.IO
                 #endregion
 
                 #region stairways
-
+                
                 foreach (var p in building.Portals[curStage])
                 {
                     if (p.RoomA == null || p.RoomB == null) continue;
@@ -311,7 +351,8 @@ namespace PlanEditor.Helpers.IO
                     {
                         place = p.RoomB;
                         stair = p.RoomA;
-                    } else if (p.RoomB.Type == Entity.EntityType.Stairway)
+                    } 
+                    else if (p.RoomB.Type == Entity.EntityType.Stairway)
                     {
                         place = p.RoomA;
                         stair = p.RoomB;
@@ -357,6 +398,7 @@ namespace PlanEditor.Helpers.IO
             stream.Position = 0;
             var sr = new StreamReader(stream, Encoding.UTF8);
             var read = sr.ReadToEnd();
+            var sw = new StreamWriter(fileName);
             sw.Write(read);
             sw.Close();
         }
@@ -380,66 +422,7 @@ namespace PlanEditor.Helpers.IO
                 if (idR != -1) room.Neigh.Add(idR);
             }
         }
-        
-        private static void DefineMineEnter(Stairway mine, List<Portal> portals, bool isFirst)
-        {
-            if (mine.EndPoints == null) mine.EndPoints = new List<RegGrid.Cell>();
-            if (mine.StartPoints == null) mine.StartPoints = new List<RegGrid.Cell>();
-            
-            foreach (var portal in portals)
-            {
-                if (portal.RoomA == null || portal.RoomB == null) continue;
-                if (portal.RoomA == mine || portal.RoomB == mine)
-                {
-                    var isHor = (portal.Orientation == Portal.PortalOrient.Horizontal);
-                    foreach (var cell in portal.Cells)
-                    {
-                        int index = (isHor) ? cell.M : cell.N;
-
-                        int min = int.MaxValue;
-                        int max = int.MinValue;
-
-                        foreach (var mc in mine.Cells)
-                        {
-                            if (isHor)
-                            {
-                                if (mc.N < min) min = mc.N;
-                                if (mc.N > max) max = mc.N;
-                            }
-                            else
-                            {
-                                if (mc.M < min) min = mc.M;
-                                if (mc.M > max) max = mc.M;
-                            }
-                        }
-                        
-                        int point = ((max - min)/2) + min;
-
-                        foreach (var mc in mine.Cells)
-                        
-                        {
-                            if (isHor)
-                            {
-                                if (mc.M == index && mc.N == point)
-                                {
-                                    if (isFirst) mine.StartPoints.Add(mc);
-                                    else mine.EndPoints.Add(mc);
-                                }
-                            }
-                            else
-                            {
-                                if (mc.N == index && mc.M == point)
-                                {
-                                    if (isFirst) mine.StartPoints.Add(mc);
-                                    else mine.EndPoints.Add(mc);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    
+       
         private static int GetIdByEntity(Entity entity)
         {
             for (int i = 0; i < Entities.Count; ++i)
@@ -459,26 +442,6 @@ namespace PlanEditor.Helpers.IO
             }
             Entities.Add(entity);
             return Entities.Count - 1;
-        }
-
-        private static Stairway CreateStairway(Stairway stair)
-        {
-            var stairway = new Stairway
-                {
-                    CountNodes = stair.CountNodes,
-                    Ppl = stair.Ppl,
-                    MaxPeople = stair.MaxPeople,
-                    Name = stair.Name,
-                    Height = stair.Height,
-                    SHeigthRoom = stair.SHeigthRoom,
-                    DifHRoom = stair.DifHRoom,
-                    EvacWide = stair.EvacWide,
-                    MainType = stair.MainType,
-                    SubType = stair.SubType,
-                    UI = stair.UI,
-                };
-            
-            return stairway;
-        }
+        }      
     }
 }

@@ -410,7 +410,7 @@ namespace PlanEditor
                             }
 
                         int s = _curStage + 1;
-                        foreach (var v in _building.Mines.Where(v => !ContentPanel.Children.Contains(v.UI)))
+                        foreach (var v in _building.Stairways.Where(v => !ContentPanel.Children.Contains(v.UI)))
                         {
                             ContentPanel.Children.Add(v.UI);
                             v.UI.RenderTransform = _transformGroup;
@@ -499,7 +499,7 @@ namespace PlanEditor
                 {
                     case Entity.EntityType.Stairway:
                         var stairway = entity as Stairway;
-                        _building.Mines.Add(stairway);
+                        _building.Stairways.Add(stairway);
                         break;
                     case Entity.EntityType.Place:
                     case Entity.EntityType.Halfway:
@@ -617,7 +617,7 @@ namespace PlanEditor
                     if (stairway == null) return;
 
                     ContentPanel.Children.Remove(stairway.UI);
-                    _building.Mines.Remove(stairway);
+                    _building.Stairways.Remove(stairway);
 
                     foreach (var obs in stairway.Obstacles)
                         ContentPanel.Children.Remove(obs.UI);
@@ -1001,7 +1001,7 @@ namespace PlanEditor
                     }
                 }
 
-                foreach (var p in _building.Mines)
+                foreach (var p in _building.Stairways)
                 {
                     if (Helper.IsCollide(x, y, p.PointsX, p.PointsY))
                     {
@@ -1027,7 +1027,7 @@ namespace PlanEditor
 
                 foreach (
                     var p in
-                        _building.Mines.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY))
+                        _building.Stairways.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY))
                                  .Where(p => _place1 != p))
                 {
                     _place2 = p;
@@ -1344,7 +1344,7 @@ namespace PlanEditor
                 }
             }
 
-            foreach (var stairway in _building.Mines)
+            foreach (var stairway in _building.Stairways)
             {
                 if (Equals(stairway, place)) continue;
 
@@ -1429,7 +1429,7 @@ namespace PlanEditor
                 }
             }
 
-            foreach (var stairway in _building.Mines)
+            foreach (var stairway in _building.Stairways)
             {
                 if (Equals(stairway, place)) continue;
 
@@ -1578,7 +1578,7 @@ namespace PlanEditor
             }
 
             int s = _curStage + 1;
-            foreach (var v in _building.Mines)
+            foreach (var v in _building.Stairways)
             {
                 if (s >= v.StageFrom && s <= v.StageTo) v.Show();
                 else v.Hide();
@@ -1603,7 +1603,7 @@ namespace PlanEditor
             }
             
             int s = _curStage + 1;
-            foreach (var v in _building.Mines)
+            foreach (var v in _building.Stairways)
             {
                 if (s >= v.StageFrom && s <= v.StageTo)
                     v.Show();
@@ -1671,7 +1671,7 @@ namespace PlanEditor
                     p.Show();
 
             int s = _curStage + 1;
-            foreach (var v in _building.Mines)
+            foreach (var v in _building.Stairways)
             {
                 if (s >= v.StageFrom && s <= v.StageTo)
                     v.Show();
@@ -1793,7 +1793,7 @@ namespace PlanEditor
                 }
             }
 
-            foreach (var p in _building.Mines.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
+            foreach (var p in _building.Stairways.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
             {
                 entity = p;
             }
@@ -1828,7 +1828,7 @@ namespace PlanEditor
                 }
             }
 
-            foreach (var p in _building.Mines.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
+            foreach (var p in _building.Stairways.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
             {
                 if (_selectedItems.Contains(p))
                 {
@@ -1879,7 +1879,7 @@ namespace PlanEditor
 
         private void SetHiddenStairways()
         {
-            foreach (var stairway in _building.Mines)
+            foreach (var stairway in _building.Stairways)
             {
                 stairway.UI.Visibility = Visibility.Hidden;
             }
@@ -1887,7 +1887,7 @@ namespace PlanEditor
 
         private void SetVisibleStairways()
         {
-            foreach (var stairway in _building.Mines)
+            foreach (var stairway in _building.Stairways)
             {
                 stairway.UI.Visibility = Visibility.Visible;
             }

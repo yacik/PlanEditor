@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using PlanEditor.RegGrid;
 
 namespace PlanEditor.Entities
@@ -15,8 +16,16 @@ namespace PlanEditor.Entities
         public int StageFrom { get; set; }
         public int StageTo { get; set; }
         
-        [NonSerialized] public List<Cell> StartPoints = new List<Cell>();
-        [NonSerialized] public List<Cell> EndPoints = new List<Cell>();
         [NonSerialized] public List<Cell> Cells = new List<Cell>();
+
+        public void Print()
+        {
+            Debug.Write("StageFrom " + StageFrom + ", StageTo " + StageTo + ", ");
+            foreach (var cell in Cells)
+            {
+                Debug.Write("[" + cell.M + ", " + cell.N + "]");
+            }
+            Debug.WriteLine("\n");
+        }
     }
 }

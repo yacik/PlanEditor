@@ -61,12 +61,12 @@ namespace PlanEditor.Entities
         {
             get 
             {
-                return Mines.Count;
+                return Stairways.Count;
             }
         }
 
         public List<List<Place>> Places = new List<List<Place>>();       
-        public List<Stairway> Mines = new List<Stairway>();  
+        public List<Stairway> Stairways = new List<Stairway>();  
         public List<List<Portal>> Portals = new List<List<Portal>>();    
 
         public override string ToString()
@@ -104,6 +104,7 @@ namespace PlanEditor.Entities
             for (int i = 0; i < Stages; ++i)
             {
                 if (Places.Count > i)
+                {
                     foreach (var v in Places[i])
                     {
                         v.PrepareForSave();
@@ -111,13 +112,16 @@ namespace PlanEditor.Entities
 
                         foreach (var obstacle in v.Obstacles) obstacle.PrepareForSave();
                     }
+                }
 
                 if (Portals.Count > i)
+                {
                     foreach (var v in Portals[i])
                         v.PrepareForSave();
+                }
             }
 
-            foreach (var v in Mines)
+            foreach (var v in Stairways)
                 v.PrepareForSave();
         }
     }
