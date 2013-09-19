@@ -32,7 +32,6 @@ namespace PlanEditor.Helpers.IO
                     Debug.WriteLine(ex.Message);
                     return false;
                 }
-                
             }
 
             if (Building == null) return false;

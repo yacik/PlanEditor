@@ -26,8 +26,8 @@
         <Grid x:Name="Stairway">
             <Label Content="С" HorizontalAlignment="Left" Margin="10,252,0,0" VerticalAlignment="Top"/>
             <Label Content="По" HorizontalAlignment="Left" Margin="88,252,0,0" VerticalAlignment="Top"/>
-            <TextBox x:Name="StageFrom" TextChanged="Text_ChangedInt" HorizontalAlignment="Left" Margin="32,256,0,0" VerticalAlignment="Top" Width="50"/>
-            <TextBox x:Name="StageTo" TextChanged="Text_ChangedInt" HorizontalAlignment="Left" Margin="119,256,0,0" VerticalAlignment="Top" Width="50"/>
+            <TextBox x:Name="StageFrom" TextChanged="Text_Stages" HorizontalAlignment="Left" Margin="32,256,0,0" VerticalAlignment="Top" Width="50"/>
+            <TextBox x:Name="StageTo" TextChanged="Text_Stages" HorizontalAlignment="Left" Margin="119,256,0,0" VerticalAlignment="Top" Width="50"/>
         </Grid>
 
     </Grid>

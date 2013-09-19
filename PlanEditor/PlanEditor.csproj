@@ -91,7 +91,6 @@
     <Compile Include="Graph\Vertex.cs" />
     <Compile Include="Helpers\IO\SaveToEvac.cs" />
     <Compile Include="Helpers\Data.cs" />
-    <Compile Include="SVGConverter\ConvertStrings.cs" />
     <Page Include="WinBuilding.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

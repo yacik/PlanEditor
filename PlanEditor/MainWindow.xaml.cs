@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Windows.Documents;
 using Microsoft.Win32;
 using PlanEditor.Helpers;
 using PlanEditor.MyMath;
@@ -332,14 +333,18 @@ namespace PlanEditor
                 ContentPanel.Children.Add(obstacle.UI);
             }
         }
-        
+
         private void Click_New(object sender, RoutedEventArgs e)
         {
+            _building.RemoveAll();
             var bldg = new WinBuilding(_building, WinBuilding.Mode.New);
             var isOk = bldg.ShowDialog();
             if (isOk == null) return;
 
-            if (isOk == true) CreateNewProject();
+            if (isOk == true)
+            {
+                CreateNewProject();
+            }
             ChangeStageName();
 
             _isChanged = true;
@@ -368,6 +373,7 @@ namespace PlanEditor
                 var rg = new RecognizeGrid(_grid, _building);
                 rg.Recognize();
                 Helpers.IO.SaveToEvac.Save(dlg.FileName, rg.Grid, _building);
+                MessageBox.Show(this, "Экспорт готов");
             }
         }
 
@@ -380,9 +386,6 @@ namespace PlanEditor
             {
                 if (LoadBinary(dlg.FileName))
                 {
-                    ContentPanel.Children.Clear();
-                    _curStage = 0;
-
                     _transformGroup = new TransformGroup();
                     _translation = new TranslateTransform();
                     _scale = new ScaleTransform();
@@ -438,11 +441,11 @@ namespace PlanEditor
 
                     DrawPlan();
                     ChangeStageName();
+
+                    _isChanged = false;
                 }
                 else MessageBox.Show("Ошибка в чтении файла");
             }
-
-            _isChanged = false;
         }
         
         private void Click_Path(object sender, RoutedEventArgs e)
@@ -480,7 +483,7 @@ namespace PlanEditor
 
         private void Click_AddRoom(object sender, RoutedEventArgs e)
         {            
-            var r = new WinRoom(_lastClick) {Owner = this};
+            var r = new WinRoom(_lastClick, _building) {Owner = this};
             var isOk = r.ShowDialog();
 
             if (isOk == null || isOk == false)
@@ -616,11 +619,30 @@ namespace PlanEditor
                     var stairway = v as Stairway;
                     if (stairway == null) return;
 
+                    int start = stairway.StageFrom - 1;
+                    int end = stairway.StageTo;
+
+                    var toRemove = new List<Entity>();
+
+                    for (int i = start; i < end; ++i)
+                    {
+                        if (i == _building.Portals.Count) break;
+
+                        var portals = _building.Portals[i];
+
+                        foreach (var portal in portals)
+                        {
+                            if (portal.RoomA != null && portal.RoomA.Equals(stairway)) toRemove.Add(portal);
+                            if (portal.RoomB != null && portal.RoomB.Equals(stairway)) toRemove.Add(portal);
+                        }
+                    }
+
+                    foreach (var portal in toRemove) RemoveEntity(portal);
+
                     ContentPanel.Children.Remove(stairway.UI);
                     _building.Stairways.Remove(stairway);
 
-                    foreach (var obs in stairway.Obstacles)
-                        ContentPanel.Children.Remove(obs.UI);
+                    foreach (var obs in stairway.Obstacles) ContentPanel.Children.Remove(obs.UI);
                     
                      stairway.Obstacles.Clear();
 
@@ -676,6 +698,7 @@ namespace PlanEditor
             if (result == true)
             {
                 Helpers.IO.SaveFile.Save(dlg.FileName, _building);
+                _isChanged = false;
             }
         }
 
@@ -737,16 +760,16 @@ namespace PlanEditor
                             var place = _selectedItem as Place;
                             if (place != null)
                             {
-                                var room = new WinRoom(place);
+                                var room = new WinRoom(place, _building);
                                 room.ShowDialog();
                             }
                             break;
                     }
                 }
-                else if (_selectedItems.Count > 0)
+                /*else if (_selectedItems.Count > 0)
                 {
                     // TODO: multiply select tool
-                }
+                }*/
             }
         }
         
@@ -884,8 +907,8 @@ namespace PlanEditor
                     {
                         if (!IsNearest(line1.Y1, line1.Y2, line2.Y1, line2.Y2)) continue;
 
-                        var mas1 = GetMinMax(line1.X1, line1.X2);
-                        var mas2 = GetMinMax(line2.X1, line2.X2);
+                        var mas1 = Helper.GetMinMax(line1.X1, line1.X2);
+                        var mas2 = Helper.GetMinMax(line2.X1, line2.X2);
 
                         min = Math.Max(mas1[0], mas2[0]);
                         max = Math.Min(mas1[1], mas2[1]);
@@ -909,8 +932,8 @@ namespace PlanEditor
                     {
                         if (!IsNearest(line1.X1, line1.X2, line2.X1, line2.X2)) continue;
 
-                        var mas1 = GetMinMax(line1.Y1, line1.Y2);
-                        var mas2 = GetMinMax(line2.Y1, line2.Y2);
+                        var mas1 = Helper.GetMinMax(line1.Y1, line1.Y2);
+                        var mas2 = Helper.GetMinMax(line2.Y1, line2.Y2);
 
                         min = Math.Max(mas1[0], mas2[0]);
                         max = Math.Min(mas1[1], mas2[1]);
@@ -935,7 +958,7 @@ namespace PlanEditor
 
             if (isFound)
             {
-                Portal door = null;
+                /*Portal door = null;
                 Place place = null;
                 if (_place1.Type == Entity.EntityType.Stairway) place = _place1;
                 if (_place2.Type == Entity.EntityType.Stairway) place = _place2;
@@ -971,7 +994,7 @@ namespace PlanEditor
                         MessageBox.Show("Размер двери не сооответствует ранее установленной");
                         wide = door.Width;
                     }
-                }
+                }*/
                 var mb = MessageBox.Show("Соединить данные помещения?", "Подтверждение", MessageBoxButton.YesNo);
                 if (mb == MessageBoxResult.Yes)
                     CreatePortal(min, max, _place1, _place2, orient, startPoint, wide);
@@ -1055,7 +1078,7 @@ namespace PlanEditor
                 if (isOk != null && isOk == true)
                 {
                     var wide = door.Wide;
-                    if (wide == -1) MessageBox.Show("Ширина задана не верно");
+                    if (wide < 0) MessageBox.Show("Ширина задана не верно");
                     else
                     {
                         if (_place1 == null || _place2 == null)
@@ -1129,8 +1152,6 @@ namespace PlanEditor
         private void CreatePortal(double min, double max, Place place1, Place place2, Portal.PortalOrient orientation,
                                   double pos, double wide)
         {
-            _isChanged = true;
-
             if (max < wide)
             {
                 MessageBox.Show("Ширина двери задана не верна");
@@ -1155,12 +1176,11 @@ namespace PlanEditor
             portal.CreateUI(pos);
             portal.UI.RenderTransform = _transformGroup;
             ContentPanel.Children.Add(portal.UI);
+
+            _isChanged = true;
         }
 
-        private double[] GetMinMax(double x1, double x2)
-        {
-            return x1 < x2 ? new [] { x1, x2 } : new [] { x2, x1 };
-        }
+       
 
         #endregion
 
@@ -1190,11 +1210,11 @@ namespace PlanEditor
         
         private void MovePortal(double moveX, double moveY, Entity v)
         {
-            _isChanged = true;
-
-            var portal = (Portal)v;
+            var portal = v as Portal;
+            if (portal == null) return;
 
             var pg = v.UI.Data as PathGeometry;
+            if (pg == null) return;
             var p = pg.Figures[0].StartPoint;
             double x = p.X;
             double y = p.Y;
@@ -1236,12 +1256,12 @@ namespace PlanEditor
                 _y = ls.Point.Y + moveY;
                 ls.Point = new Point(_x, _y);
             }
+
+            _isChanged = true;
         }
 
         private void MovePlace(double moveX, double moveY, Entity v)
         {
-            _isChanged = true;
-
             var place = v as Place;
             if (place == null || !place.IsMovable) return;
 
@@ -1275,6 +1295,8 @@ namespace PlanEditor
                 foreach (var obstacle in place.Obstacles) MoveObstacle(moveX, moveY, obstacle);
         
             CollidePlaces(place, _building.Places[_curStage]);
+
+            _isChanged = true;
         }
 
         private void MoveObstacle(double moveX, double moveY, Obstacle o)
@@ -1306,6 +1328,8 @@ namespace PlanEditor
                     ls.Point = new Point(x, y);
                 }
             }
+
+            _isChanged = true;
         }
 
         private void CollidePlacesAfterLoad(Place place, List<Place> places)
@@ -1370,6 +1394,7 @@ namespace PlanEditor
                 {
                     place.Collide();
                     stairway.Collide();
+
                     if (!stairway.Collisions.Contains(place))
                         stairway.Collisions.Add(place);
                 }
@@ -1490,8 +1515,6 @@ namespace PlanEditor
 
         private void MoveSelected(double x, double y)
         {
-            _isChanged = true;
-
             double dX = Helper.Tan(x, _lastPosX);
             double dY = Helper.Tan(y, _lastPosY);
 
@@ -1550,6 +1573,7 @@ namespace PlanEditor
                     }
                 }
             }
+            
         }
 
         #endregion
@@ -1626,7 +1650,9 @@ namespace PlanEditor
 
         private void CreateNewProject()
         {
+            ContentPanel.Children.Clear();
             _curStage = 0;
+
             ContentPanel.IsEnabled = true;
             MenuAdd.IsEnabled = true;
             MenuTools.IsEnabled = true;
@@ -1636,11 +1662,10 @@ namespace PlanEditor
 
             _building.Row = (int)(_building.xMax / Data.GridStep);
             _building.Col = (int)(_building.yMax / Data.GridStep);
-
+            
             DrawGrid();
 
-            if (!ContentPanel.Children.Contains(Stage))
-                ContentPanel.Children.Add(Stage);
+            if (!ContentPanel.Children.Contains(Stage)) ContentPanel.Children.Add(Stage);
         }
 
         private void AddNewLine(double x, double y)

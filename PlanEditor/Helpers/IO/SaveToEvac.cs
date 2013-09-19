@@ -174,6 +174,9 @@ namespace PlanEditor.Helpers.IO
         public static void Save(string fileName, RegGrid.Grid grid, Entities.Building building)
         {
             var _building = new Building(building);
+
+            Entities.Clear();
+            Stairways.Clear();
             
             // Создаем список лестниц для последующий обработки (в зависимости от кол-ва этажей)
             // потом для каждой лестнице на этаже определяем ячейки

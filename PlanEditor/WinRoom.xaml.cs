@@ -15,7 +15,7 @@ namespace PlanEditor
         public Entity Entity { get; private set; }
 
         private readonly Place _place;
-        private readonly List<Place> _places;
+        private readonly Building _building;
         private readonly List<string> _lstType = new List<string>();
         private readonly List<List<string>> _subList = new List<List<string>>();
         private readonly List<string> _lst1 = new List<string>();
@@ -30,11 +30,13 @@ namespace PlanEditor
         private bool _isMore;
         private bool _isStairway;
 
-        public WinRoom(Place place)
+        public WinRoom(Place place, Building building)
         {
             InitializeComponent();
             _place = place;
+            _building = building;
             Title = _place.Name;
+
             if (!_place.IsMovable)
             {
                 Wide.IsEnabled = false;
@@ -44,25 +46,8 @@ namespace PlanEditor
             InitializeCombo();
             Initialize();
         }
-        
-        public WinRoom(List<Place> places)
-        {
-            InitializeComponent();
-            InitializeCombo();
 
-            Title = "Помещения";
-
-            name.IsEnabled = false;
-            Wide.IsEnabled = false;
-            Height.IsEnabled = false;
-            Leng.IsEnabled = false;
-
-            Stairway.Visibility = Visibility.Hidden;
-
-            _places = places;
-        }   
-
-        public WinRoom(Point point)
+        public WinRoom(Point point, Building building)
         {
             InitializeComponent();
             InitializeCombo();
@@ -72,6 +57,7 @@ namespace PlanEditor
 
             Stairway.Visibility = Visibility.Hidden;
             _startPoint = point;
+            _building = building;
         }
 
         private void InitializeCombo()
@@ -106,6 +92,7 @@ namespace PlanEditor
             _fields.Add(people, true);
             
             var pg = _place.UI.Data as PathGeometry;
+            if (pg == null) return;
             if (pg.Figures[0].Segments.Count > 4)
             {
                 Wide.IsEnabled = false;
@@ -214,13 +201,7 @@ namespace PlanEditor
         private void Click_OK(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
-
-            if (_places != null && _place == null)
-            {
-                Places();
-                return;
-            }
-
+            
             if (_place != null)
             {
                 PlaceNotNull();
@@ -493,20 +474,7 @@ namespace PlanEditor
                 Entity = p;
             }
         }
-    
-        private void Places()
-        {
-            foreach (var plc in _places)
-            {
-                plc.MainType = type.SelectedIndex;
-                plc.SubType = subType.SelectedIndex;
-
-                int i;
-                if (int.TryParse(people.Text, out i))
-                    plc.Ppl = i;
-            }    
-        }
-
+      
         private void Text_ChangedDouble(object sender, TextChangedEventArgs e)
         {
             var textBox = e.Source as TextBox;
@@ -531,17 +499,34 @@ namespace PlanEditor
         private void Text_ChangedInt(object sender, TextChangedEventArgs e)
         {
             var textBox = e.Source as TextBox;
+            if (textBox == null) return;
 
             int i;
             int min = 0;
             var isParsed = int.TryParse(textBox.Text, out i);
             
             if (textBox.Name == "people")
-                min = -1;
+                min = 0;
             
-            _fields[textBox] = type.SelectedIndex != 7 ? i > min && isParsed : i > 0 && isParsed;
+            _fields[textBox] = type.SelectedIndex != 7 ? i >= min && isParsed : i >= 0 && isParsed;
 
             textBox.BorderBrush = _fields[textBox] ? Brushes.DarkGray : Brushes.Red;
+            CheckFields();
+        }
+
+        private void Text_Stages(object sender, TextChangedEventArgs e)
+        {
+            var textBox = e.Source as TextBox;
+            if (textBox == null) return;
+
+            int stage = 0;
+            int max = _building.Stages;
+            
+            var isParsed = int.TryParse(textBox.Text, out stage);
+            
+            _fields[textBox] = (isParsed && stage > 0 && stage <= max);
+            textBox.BorderBrush = _fields[textBox] ? Brushes.DarkGray : Brushes.Red;
+
             CheckFields();
         }
 

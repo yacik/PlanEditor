@@ -30,7 +30,7 @@ namespace PlanEditor.Helpers
         public static SolidColorBrush White { get { white.Color = Colors.White; return white; } }
         public static SolidColorBrush Red { get { red.Color = Colors.Red; return red; } }
         //public static SolidColorBrush Green { get { green.Color = Colors.Green; return green; } }
-        public static SolidColorBrush Green { get { green.Color = Color.FromArgb(255, 51, 99, 51); return green; } }
+        public static SolidColorBrush Green { get { green.Color = Color.FromArgb(255, 63, 96, 63); return green; } }
         public static SolidColorBrush LightGray { get { lightGray.Color = Colors.LightGray; return lightGray; } }
     }
 }

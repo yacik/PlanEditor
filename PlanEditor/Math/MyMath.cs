@@ -42,6 +42,11 @@ namespace PlanEditor.MyMath
             return (x > y);
         }
 
+        public static double[] GetMinMax(double x1, double x2)
+        {
+            return x1 < x2 ? new[] { x1, x2 } : new[] { x2, x1 };
+        }
+
         public static double[] GetMinMax(double p1, double p2, double p3, double p4)
         {
             double[] mas = { p1, p2, p3, p4 };

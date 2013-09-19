@@ -18,7 +18,6 @@ C:\Users\Andrey\Documents\Visual Studio 2012\Projects\GridConverter\GridConverte
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\Plan Editor.exe.config
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\Plan Editor.exe
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\Plan Editor.pdb
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\PlanEditor.csprojResolveAssemblyReference.cache
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\WinBuilding.baml
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\WinPortal.baml
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\MainWindow.baml
@@ -38,3 +37,4 @@ C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\WinObstacle.g.cs
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\MahApps.Metro.dll
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\System.Windows.Interactivity.dll
+C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\PlanEditor.csprojResolveAssemblyReference.cache

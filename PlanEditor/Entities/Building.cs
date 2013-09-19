@@ -124,5 +124,12 @@ namespace PlanEditor.Entities
             foreach (var v in Stairways)
                 v.PrepareForSave();
         }
+
+        public void RemoveAll()
+        {
+            if (Places != null) Places.Clear(); 
+            if (Stairways != null) Stairways.Clear();
+            if (Portals != null) Portals .Clear();
+        }
     }
 }
