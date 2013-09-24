@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using PlanEditor.Entities;
 
@@ -35,7 +36,7 @@ namespace PlanEditor.Helpers.IO
             }
 
             if (Building == null) return false;
-            
+
             for (int i = 0; i < Building.Stages; ++i)
             {
                 if (Building.Places.Count > i)
@@ -73,6 +74,7 @@ namespace PlanEditor.Helpers.IO
             {
                 Building.Stairways = new List<Stairway>();
             }
+            
             return true;
         }
 

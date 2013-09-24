@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows.Documents;
 using Microsoft.Win32;
+using PlanEditor.Graph;
 using PlanEditor.Helpers;
 using PlanEditor.MyMath;
 using PlanEditor.RegGrid;
@@ -51,6 +52,7 @@ namespace PlanEditor
         private readonly List<Obstacle> _obstacles = new List<Obstacle>();
         private readonly List<Line> _lines = new List<Line>();
         private readonly List<Line> _drawGrid = new List<Line>();
+        private SimpleGraph Graph = new SimpleGraph();
         private bool _shiftPressed;
         private bool _isChanged;
         private Entity _selectedItem;
@@ -306,7 +308,7 @@ namespace PlanEditor
                     break;
             }
         }
-
+        
         private void GridField_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             _curPosMouse = new Point(e.GetPosition(null).X, e.GetPosition(null).Y);           
@@ -365,6 +367,34 @@ namespace PlanEditor
         {
             if (_building == null) return;
 
+            if (!CheckPlacesDoors())
+            {
+                MessageBox.Show(this, "Ошибка", "Здание содержит ошибки (не все помещения доступны)");//<!------------------------------
+                return;
+            }//*/
+
+            #region IsCollide
+
+            bool isCollide = false;
+            foreach (var places in _building.Places)
+            {
+                foreach (var place in places)
+                {
+                    if (place.IsCollide)
+                    {
+                        place.Collide();
+                        isCollide = true;
+                    }
+                }
+            }
+            if (isCollide)
+            {
+                MessageBox.Show(this, "Ошибка", "Имеются пересекающиеся помещения");//<!------------------------------
+                return;
+            }
+
+            #endregion
+
             var dlg = new SaveFileDialog { DefaultExt = ".txt", Filter = "Text Files (*.txt) |*txt" };
             var result = dlg.ShowDialog();
 
@@ -373,8 +403,116 @@ namespace PlanEditor
                 var rg = new RecognizeGrid(_grid, _building);
                 rg.Recognize();
                 Helpers.IO.SaveToEvac.Save(dlg.FileName, rg.Grid, _building);
-                MessageBox.Show(this, "Экспорт готов");
+                MessageBox.Show(this, "Экспорт готов");//<!------------------------------
             }
+
+            /*
+                var processInfo = new ProcessStartInfo("java.exe", "-jar app.jar")
+                      {
+                          CreateNoWindow = true,
+                          UseShellExecute = false
+                      };
+                Process proc;
+
+                if ((proc = Process.Start(processInfo)) == null)
+                {
+                    throw new InvalidOperationException("??");
+                }
+
+                proc.WaitForExit();
+                int exitCode = proc.ExitCode;
+                proc.Close();
+             */
+        }
+
+        // проверить, чтобы все помещения имеи двери
+        private bool CheckPlacesDoors()
+        {
+            bool isOK = true;
+
+            #region fillgraph
+            foreach (var portals in _building.Portals)
+            {
+                foreach (var portal in portals)
+                {
+                    var checkPortal = Graph.IsPortal(portal);
+                    if (checkPortal.HasValue && !checkPortal.Value)
+                    {
+                        var p1 = portal.RoomA;
+                        var p2 = portal.RoomB;
+
+                        var ver1 = Graph.IsPlace(p1);
+                        var ver2 = Graph.IsPlace(p2);
+
+                        if (ver1.HasValue && !ver1.Value) Graph.Vertices.Add(new Vertex(p1));
+                        if (ver2.HasValue && !ver2.Value) Graph.Vertices.Add(new Vertex(p2));
+                        
+                        var v1 = Graph.GetVertexByPlace(portal.RoomA);
+                        var v2 = Graph.GetVertexByPlace(portal.RoomB);
+
+                        var edge = new Edge(v1, v2, portal);
+                        Graph.Edgies.Add(edge);
+                        if (v1 != null) v1.Edges.Add(edge);
+                        if (v2 != null) v2.Edges.Add(edge);
+                    }
+                }
+            }
+            #endregion
+
+            // check graph
+            var visited = new List<Place>();
+            var start = new List<Vertex>();
+
+            foreach (var edge in Graph.Edgies)
+            {
+                if (edge.Portal.RoomA == null)
+                {
+                    start.Add(edge.VerB);
+                }
+                if (edge.Portal.RoomB == null)
+                {
+                     start.Add(edge.VerA);
+                }
+            }
+
+            RecurseCheck(start, visited);
+
+            foreach (var places in _building.Places)
+            {
+                foreach (var place in places)
+                {
+                    if (!visited.Contains(place))
+                    {
+                        place.Collide();
+                        isOK = false;
+                    }
+                }
+            }
+
+            return isOK;
+        }
+
+        private void RecurseCheck(List<Vertex> vertices, List<Place> visited)
+        {
+            var newVertices = new List<Vertex>();
+
+            foreach (var ver in vertices)
+            {
+                if (!visited.Contains(ver.Place)) visited.Add(ver.Place);
+
+                foreach (var edge in ver.Edges)
+                {
+                    var v = edge.GetOppositeVertex(ver);
+                    if (v == null) continue;
+
+                    if (!visited.Contains(v.Place))
+                        newVertices.Add(v);
+                }
+            }
+
+            if (newVertices.Count == 0) return;
+            
+            RecurseCheck(newVertices, visited);
         }
 
         private void Click_Open(object sender, RoutedEventArgs e)
@@ -444,7 +582,7 @@ namespace PlanEditor
 
                     _isChanged = false;
                 }
-                else MessageBox.Show("Ошибка в чтении файла");
+                else MessageBox.Show("Ошибка в чтении файла");//<!------------------------------
             }
         }
         
@@ -566,7 +704,7 @@ namespace PlanEditor
         {
             if (_selectedItems.Count > 0)
             {
-                var mb = MessageBox.Show("Удалить выбранные элементы?", "Подтверждение удаления", MessageBoxButton.YesNo);
+                var mb = MessageBox.Show("Удалить выбранные элементы?", "Подтверждение удаления", MessageBoxButton.YesNo);//<!------------------------------
                 if (mb == MessageBoxResult.No) return;
                 
                 _selectedItems.Add(_selectedItem);
@@ -577,7 +715,7 @@ namespace PlanEditor
             }
             if (_selectedItem != null)
             {
-                var mb = MessageBox.Show("Удалить выбранные элементы?", "Подтверждение удаления", MessageBoxButton.YesNo);
+                var mb = MessageBox.Show("Удалить выбранные элементы?", "Подтверждение удаления", MessageBoxButton.YesNo);//<!------------------------------
                 if (mb == MessageBoxResult.No) return;
 
                 if (_mode == CanvasMode.Edit)
@@ -806,7 +944,7 @@ namespace PlanEditor
             
             if (line == null)
             {
-                MessageBox.Show("Невозможно соединить помещение");
+                MessageBox.Show("Невозможно соединить помещение");//<!------------------------------
                 return;
             }
 
@@ -818,7 +956,7 @@ namespace PlanEditor
 
                 if (portal.Max < wide)
                 {
-                    MessageBox.Show("Ширина двери задана не верна");
+                    MessageBox.Show("Ширина двери задана не верна");//<!------------------------------
                     return;
                 }
                 
@@ -832,14 +970,14 @@ namespace PlanEditor
 
                 if (portal.Max < wide)
                 {
-                    MessageBox.Show("Ширина двери задана не верна");
+                    MessageBox.Show("Ширина двери задана не верна");//<!------------------------------
                     return;
                 }
                 
                 portal.CreateUI(line.X1);
             }
 
-            var mb = MessageBox.Show("Создать дверь, ведущую на улицу?", "Подтверждение", MessageBoxButton.YesNo);
+            var mb = MessageBox.Show("Создать дверь, ведущую на улицу?", "Подтверждение", MessageBoxButton.YesNo);//<!------------------------------
             if (mb == MessageBoxResult.Yes)
             {
                 portal.UI.RenderTransform = _transformGroup;
@@ -917,7 +1055,7 @@ namespace PlanEditor
 
                         if (d < compWide)
                         {
-                            MessageBox.Show("Ширина двери превышает размеры стен");
+                            MessageBox.Show("Ширина двери превышает размеры стен");//<!------------------------------
                             continue;
                         }
 
@@ -942,7 +1080,7 @@ namespace PlanEditor
 
                         if (d < compWide)
                         {
-                            MessageBox.Show("Ширина двери превышает размеры стен");
+                            MessageBox.Show("Ширина двери превышает размеры стен");//<!------------------------------
                             continue;
                         }
 
@@ -995,7 +1133,7 @@ namespace PlanEditor
                         wide = door.Width;
                     }
                 }*/
-                var mb = MessageBox.Show("Соединить данные помещения?", "Подтверждение", MessageBoxButton.YesNo);
+                var mb = MessageBox.Show("Соединить данные помещения?", "Подтверждение", MessageBoxButton.YesNo);//<!------------------------------
                 if (mb == MessageBoxResult.Yes)
                     CreatePortal(min, max, _place1, _place2, orient, startPoint, wide);
             }
@@ -1062,13 +1200,13 @@ namespace PlanEditor
 
                 if (_place1 == null && _place2 == null)
                 {
-                    MessageBox.Show("Помещения не выбраны");
+                    MessageBox.Show("Помещения не выбраны");//<!------------------------------
                     return;
                 }
 
                 if ((_place1 != null && _place1.IsCollide) || (_place2 != null && _place2.IsCollide))
                 {
-                    MessageBox.Show("Помещения пересекаются, невозможно соединить");
+                    MessageBox.Show("Помещения пересекаются, невозможно соединить");//<!------------------------------
                     return;
                 }
 
@@ -1078,7 +1216,7 @@ namespace PlanEditor
                 if (isOk != null && isOk == true)
                 {
                     var wide = door.Wide;
-                    if (wide < 0) MessageBox.Show("Ширина задана не верно");
+                    if (wide < 0) MessageBox.Show("Ширина задана не верно");//<!------------------------------
                     else
                     {
                         if (_place1 == null || _place2 == null)
@@ -1154,7 +1292,7 @@ namespace PlanEditor
         {
             if (max < wide)
             {
-                MessageBox.Show("Ширина двери задана не верна");
+                MessageBox.Show("Ширина двери задана не верна");//<!------------------------------
                 return;
             }
 
@@ -1897,7 +2035,7 @@ namespace PlanEditor
         {
             if (_isChanged)
             {
-                var mb = MessageBox.Show("Имеются не сохраненные данные, сохранить?", "Подтверждение", MessageBoxButton.YesNo);
+                var mb = MessageBox.Show("Имеются не сохраненные данные, сохранить?", "Подтверждение", MessageBoxButton.YesNo);//<!------------------------------
                 if (mb == MessageBoxResult.Yes) SaveProject();
             }
         }
