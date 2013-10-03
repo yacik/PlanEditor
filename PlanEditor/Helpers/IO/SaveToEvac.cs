@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using PlanEditor.Entities;
+using System.Threading.Tasks;
 
 namespace PlanEditor.Helpers.IO
 {
@@ -238,7 +239,7 @@ namespace PlanEditor.Helpers.IO
                     var start = stairway.Cells[node];
                     RegGrid.Cell end = null;
 
-                    foreach (var nextStair in Stairways[i + 1].Where(s => s.UI.Equals(stairway.UI)))
+                    foreach (var nextStair in Stairways[i + 1].AsParallel().Where(s => s.UI.Equals(stairway.UI)))
                     {
                         end = nextStair.Cells[node];
                     }

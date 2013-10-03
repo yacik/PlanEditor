@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using MahApps.Metro.Controls;
 using PlanEditor.Entities;
 using System.Collections.Generic;
 using System.Windows;

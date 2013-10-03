@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using MahApps.Metro.Controls;
@@ -12,14 +14,17 @@ namespace PlanEditor
     public partial class WinBuilding : Window
     {
         public enum Mode { New, Edit}
+        private readonly Dictionary<object, bool> _fields = new Dictionary<object, bool>();
 
-        private Building m_Building;
+        private readonly Building _mBuilding;
 
         public WinBuilding(Building building, Mode mode)
         {
-            m_Building = building;
-            
+            if (building == null) return;
+
             InitializeComponent();
+            
+            _mBuilding = building;
 
             FillMode();
             FillAUP();
@@ -30,7 +35,15 @@ namespace PlanEditor
 
             if (mode == Mode.Edit)
             {
+                Title = "Редактирование здания";
+                InitializeFields(true);
                 Load();
+            }
+            else
+            {
+                Title = "Новое здание";
+                BtnOk.IsEnabled = false;
+                InitializeFields(false);
             }
         }
 
@@ -38,96 +51,102 @@ namespace PlanEditor
         {
             if (Insurance.SelectedIndex == 1) 
             {
-                Addition.Visibility = System.Windows.Visibility.Visible;
+                Addition.Visibility = Visibility.Visible;
                 Addition.Text = "Укажите название документа, которым застрахована гражданская ответственность перед третьими лицами";
             }
             else if (Insurance.SelectedIndex == 2)
             {
-                Addition.Visibility = System.Windows.Visibility.Visible;
+                Addition.Visibility = Visibility.Visible;
                 Addition.Text = "Укажите оценку остаточной стоимости имущества третьих лиц";
             }
             else
             {
-                Addition.Visibility = System.Windows.Visibility.Hidden;
+                Addition.Visibility = Visibility.Hidden;
             }
         }
         
         private void FillMode()
         {
-            var lst = new List<string>();
-                       
-            lst.Add("Общеобразовательные учреждения (школа, школа-интернат, детский дом, лицей, гимназия, колледж)"); 
-            lst.Add("Учреждения начального профессионального образования (профессиональное техническое училище)");
-            lst.Add("Учреждения среднего профессионального образования (среднее специальное учебное заведение)");
-            lst.Add("Прочие внешкольные и детские учреждения");
-            lst.Add("Детские оздоровительные лагеря, летние детские дачи");
-            lst.Add("Санатории, дома отдыха, профилактории");
-            lst.Add("Амбулатории, поликлиники, диспансеры, медпункты, консультации");
-            lst.Add("Предприятия розничной торговли: универмаги, промтоварные магазины; аптеки ");
-            lst.Add("Предприятия рыночной торговли: крытые, оптовые рынки, торговые павильоны");
-            lst.Add("Предприятия общественного питания");
-            lst.Add("Гостиницы, мотели");
-            lst.Add("Спортивные сооружения");
-            lst.Add("Клубные и культурно-зрелищные учреждения");
-            lst.Add("Библиотеки");
-            lst.Add("Музеи");
-            lst.Add("Прочие здания");
+            var lst = new List<string>
+            {
+                "Общеобразовательные учреждения (школа, школа-интернат, детский дом, лицей, гимназия, колледж)",
+                "Учреждения начального профессионального образования (профессиональное техническое училище)",
+                "Учреждения среднего профессионального образования (среднее специальное учебное заведение)",
+                "Прочие внешкольные и детские учреждения",
+                "Детские оздоровительные лагеря, летние детские дачи",
+                "Санатории, дома отдыха, профилактории",
+                "Амбулатории, поликлиники, диспансеры, медпункты, консультации",
+                "Предприятия розничной торговли: универмаги, промтоварные магазины; аптеки ",
+                "Предприятия рыночной торговли: крытые, оптовые рынки, торговые павильоны",
+                "Предприятия общественного питания",
+                "Гостиницы, мотели",
+                "Спортивные сооружения",
+                "Клубные и культурно-зрелищные учреждения",
+                "Библиотеки",
+                "Музеи",
+                "Прочие здания"
+            };
 
             FillComboBox(lst, BuildingFunctionality);
         }
 
         private void FillAUP()
         {
-            var lst = new List<string>();
-
-            lst.Add("Здание оборудовано системой АУП, соответствующей требованиям нормативных документов по пожарной безопасности");
-            lst.Add("Оборудование здания системой АУП не требуется в соответствии с требованиями нормативных документов по пожарной безопасности");
-            lst.Add("Здание не оборудовано системой АУП, отвечающей требованиям нормативных документов по пожарной безопасности");
+            var lst = new List<string>
+            {
+                "Здание оборудовано системой АУП, соответствующей требованиям нормативных документов по пожарной безопасности",
+                "Оборудование здания системой АУП не требуется в соответствии с требованиями нормативных документов по пожарной безопасности",
+                "Здание не оборудовано системой АУП, отвечающей требованиям нормативных документов по пожарной безопасности"
+            };
 
             FillComboBox(lst, AUP);
         }
 
         private void FillFireSignal()
         {
-            var lst = new List<string>();
-            
-            lst.Add("Здание оборудовано системой пожарной сигнализации, соответствующей требованиям нормативных документов по пожарной безопасности");
-            lst.Add("Оборудование здания системой пожарной сигнализации не требуется в соответствии с требованиями нормативных документов по пожарной безопасности");
-            lst.Add("Здание не оборудовано системой пожарной сигнализации, соответствующей требованиям нормативных документов по пожарной безопасности");
+            var lst = new List<string>
+            {
+                "Здание оборудовано системой пожарной сигнализации, соответствующей требованиям нормативных документов по пожарной безопасности",
+                "Оборудование здания системой пожарной сигнализации не требуется в соответствии с требованиями нормативных документов по пожарной безопасности",
+                "Здание не оборудовано системой пожарной сигнализации, соответствующей требованиям нормативных документов по пожарной безопасности"
+            };
 
             FillComboBox(lst, FireSignal);
         }
 
         private void FillNotification()
         {
-            var lst = new List<string>();
-
-            lst.Add("Здание оборудовано системой оповещения людей о пожаре и управления эвакуацией людей, соответствующей требованиям нормативных документов по пожарной безопасности");
-            lst.Add("Оборудование здания системой оповещения людей о пожаре и управления эвакуацией людей не требуется в соответствии с требованиями нормативных документов по пожарной безопасности");
-            lst.Add("Здание не оборудовано системой оповещения людей о пожаре или здание не оборудовано системой управления эвакуацией людей, соответствующей требованиям нормативных документов по пожарной безопасности");
+            var lst = new List<string>
+            {
+                "Здание оборудовано системой оповещения людей о пожаре и управления эвакуацией людей, соответствующей требованиям нормативных документов по пожарной безопасности",
+                "Оборудование здания системой оповещения людей о пожаре и управления эвакуацией людей не требуется в соответствии с требованиями нормативных документов по пожарной безопасности",
+                "Здание не оборудовано системой оповещения людей о пожаре или здание не оборудовано системой управления эвакуацией людей, соответствующей требованиям нормативных документов по пожарной безопасности"
+            };
 
             FillComboBox(lst, Notification);
         }
 
         private void FillAntifog()
         {
-            var lst = new List<string>();
-
-            lst.Add("Здание оборудовано системой противодымной защиты, соответствующей требованиям нормативных документов по пожарной безопасности");
-            lst.Add("Оборудование здания системой противодымной защиты не требуется в соответствии с требованиями нормативных документов по пожарной безопасности");
-            lst.Add("Здание не оборудовано системой противодымной защиты, соответствующей требованиям нормативных документов по пожарной безопасности");
+            var lst = new List<string>
+            {
+                "Здание оборудовано системой противодымной защиты, соответствующей требованиям нормативных документов по пожарной безопасности",
+                "Оборудование здания системой противодымной защиты не требуется в соответствии с требованиями нормативных документов по пожарной безопасности",
+                "Здание не оборудовано системой противодымной защиты, соответствующей требованиям нормативных документов по пожарной безопасности"
+            };
 
             FillComboBox(lst, Antifog);
         }
 
         private void FillInsurance()
         {
-            var lst = new List<string>();
-
-            lst.Add("Оценка возможного ущерба имуществу третьих лиц от пожара не производилась");
-            lst.Add("Имущество третьего лица застраховано"); //Название документа, которым застрахована гражданская ответственность перед третьими лицами
-            lst.Add("Оценка возможного ущерба имуществу третьих лиц от пожара"); //Оценка остаточной стоимости имущества третьих лиц
-            lst.Add("Возможность ущерба имуществу третьих лиц от пожара отсутствует");
+            var lst = new List<string>
+            {
+                "Оценка возможного ущерба имуществу третьих лиц от пожара не производилась",
+                "Имущество третьего лица застраховано",
+                "Оценка возможного ущерба имуществу третьих лиц от пожара",
+                "Возможность ущерба имуществу третьих лиц от пожара отсутствует"
+            };
 
             FillComboBox(lst, Insurance);
 
@@ -135,38 +154,36 @@ namespace PlanEditor
             Addition.Visibility = System.Windows.Visibility.Hidden;
         }
         
-        private void FillComboBox(List<string> lst, ComboBox cb)
+        private void FillComboBox(IEnumerable<string> lst, ComboBox cb)
         {
-            foreach (var v in lst)
+            foreach (var item in lst.Select(v => new ComboBoxItem {Content = v}))
             {
-                var item = new ComboBoxItem();
-                item.Content = v;
                 cb.Items.Add(item);
             }
         }
 
         private void Click_OK(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = true;
+            DialogResult = true;
 
-            m_Building.Name = BuildingName.Text;
-            m_Building.Address = BuildingAddress.Text;
-            m_Building.Functionality = BuildingFunctionality.SelectedIndex;
-            m_Building.People = int.Parse(NumPeople.Text);
-            m_Building.MaxPeople = int.Parse(MaxPeople.Text);
-            m_Building.FireSafetySys = AUP.SelectedIndex;
-            m_Building.FireSignal = FireSignal.SelectedIndex;
-            m_Building.Notification = Notification.SelectedIndex;
-            m_Building.AntiFog = Antifog.SelectedIndex;
-            m_Building.Insurance = Insurance.SelectedIndex;
-            m_Building.Stages = int.Parse(Stages.Text);
-            m_Building.Lx = double.Parse(Width.Text);
-            m_Building.Ly = double.Parse(Length.Text);
-            m_Building.HeightStage = double.Parse(Height.Text);
+            _mBuilding.Name = BuildingName.Text;
+            _mBuilding.Address = BuildingAddress.Text;
+            _mBuilding.Functionality = BuildingFunctionality.SelectedIndex;
+            _mBuilding.People = int.Parse(NumPeople.Text);
+            _mBuilding.MaxPeople = int.Parse(MaxPeople.Text);
+            _mBuilding.FireSafetySys = AUP.SelectedIndex;
+            _mBuilding.FireSignal = FireSignal.SelectedIndex;
+            _mBuilding.Notification = Notification.SelectedIndex;
+            _mBuilding.AntiFog = Antifog.SelectedIndex;
+            _mBuilding.Insurance = Insurance.SelectedIndex;
+            _mBuilding.Stages = int.Parse(Stages.Text);
+            _mBuilding.Lx = double.Parse(Width.Text);
+            _mBuilding.Ly = double.Parse(Length.Text);
+            _mBuilding.HeightStage = double.Parse(Height.Text);
 
-            if (m_Building.Insurance == 1 || m_Building.Insurance == 2)
+            if (_mBuilding.Insurance == 1 || _mBuilding.Insurance == 2)
             {
-                m_Building.Addition = Addition.Text;    
+                _mBuilding.Addition = Addition.Text;    
             }
 
             InitializeLayers();
@@ -174,34 +191,97 @@ namespace PlanEditor
 
         private void Load()
         {
-            BuildingName.Text = m_Building.Name;
-            BuildingAddress.Text = m_Building.Address;
-            BuildingFunctionality.SelectedIndex = m_Building.Functionality;
-            NumPeople.Text = m_Building.People.ToString();
-            MaxPeople.Text = m_Building.MaxPeople.ToString();
-            AUP.SelectedIndex = m_Building.FireSafetySys;
-            FireSignal.SelectedIndex = m_Building.FireSignal;
-            Notification.SelectedIndex = m_Building.Notification;
-            Antifog.SelectedIndex = m_Building.AntiFog;
-            Insurance.SelectedIndex = m_Building.Insurance;
-            Stages.Text = m_Building.Stages.ToString();
-            Width.Text = m_Building.Lx.ToString();
-            Length.Text = m_Building.Ly.ToString();
-            Height.Text = m_Building.HeightStage.ToString();
+            BuildingName.Text = _mBuilding.Name;
+            BuildingAddress.Text = _mBuilding.Address;
+            BuildingFunctionality.SelectedIndex = _mBuilding.Functionality;
+            NumPeople.Text = _mBuilding.People.ToString();
+            MaxPeople.Text = _mBuilding.MaxPeople.ToString();
+            AUP.SelectedIndex = _mBuilding.FireSafetySys;
+            FireSignal.SelectedIndex = _mBuilding.FireSignal;
+            Notification.SelectedIndex = _mBuilding.Notification;
+            Antifog.SelectedIndex = _mBuilding.AntiFog;
+            Insurance.SelectedIndex = _mBuilding.Insurance;
+            Stages.Text = _mBuilding.Stages.ToString();
+            Width.Text = _mBuilding.Lx.ToString();
+            Length.Text = _mBuilding.Ly.ToString();
+            Height.Text = _mBuilding.HeightStage.ToString();
 
-            if (m_Building.Insurance == 1 || m_Building.Insurance == 2)
+            if (_mBuilding.Insurance == 1 || _mBuilding.Insurance == 2)
             {
-                Addition.Text = m_Building.Addition;
+                Addition.Text = _mBuilding.Addition;
             }
         }
 
         private void InitializeLayers()
         {
-            for (int i = 0; i < m_Building.Stages; ++i)
+            for (int i = 0; i < _mBuilding.Stages; ++i)
             {
-                m_Building.Places.Add(new List<Place>());
-                m_Building.Portals.Add(new List<Portal>());
+                _mBuilding.Places.Add(new List<Place>());
+                _mBuilding.Portals.Add(new List<Portal>());
             }
+        }
+
+        private void InitializeFields(bool val)
+        {
+            _fields.Add(NumPeople, val);
+            _fields.Add(MaxPeople, val);
+            _fields.Add(Stages, val);
+            _fields.Add(Height, val);
+            _fields.Add(Width, val);
+            _fields.Add(Length, val);
+        }
+
+        private void ChengedInt(object sender, TextChangedEventArgs e)
+        {
+            var field = e.Source as TextBox;
+            if (field != null)
+            {
+                int val;
+                if (int.TryParse(field.Text, out val))
+                {
+                    _fields[field] = (val > 0);
+                }
+                else
+                {
+                    _fields[field] = false;
+                }
+            }
+
+            CheckFields();
+        }
+
+        private void ChengedDouble(object sender, TextChangedEventArgs e)
+        {
+            var field = e.Source as TextBox;
+            if (field != null)
+            {
+                double val;
+                if (double.TryParse(field.Text, out val))
+                {
+                    _fields[field] = (val > 0);
+                }
+                else
+                {
+                    _fields[field] = false;
+                }
+            }
+
+            CheckFields();
+        }
+
+        private void CheckFields()
+        {
+            var isOk = true;
+            foreach (var field in _fields)
+            {
+                if (field.Value == false)
+                {
+                    isOk = false;
+                    break;
+                }
+            }
+
+            BtnOk.IsEnabled = isOk;
         }
     }    
 }

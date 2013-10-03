@@ -19,18 +19,12 @@ namespace PlanEditor.Entities
 
         public void Show()
         {
-            if (UI != null)
-            {
-                UI.Visibility = Visibility.Visible;
-            }
+            if (UI != null) UI.Visibility = Visibility.Visible;
         }
 
         public void Hide()
         {
-            if (UI != null)
-            {
-                UI.Visibility = Visibility.Hidden;
-            }
+            if (UI != null) UI.Visibility = Visibility.Hidden;
         }
 
         public void LoadUI()
@@ -75,8 +69,8 @@ namespace PlanEditor.Entities
         [NonSerialized]
         public Path UI;
 
-        protected List<double> ExportX;
-        protected List<double> ExportY;
+        public List<double> ExportX;
+        public List<double> ExportY;
 
         public void PrepareForSave()
         {
@@ -89,11 +83,11 @@ namespace PlanEditor.Entities
             get 
             {
                 var pg = (PathGeometry)UI.Data;
-                var lst = new List<double>();                
+                var lst = new List<double>();          
+      
                 foreach (var pf in pg.Figures)
                 {
                     lst.Add(pf.StartPoint.X);
-                    
                     lst.AddRange(from LineSegment ls in pf.Segments select ls.Point.X);
                 }
 
@@ -104,16 +98,13 @@ namespace PlanEditor.Entities
         {
             get 
             {
-                List<double> lst = new List<double>();
-                PathGeometry pg = (PathGeometry)UI.Data;
-                foreach (PathFigure pf in pg.Figures)
+                var lst = new List<double>();
+                var pg = (PathGeometry)UI.Data;
+
+                foreach (var pf in pg.Figures)
                 {
                     lst.Add(pf.StartPoint.Y);
-
-                    foreach (LineSegment ls in pf.Segments)
-                    {
-                        lst.Add(ls.Point.Y);
-                    }
+                    lst.AddRange(from LineSegment ls in pf.Segments select ls.Point.Y);
                 }
 
                 return lst;
@@ -122,21 +113,15 @@ namespace PlanEditor.Entities
 
         public void Select()
         {
-            if (UI != null)
-            {
-                UI.Stroke = Colours.Red;
-            }
+            if (UI != null) UI.Stroke = Colours.Red;
         }
        
         public void Deselect()
         {
-            if (UI != null)
-            {
-                UI.Stroke = Colours.Black;
-            }
+            if (UI != null) UI.Stroke = Colours.Black;
         }
 
-        public double Length // длина помещения, м	
+        public double Length // длина
         {
             get
             {

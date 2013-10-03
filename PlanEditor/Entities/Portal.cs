@@ -24,6 +24,7 @@ namespace PlanEditor.Entities
         public double Min { get; set; }
         public double Max { get; set; }
         public double Width { get; set; }
+        public double Height { get; set; }
 
         [NonSerialized]
         public List<Cell> Cells = new List<Cell>();

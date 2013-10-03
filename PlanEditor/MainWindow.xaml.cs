@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Windows.Documents;
 using Microsoft.Win32;
 using PlanEditor.Graph;
 using PlanEditor.Helpers;
+using PlanEditor.Helpers.IO;
 using PlanEditor.MyMath;
 using PlanEditor.RegGrid;
 using System;
@@ -15,6 +14,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using PlanEditor.Entities;
+using Building = PlanEditor.Entities.Building;
+using Path = System.Windows.Shapes.Path;
 
 namespace PlanEditor
 {
@@ -76,7 +77,9 @@ namespace PlanEditor
 
             Stage.SetValue(Panel.ZIndexProperty, 100);
             _mode = CanvasMode.Select;
-            
+
+            ActiveDeactiveFileMenu(false);
+
             #region MouseEvents
 
             ContentPanel.MouseMove += GridField_MouseMove;
@@ -346,10 +349,15 @@ namespace PlanEditor
             if (isOk == true)
             {
                 CreateNewProject();
-            }
-            ChangeStageName();
+                ChangeStageName();
 
-            _isChanged = true;
+                _isChanged = true;
+                ActiveDeactiveFileMenu(true);
+            }
+            else
+            {
+                ActiveDeactiveFileMenu(false);
+            }
         }
 
         private void Click_Save(object sender, RoutedEventArgs e)
@@ -363,6 +371,27 @@ namespace PlanEditor
             ActiveDeactiveMenu(false);
         }
 
+        private void Click_FindTool(object sender, RoutedEventArgs e)
+        {
+            if (_building == null) return;
+
+            var findWin = new FindWindow(_building) {Owner = this};
+            findWin.Show();
+        }
+
+        private void Click_ExportToHtml(object sender, RoutedEventArgs e)
+        {
+            var dlg = new SaveFileDialog { DefaultExt = ".html", Filter = "html file (*.html) |*html" };
+            var result = dlg.ShowDialog();
+
+            if (result != true) return;
+            
+            SaveToHtmlData.Save(_building, dlg.FileName);
+
+            string folder = System.IO.Path.GetDirectoryName(dlg.FileName);
+            SaveImage.SaveFile(_building, folder);
+        }
+        
         private void Click_Export(object sender, RoutedEventArgs e)
         {
             if (_building == null) return;
@@ -527,6 +556,7 @@ namespace PlanEditor
                     _transformGroup = new TransformGroup();
                     _translation = new TranslateTransform();
                     _scale = new ScaleTransform();
+
                     _transformGroup.Children.Add(_translation);
                     _transformGroup.Children.Add(_scale);
 
@@ -539,9 +569,9 @@ namespace PlanEditor
                             {
                                 ContentPanel.Children.Add(v.UI);
                                 v.UI.RenderTransform = _transformGroup;
-                                
+
                                 if (i != _curStage) v.UI.Visibility = Visibility.Hidden;
-                                
+
                                 foreach (var obstacle in v.Obstacles)
                                 {
                                     ContentPanel.Children.Add(obstacle.UI);
@@ -566,7 +596,7 @@ namespace PlanEditor
                                 if (i != _curStage) v.UI.Visibility = Visibility.Hidden;
                             }
                     }
-                    
+
                     for (int i = 0; i < _building.Stages; ++i)
                     {
                         if (_building.Places[i] == null) continue;
@@ -581,8 +611,13 @@ namespace PlanEditor
                     ChangeStageName();
 
                     _isChanged = false;
+                    ActiveDeactiveFileMenu(true);
                 }
-                else MessageBox.Show("Ошибка в чтении файла");//<!------------------------------
+                else
+                {
+                    MessageBox.Show("Ошибка в чтении файла"); //<!------------------------------
+                    ActiveDeactiveFileMenu(false);
+                }
             }
         }
         
@@ -835,7 +870,7 @@ namespace PlanEditor
 
             if (result == true)
             {
-                Helpers.IO.SaveFile.Save(dlg.FileName, _building);
+                SaveFile.Save(dlg.FileName, _building);
                 _isChanged = false;
             }
         }
@@ -2064,6 +2099,14 @@ namespace PlanEditor
             StageTo.IsEnabled = isEnabled;
             AddPlace.IsEnabled = isEnabled;
             AddDoor.IsEnabled = isEnabled;
+        }
+
+        private void ActiveDeactiveFileMenu(bool isEnabled)
+        {
+            MISave.IsEnabled = isEnabled;
+            MIExport.IsEnabled = isEnabled;
+            MIEdit.IsEnabled = isEnabled;
+            MITable.IsEnabled = isEnabled;
         }
 
         private void Click_CheckEntity(object sender, RoutedEventArgs e)

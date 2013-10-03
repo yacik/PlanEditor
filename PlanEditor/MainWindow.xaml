@@ -23,15 +23,17 @@
                 <MenuItem Header="Файл">
                     <MenuItem Header="Новый" Click="Click_New" />
                     <MenuItem Header="Открыть" Click="Click_Open"/>
-                    <MenuItem Header="Сохранить" Click="Click_Save"/>
-                    <MenuItem Header="Экспортировать" Click="Click_Export"/>
-                    <MenuItem Header="Редактировать" Click="Click_EditBuilding"/>
+                    <MenuItem Header="Сохранить" x:Name="MISave" Click="Click_Save"/>
+                    <MenuItem Header="Экспортировать" x:Name="MIExport" Click="Click_Export"/>
+                    <MenuItem Header="Редактировать" x:Name="MIEdit" Click="Click_EditBuilding"/>
+                    <MenuItem Header="Таблица" x:Name="MITable" Click="Click_ExportToHtml"/>
                 </MenuItem>
                 <MenuItem Header="Инструменты" x:Name="MenuTools">
                     <!--<MenuItem Header="Увеличить" Click="Click_ZoomIn"/>
                     <MenuItem Header="Уменьшить" Click="Click_ZoomOut"/>-->
                     <MenuItem Header="Выбрать" x:Name="SelectTool" Click="Click_SelectTool" />
                     <MenuItem Header="Перемещение" x:Name="MoveTool" Click="Click_MoveTool" />
+                    <MenuItem Header="Найти" x:Name="FindTool" Click="Click_FindTool" />
                     <!--<MenuItem Header="Сетка" Click="Click_Grid" />-->
                     <Separator/>
                     <MenuItem Header="Этаж выше" x:Name="StageNext" Click="Click_NextStage"/>

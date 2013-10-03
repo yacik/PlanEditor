@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO.IsolatedStorage;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -12,13 +13,15 @@ namespace PlanEditor
     {
         public double Wide { get; private set; }
         private readonly Portal _portal;
-        private readonly bool isStairway;
+        private readonly bool _isStairway;
 
         public WinPortal()
         {
-            Wide = -1;
             InitializeComponent();
 
+            Wide = -1;
+            HeightText.Text = "1.9";
+            
             Title = "Добавить дверь";
 
             btnOk.IsEnabled = false;
@@ -36,14 +39,16 @@ namespace PlanEditor
             if (portal.RoomA != null && portal.RoomA.Type == Entity.EntityType.Stairway)
             {
                 WideText.IsEnabled = false;
-                isStairway = true;
+                _isStairway = true;
             }
 
             if (portal.RoomB != null && portal.RoomB.Type == Entity.EntityType.Stairway)
             {
                 WideText.IsEnabled = false;
-                isStairway = true;
+                _isStairway = true;
             }
+
+            HeightText.Text = portal.Height.ToString();
         }
 
 
@@ -57,11 +62,17 @@ namespace PlanEditor
             }
             else
             {
-                if (!isStairway)
+                if (!_isStairway)
                 {
                     Wide = double.Parse(WideText.Text);
                     _portal.Width = Wide;
                     EditPlace();
+                }
+
+                double h;
+                if (double.TryParse(HeightText.Text, out h))
+                {
+                    _portal.Height = h;
                 }
             }
         }

@@ -39,6 +39,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -55,6 +56,9 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="zxing">
+      <HintPath>lib\zxing.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -62,10 +66,16 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Entities\Obstacle.cs" />
+    <Compile Include="Entities\QRPointer.cs" />
+    <Compile Include="FindWindow.xaml.cs">
+      <DependentUpon>FindWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\IO\SaveImage.cs" />
+    <Compile Include="Helpers\IO\SaveQR.cs" />
+    <Compile Include="Helpers\IO\SaveToHtmlData.cs" />
     <Compile Include="WinBuilding.xaml.cs">
       <DependentUpon>WinBuilding.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ConvertStrings.cs" />
     <Compile Include="WinObstacle.xaml.cs">
       <DependentUpon>WinObstacle.xaml</DependentUpon>
     </Compile>
@@ -77,9 +87,7 @@
     <Compile Include="Entities\Building.cs" />
     <Compile Include="Helpers\IO\LoadFile.cs" />
     <Compile Include="Helpers\IO\LoadIntdFile.cs" />
-    <Compile Include="Helpers\IO\LoadSVGFile.cs" />
     <Compile Include="Helpers\IO\SaveFile.cs" />
-    <Compile Include="Helpers\IO\SaveToXML.cs" />
     <Compile Include="RegGrid\RecognizeGrid.cs" />
     <Compile Include="WinRoom.xaml.cs">
       <DependentUpon>WinRoom.xaml</DependentUpon>
@@ -91,6 +99,10 @@
     <Compile Include="Graph\Vertex.cs" />
     <Compile Include="Helpers\IO\SaveToEvac.cs" />
     <Compile Include="Helpers\Data.cs" />
+    <Page Include="FindWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="WinBuilding.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -68,6 +68,7 @@ namespace PlanEditor.Entities
         public List<List<Place>> Places = new List<List<Place>>();       
         public List<Stairway> Stairways = new List<Stairway>();  
         public List<List<Portal>> Portals = new List<List<Portal>>();    
+        public List<QRPointer> Pointer = new List<QRPointer>();
 
         public override string ToString()
         {

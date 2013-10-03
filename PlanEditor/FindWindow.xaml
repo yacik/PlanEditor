@@ -1,0 +1,11 @@
+﻿<Window x:Class="PlanEditor.FindWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Найти" Height="133" Width="300">
+    <Grid>
+        <ComboBox x:Name="ObjectBox" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="272"/>
+        <TextBox x:Name="TextSearch" HorizontalAlignment="Left" Height="23" Margin="10,37,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <Label x:Name="ErrorLabel" HorizontalAlignment="Left" Margin="135,37,0,0" VerticalAlignment="Top" Width="147"/>
+        <Button x:Name="Find" Click="Click_Find" Content="Найти" HorizontalAlignment="Left" Margin="207,65,0,0" VerticalAlignment="Top" Width="75"/>
+    </Grid>
+</Window>
