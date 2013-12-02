@@ -18,6 +18,8 @@ namespace PlanEditor.Entities
             MaxPeople = 0;
             Name = "";
             IsMovable = true;
+            ScanarioID = -1;
+            IsOnFire = false;
         }
 
         public int CountNodes { get; set; }	        // Количество узлов сетки, принадлежащих помещению 
@@ -32,6 +34,9 @@ namespace PlanEditor.Entities
         public int SubType { get; set; }
 
         public bool IsMovable { get; set; }
+
+        public bool IsOnFire { get; set; }
+        public int ScanarioID { get; set; }
 
         public override string ToString()
         {

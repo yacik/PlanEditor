@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using MahApps.Metro.Controls;
 using PlanEditor.Entities;
 using PlanEditor.Helpers;
 
@@ -55,8 +53,8 @@ namespace PlanEditor
             
             if (_obstacle == null)
             {
-                double w = double.Parse(Wide.Text.ToString()) / Data.Sigma;
-                double l = double.Parse(Length.Text.ToString()) / Data.Sigma;
+                double w = double.Parse(Wide.Text.ToString()) / Constants.Sigma;
+                double l = double.Parse(Length.Text.ToString()) / Constants.Sigma;
 
                 var obstacle = new Obstacle(_owner) { UI = CreateNew(w, l) };
                 _owner.Obstacles.Add(obstacle);
@@ -121,8 +119,8 @@ namespace PlanEditor
                     return;
                 }
                 
-                w /= Data.Sigma;
-                l /= Data.Sigma;
+                w /= Constants.Sigma;
+                l /= Constants.Sigma;
                 BtnOK.IsEnabled = (w < _max.X -1 && l < _max.Y - 1);
             }
             else

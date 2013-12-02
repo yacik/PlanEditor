@@ -25,16 +25,17 @@ namespace PlanEditor.Entities
         public double Max { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
+        public double Depth { get; set; }
 
         [NonSerialized]
         public List<Cell> Cells = new List<Cell>();
 
         public void CreateUI(double v) // Call this function when add new portal on canvas
         {
-            var wide = Width / Data.Sigma;
+            var wide = Width / Constants.Sigma;
 
-            var shiftX = Data.GridStep;
-            var shiftY = Data.GridStep;
+            var shiftX = Constants.GridStep;
+            var shiftY = Constants.GridStep;
             
             if (Orientation == PortalOrient.Horizontal)
                 shiftX = wide;
@@ -46,7 +47,7 @@ namespace PlanEditor.Entities
             var pf = new PathFigure();
             pg.Figures.Add(pf);
 
-            pf.StartPoint = Orientation == PortalOrient.Horizontal ? new Point(Min, v - Data.GridStep/2) : new Point(v - Data.GridStep / 2, Min);
+            pf.StartPoint = Orientation == PortalOrient.Horizontal ? new Point(Min, v - Constants.GridStep/2) : new Point(v - Constants.GridStep / 2, Min);
 
             var startPoint = pf.StartPoint;
 

@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿
+
+
+using System.Collections.Generic;
 using PlanEditor.Helpers;
 
 namespace PlanEditor.RegGrid
@@ -25,8 +28,8 @@ namespace PlanEditor.RegGrid
                 {
                     for (int m = 0; m < _building.Row; ++m)
                     {
-                        double x = m * Data.GridStep + Data.GridStep/2;
-                        double y = n * Data.GridStep + Data.GridStep/2;
+                        double x = m * Constants.GridStep + Constants.GridStep/2;
+                        double y = n * Constants.GridStep + Constants.GridStep/2;
                         var c = new Cell(x, y, m, n, i);
 
                         cells.Add(c);

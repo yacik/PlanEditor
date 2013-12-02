@@ -1,6 +1,11 @@
 ﻿
+using System;
+using System.Drawing;
+using System.Runtime.Serialization;
+
 namespace PlanEditor.Entities
 {
+    [Serializable]
     public class QRPointer
     {
         public QRPointer(string name)
@@ -8,7 +13,8 @@ namespace PlanEditor.Entities
             Code = name + "generate code";
         }
 
-        public int ID { get; set; }
-        public string Code { get; private set; }
+        [DataMember] public int ID { get; set; }
+        [DataMember] public string Code { get; private set; }
+        [DataMember] public Point Pos { get; set; }
     }
 }

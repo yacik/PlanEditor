@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using PlanEditor.Helpers;
 
 namespace PlanEditor.MyMath
 {
@@ -22,6 +20,11 @@ namespace PlanEditor.MyMath
             }
 
             return c;
+        }
+
+        public static double MetersToPxl(double meters)
+        {
+            return meters/Constants.Sigma;
         }
 
         public static double Tan(double x1, double y1, double x2, double y2)
@@ -52,7 +55,7 @@ namespace PlanEditor.MyMath
             double[] mas = { p1, p2, p3, p4 };
             double max = double.MinValue;
             double min = double.MaxValue;
-
+            
             for (int i = 0; i < mas.Length; ++i)
             {
                 if (mas[i] > max)
@@ -72,11 +75,9 @@ namespace PlanEditor.MyMath
                 else if (b == -1)
                     b = mas[i];
             }
-            
-            if (a < b)
-                return new double[] { a, b };
-            else
-                return new double[] { b, a };
+
+
+            return (a < b) ? new[] { a, b } : new[] { b, a };
         }
     }
 }

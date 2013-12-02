@@ -18,7 +18,7 @@ namespace PlanEditor.Helpers.IO
                     int stage = i + 1;
                     writer.WriteLine("<h3> Этаж " + stage + "</h3>");
 
-                    writer.WriteLine("<table border=\"1\">");
+                    writer.WriteLine("<table border=\"0\">");
 
                     writer.WriteLine("<tr>");
                     writer.WriteLine("<td>Номер помещения</td>");
@@ -27,6 +27,7 @@ namespace PlanEditor.Helpers.IO
                     writer.WriteLine("<td>Высота</td>");
                     writer.WriteLine("<td>Ширина пути эвакуации</td>");
                     writer.WriteLine("<td>Количество людей</td>");
+                    writer.WriteLine("<td>Тип помещения</td>");
                     writer.WriteLine("</tr>");
 
                     for (int num = 0; num < building.Places[i].Count; ++num)
@@ -43,6 +44,7 @@ namespace PlanEditor.Helpers.IO
                         writer.WriteLine("<td>" + place.Height + "</td>");
                         writer.WriteLine("<td>" + place.EvacWide + "</td>");
                         writer.WriteLine("<td>" + place.Ppl + "</td>");
+                        writer.WriteLine("<td>" + place.MainType + ", " + place.SubType + "</td>");
 
                         writer.WriteLine("</tr>");
                     }
@@ -94,6 +96,7 @@ namespace PlanEditor.Helpers.IO
                     writer.WriteLine("<td>Номер портала</td>");
                     writer.WriteLine("<td>Ширина</td>");
                     writer.WriteLine("<td>Высота</td>");
+                    writer.WriteLine("<td>Глубина проема</td>");
 
                     writer.WriteLine("</tr>");
 
@@ -106,6 +109,7 @@ namespace PlanEditor.Helpers.IO
                         writer.WriteLine("<td>" + numPortal + "</td>");
                         writer.WriteLine("<td>" + portal.Wide + "</td>");
                         writer.WriteLine("<td>" + 0 + "</td>");
+                        writer.WriteLine("<td>" + portal.Depth  + "</td>");
 
                         writer.WriteLine("</tr>");
                     }

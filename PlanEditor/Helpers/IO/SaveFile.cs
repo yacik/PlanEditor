@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace PlanEditor.Helpers.IO
@@ -9,10 +10,17 @@ namespace PlanEditor.Helpers.IO
         {
             using (var fs = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write))
             {
-                var bf = new BinaryFormatter();
-                building.PrepareForExport();
-                bf.Serialize(fs, building);
-                fs.Close();
+                try
+                {
+                    var bf = new BinaryFormatter();
+                    building.PrepareForExport();
+                    bf.Serialize(fs, building);
+                    fs.Close();
+                }
+                catch (Exception ex)
+                {
+                    PELogger.GetLogger.WriteLn(ex.Message); 
+                }
             }
         }
     }

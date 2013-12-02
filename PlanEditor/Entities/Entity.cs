@@ -49,12 +49,15 @@ namespace PlanEditor.Entities
             {
                 case EntityType.Place:
                     p.Fill = Colours.Indigo;
+                    //p.Fill = Colours.Room;
                     break;
                 case EntityType.Halfway:
+                    //p.Fill = Colours.Halfway;
                     p.Fill = Colours.Green;
                     break;
                 case EntityType.Stairway:
                     p.Fill = Colours.Violet;
+                    //p.Fill = Colours.Stairway;
                     break;
                 case EntityType.Portal:
                     p.Fill = Colours.LightGray;
@@ -149,7 +152,7 @@ namespace PlanEditor.Entities
                     dist = d;
             }
 
-            return dist * Data.Sigma;
+            return dist * Constants.Sigma;
         }
     }
 }

@@ -14,8 +14,8 @@ namespace PlanEditor.Helpers.IO
 
             for (int i = 0; i < building.Stages; ++i)
             {
-                int wide = (int) (building.Lx/Data.Sigma);
-                int height = (int) (building.Ly/Data.Sigma);
+                int wide = (int) (building.Lx/Constants.Sigma);
+                int height = (int) (building.Ly/Constants.Sigma);
 
                 var bitmap = new Bitmap(wide, height);
                 var graphics = Graphics.FromImage(bitmap);
@@ -70,8 +70,7 @@ namespace PlanEditor.Helpers.IO
                         graphics.FillRectangle(Brushes.DarkSlateGray, xMin, yMin, x, y);
 
                         ++strwCount;
-                        graphics.DrawString(strwCount.ToString(), new Font("Verdana", 12), Brushes.Black,
-                            new PointF(xMin, yMin));
+                        graphics.DrawString(strwCount.ToString(), new Font("Verdana", 12), Brushes.Black, new PointF(xMin, yMin));
                     }
                 }
 

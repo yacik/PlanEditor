@@ -1,23 +1,22 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using PlanEditor.Entities;
-using System.Threading.Tasks;
 
 namespace PlanEditor.Helpers.IO
 {
     #region Export DS
-
+    
     [DataContract]
     internal struct Room
     {
-        public Room(Place place, int id)
+        public Room(Place place, int id, double z)
         {
             ID = id;
+
             CountNodes = place.CountNodes;
             Ppl = place.Ppl;
             MaxPeople = place.MaxPeople;
@@ -29,8 +28,22 @@ namespace PlanEditor.Helpers.IO
             DifHRoom = place.DifHRoom;
             MainType = place.MainType;
             SubType = place.SubType;
+            scenario = place.IsOnFire ? 1 : 0;
+
+            timeblock = 0.00;
+            x1 = place.PointsX[0];
+            y1 = place.PointsY[0];
+            z1 = z;
+            x2 = place.PointsX[1];
+            y2 = place.PointsY[1];
+            z2 = Height; // meters
 
             Neigh = new List<int>();
+        }
+
+        public void SetScenario(int id)
+        {
+            scenario = id;
         }
 
         [DataMember] public int ID;
@@ -46,6 +59,15 @@ namespace PlanEditor.Helpers.IO
         [DataMember] public int MainType;
         [DataMember] public int SubType;
         [DataMember] public List<int> Neigh;
+        
+        [DataMember] public double timeblock;
+        [DataMember] public int scenario;
+        [DataMember] public double x1;
+        [DataMember] public double y1;
+        [DataMember] public double z1;
+        [DataMember] public double x2;
+        [DataMember] public double y2;
+        [DataMember] public double z2;
     };
 
     [DataContract]
@@ -82,6 +104,10 @@ namespace PlanEditor.Helpers.IO
                         ++InnerDoors;
                 }
             }
+
+            Wide = MyMath.Helper.MetersToPxl(Lx);
+            Length = MyMath.Helper.MetersToPxl(Ly);
+            Height = building.HeightStage; // meters
         }
 
         [DataMember] public string Name;
@@ -102,12 +128,15 @@ namespace PlanEditor.Helpers.IO
         [DataMember] public List<Mine> Mines;
         [DataMember] public int OuterDoors;
         [DataMember] public int InnerDoors;
+        [DataMember] public double Wide;
+        [DataMember] public double Length;
+        [DataMember] public double Height;
     };
 
     [DataContract]
     internal struct Door
     {
-        public Door(Portal portal, int id)
+        public Door(Portal portal, int id, int stage)
         {
             Wide = portal.Wide;
             Code = (portal.RoomB == null) ? 1 : 2;
@@ -124,6 +153,13 @@ namespace PlanEditor.Helpers.IO
             }
             // x - 1, y - 2
             directAper = (portal.Orientation == Portal.PortalOrient.Vertical) ? 1 : 2;
+
+            x1 = portal.PointsX[0];
+            y1 = portal.PointsY[0];
+            x2 = portal.PointsX[1];
+            y2 = portal.PointsY[1];
+            z1 = stage;
+            z2 = (portal.Height < 1) ? 3.0 : portal.Height; // meters
         }
 
         [DataMember] public double Wide;
@@ -131,6 +167,13 @@ namespace PlanEditor.Helpers.IO
         [DataMember] public int ID;
         [DataMember] public List<int> Cells;
         [DataMember] public int directAper;
+
+        [DataMember] public double x1;
+        [DataMember] public double y1;
+        [DataMember] public double z1;
+        [DataMember] public double x2;
+        [DataMember] public double y2;
+        [DataMember] public double z2;
     }
 
     [DataContract]
@@ -211,7 +254,7 @@ namespace PlanEditor.Helpers.IO
                     Stairways[i].Add(stair);
 
                     int id = GenerateId(stair);
-                    var room = new Room(stair, id);
+                    var room = new Room(stair, id, i);
                     _building.Rooms.Add(room);
                 }
             }
@@ -259,17 +302,18 @@ namespace PlanEditor.Helpers.IO
 
             for (int curStage = 0; curStage < building.Stages; ++curStage)
             {
-                #region grid
                 /*
-                    -1; // outside of computational domain
-                    +1; // внешняя дверь (выход из опасной зоны)
-                    +2; // внутренняя дверь
-                    +5; // внутренняя ячейка горизонтальной поверхности
-                    +6; // внутренняя ячейка горизонтальной поверхности cо ступеньками
-                    +7; // внутренняя ячейка шахты (не принадлежит слою и не имеет соседей в горизонтальной плоскости)
-                    +9; // код узла шахты не подлежащий расчету эвакуации (проекция на уровень layer лестничного проема
-	                10; // код узла лестничного перехода, относящийся к шахте >=10 (узел принадлежит уровню layer)
-                */
+                #region grid
+                
+                  //-1; // outside of computational domain
+                  //+1; // внешняя дверь (выход из опасной зоны)
+                  //+2; // внутренняя дверь
+                  //+5; // внутренняя ячейка горизонтальной поверхности
+                  //+6; // внутренняя ячейка горизонтальной поверхности cо ступеньками
+                  //+7; // внутренняя ячейка шахты (не принадлежит слою и не имеет соседей в горизонтальной плоскости)
+                  //+9; // код узла шахты не подлежащий расчету эвакуации (проекция на уровень layer лестничного проема
+	              //10; // код узла лестничного перехода, относящийся к шахте >=10 (узел принадлежит уровню layer)
+                
                 if (grid.Cells.Count > curStage)
                 {
                     foreach (var cell in grid.Cells[curStage])
@@ -314,6 +358,7 @@ namespace PlanEditor.Helpers.IO
                     }
                 }
                 #endregion
+                */
 
                 #region places
                 if (building.Places.Count > curStage)
@@ -321,7 +366,7 @@ namespace PlanEditor.Helpers.IO
                     foreach (var place in building.Places[curStage])
                     {
                         int id = GetIdByEntity(place);
-                        var room = new Room(place, id);
+                        var room = new Room(place, id, curStage);
                         _building.Rooms.Add(room);
                     }
 
@@ -386,7 +431,7 @@ namespace PlanEditor.Helpers.IO
                     foreach (var p in building.Portals[curStage])
                     {
                         int id = GetIdByEntity(p);
-                        var portal = new Door(p, id);
+                        var portal = new Door(p, id, curStage);
                         _building.Portals.Add(portal);
                     }
                 }
@@ -395,6 +440,8 @@ namespace PlanEditor.Helpers.IO
 
             _building.NumMines = _building.Mines.Count;
             _building.NumPlaces += Stairways.Sum(sum => sum.Count);
+
+            DefineScenarion(_building.Rooms);
 
             var stream = new MemoryStream();
             var ser = new DataContractJsonSerializer(typeof(List<Building>));
@@ -405,6 +452,17 @@ namespace PlanEditor.Helpers.IO
             var sw = new StreamWriter(fileName);
             sw.Write(read);
             sw.Close();
+        }
+
+        private static void DefineScenarion(List<Room> rooms)
+        {
+            foreach (var place in rooms.Where(r => r.scenario == 1))
+            {
+                foreach (var room in place.Neigh.SelectMany(neigh => rooms.Where(v => v.ID == neigh)))
+                {
+                    room.SetScenario(place.ID);
+                }
+            }
         }
 
         private static void DefineStairway(Place place, Room room, int curStage)

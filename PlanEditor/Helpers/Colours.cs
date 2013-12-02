@@ -29,5 +29,15 @@ namespace PlanEditor.Helpers
         public static SolidColorBrush Red { get { red.Color = Colors.Red; return red; } }
         public static SolidColorBrush Green { get { green.Color = Color.FromArgb(255, 63, 96, 63); return green; } }
         public static SolidColorBrush LightGray { get { lightGray.Color = Colors.LightGray; return lightGray; } }
+
+
+        private static readonly SolidColorBrush room = new SolidColorBrush();
+        public static SolidColorBrush Room { get { room.Color = Color.FromArgb(255, 160, 160, 160); return room; } }
+
+        private static readonly SolidColorBrush halfway = new SolidColorBrush();
+        public static SolidColorBrush Halfway { get { halfway.Color = Color.FromArgb(255, 192, 192, 192); return halfway; } }
+
+        private static readonly SolidColorBrush stairway = new SolidColorBrush();
+        public static SolidColorBrush Stairway { get { stairway.Color = Color.FromArgb(255, 128, 128, 128); return stairway; } }
     }
 }

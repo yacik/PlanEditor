@@ -70,9 +70,13 @@
     <Compile Include="FindWindow.xaml.cs">
       <DependentUpon>FindWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\IO\SaveForFDS.cs" />
     <Compile Include="Helpers\IO\SaveImage.cs" />
     <Compile Include="Helpers\IO\SaveQR.cs" />
     <Compile Include="Helpers\IO\SaveToHtmlData.cs" />
+    <Compile Include="Helpers\PELogger.cs" />
+    <Compile Include="TempData\TempDoor.cs" />
+    <Compile Include="TempData\TempRoom.cs" />
     <Compile Include="WinBuilding.xaml.cs">
       <DependentUpon>WinBuilding.xaml</DependentUpon>
     </Compile>
@@ -98,7 +102,7 @@
     <Compile Include="Graph\Graph.cs" />
     <Compile Include="Graph\Vertex.cs" />
     <Compile Include="Helpers\IO\SaveToEvac.cs" />
-    <Compile Include="Helpers\Data.cs" />
+    <Compile Include="Helpers\Constants.cs" />
     <Page Include="FindWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -126,7 +130,6 @@
     <Compile Include="Entities\Portal.cs" />
     <Compile Include="RegGrid\Cell.cs" />
     <Compile Include="RegGrid\Grid.cs" />
-    <Compile Include="Helpers\Logger.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -156,6 +159,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="ClassDiagram2.cd" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

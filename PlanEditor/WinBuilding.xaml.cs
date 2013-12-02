@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using MahApps.Metro.Controls;
 using PlanEditor.Entities;
 
 namespace PlanEditor
@@ -271,15 +269,7 @@ namespace PlanEditor
 
         private void CheckFields()
         {
-            var isOk = true;
-            foreach (var field in _fields)
-            {
-                if (field.Value == false)
-                {
-                    isOk = false;
-                    break;
-                }
-            }
+            var isOk = _fields.Where(v => v.Value == false).All(field => field.Value != false);
 
             BtnOk.IsEnabled = isOk;
         }

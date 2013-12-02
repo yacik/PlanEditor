@@ -26,9 +26,9 @@ namespace PlanEditor.RegGrid
 
         private void DefineVertices(int a)
         {
-            for (int i = 0; i < Data.Stages; ++i)
+            for (int i = 0; i < Constants.Stages; ++i)
             {
-                foreach (var place in Data.Places[i])
+                foreach (var place in Constants.Places[i])
                 {
                     //if (place.Type != Place.PlaceType.Halfway) continue;
                     foreach (Cell c in place.Cells)
@@ -43,9 +43,9 @@ namespace PlanEditor.RegGrid
 
         private void DefineEdges(int a)
         {
-            for (int i = 0; i < Data.Stages; ++i)
+            for (int i = 0; i < Constants.Stages; ++i)
             {
-                foreach (var place in Data.Places[i])
+                foreach (var place in Constants.Places[i])
                 {
                     //if (place.Type != Place.PlaceType.Halfway) continue;
 

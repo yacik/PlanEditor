@@ -1,11 +1,10 @@
-﻿using System.Diagnostics;
-using System.IO.IsolatedStorage;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using MahApps.Metro.Controls;
 using PlanEditor.Entities;
 using PlanEditor.Helpers;
+
 
 namespace PlanEditor
 {
@@ -13,7 +12,6 @@ namespace PlanEditor
     {
         public double Wide { get; private set; }
         private readonly Portal _portal;
-        private readonly bool _isStairway;
 
         public WinPortal()
         {
@@ -25,30 +23,23 @@ namespace PlanEditor
             Title = "Добавить дверь";
 
             btnOk.IsEnabled = false;
+
+            WideText.Text = TempData.TempDoor.Wide;
+            HeightText.Text = TempData.TempDoor.Height;
+            DepthText.Text = TempData.TempDoor.Depth;
         }
 
         public WinPortal(Portal portal)
         {
             InitializeComponent();
             
-            WideText.Text = portal.Width.ToString();
-
             Title = "Редактирование двери";
 
             _portal = portal;
-            if (portal.RoomA != null && portal.RoomA.Type == Entity.EntityType.Stairway)
-            {
-                WideText.IsEnabled = false;
-                _isStairway = true;
-            }
-
-            if (portal.RoomB != null && portal.RoomB.Type == Entity.EntityType.Stairway)
-            {
-                WideText.IsEnabled = false;
-                _isStairway = true;
-            }
-
-            HeightText.Text = portal.Height.ToString();
+           
+            HeightText.Text = _portal.Height.ToString();
+            WideText.Text = _portal.Width.ToString();
+            DepthText.Text = _portal.Depth.ToString();
         }
 
 
@@ -56,25 +47,33 @@ namespace PlanEditor
         {
             DialogResult = true;
 
+            TempData.TempDoor.Wide = WideText.Text;
+            TempData.TempDoor.Height = HeightText.Text;
+            TempData.TempDoor.Depth = DepthText.Text;
+
             if (_portal == null)
             {
                 Wide = double.Parse(WideText.Text);
             }
             else
             {
-                if (!_isStairway)
-                {
-                    Wide = double.Parse(WideText.Text);
-                    _portal.Width = Wide;
-                    EditPlace();
-                }
+                Wide = double.Parse(WideText.Text);
+                _portal.Width = Wide;
 
-                double h;
-                if (double.TryParse(HeightText.Text, out h))
+                try
                 {
-                    _portal.Height = h;
+                    _portal.Height = double.Parse(HeightText.Text);
+                    _portal.Depth = double.Parse(DepthText.Text);
+
+                    EditPlace();
+                } 
+                catch(Exception ex)
+                {
+                    PELogger.GetLogger.WriteLn(ex.Message);
                 }
             }
+
+            
         }
         private void Text_Changed(object sender, TextChangedEventArgs e)
         {
@@ -83,18 +82,12 @@ namespace PlanEditor
             
             if (_portal == null)
             {
-                if (d > 0 && isParsed)
-                    btnOk.IsEnabled = true;
-                else
-                    btnOk.IsEnabled = false;
+                btnOk.IsEnabled = (d > 0 && isParsed);
             }
             else
             {
-                double metr = (_portal.Max - _portal.Min) * Data.Sigma;
-                if (d > 0 && isParsed && d <= metr)
-                    btnOk.IsEnabled = true;
-                else
-                    btnOk.IsEnabled = false;
+                double metr = (_portal.Max - _portal.Min) * Constants.Sigma;
+                btnOk.IsEnabled = (d > 0 && isParsed && d <= metr);
             }
         }
 
@@ -103,10 +96,8 @@ namespace PlanEditor
             double w = 0.0;
             double l = 0.0;
 
-            if (_portal.Orientation == Portal.PortalOrient.Vertical)
-                l = Wide / Data.Sigma;
-            else
-                w = Wide / Data.Sigma;
+            if (_portal.Orientation == Portal.PortalOrient.Vertical) l = Wide / Constants.Sigma;
+            else w = Wide / Constants.Sigma;
 
             var pg = _portal.UI.Data as PathGeometry;
             var startPoint = pg.Figures[0].StartPoint;

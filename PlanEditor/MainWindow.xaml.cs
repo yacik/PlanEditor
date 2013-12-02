@@ -1,4 +1,4 @@
-Ôªøusing System.ComponentModel;
+using System.ComponentModel;
 using System.Linq;
 using Microsoft.Win32;
 using PlanEditor.Graph;
@@ -121,10 +121,10 @@ namespace PlanEditor
 
                         foreach (var obstacle in _obstacles) obstacle.Deselect();
                         _obstacles.Clear();
-                        
+
                         if (_selectedItem != null)
                             _selectedItem.Deselect();
-                        
+
                         _mode = CanvasMode.Select;
                         ActiveDeactiveMenu(true);
                         AddObstacle.IsEnabled = false;
@@ -153,7 +153,7 @@ namespace PlanEditor
         {
             if (Key.LeftShift == e.Key) _shiftPressed = false;
         }
-        
+
         private void GridField_MouseLeave(object sender, MouseEventArgs e)
         {
 
@@ -167,12 +167,12 @@ namespace PlanEditor
                 _lastPosY = e.GetPosition(null).Y;
             }
         }
-        
+
         private void GridField_MouseMove(object sender, MouseEventArgs e)
         {
             double x = e.GetPosition(null).X;
             double y = e.GetPosition(null).Y;
-            
+
             if (e.MiddleButton == MouseButtonState.Pressed)
             {
                 Move(x, y);
@@ -204,7 +204,7 @@ namespace PlanEditor
                 }
             }
         }
-        
+
         private void GridField_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             _lastPosX = e.GetPosition(null).X;
@@ -215,8 +215,8 @@ namespace PlanEditor
         {
             double x = e.GetPosition(null).X - _translation.X;
             double y = e.GetPosition(null).Y - _translation.Y;
-            
-            _lastClick = (x < Data.GridStep || x > _building.xMax || y < Data.GridStep || y > _building.yMax)
+
+            _lastClick = (x < Constants.GridStep || x > _building.xMax || y < Constants.GridStep || y > _building.yMax)
                              ? _lastClick
                              : new Point(x, y);
             switch (_mode)
@@ -288,7 +288,7 @@ namespace PlanEditor
                         {
                             DeselectAll();
                             _selectedItem = SelectObject(x, y);
-                            if (_selectedItem != null)  _selectedItem.Select();
+                            if (_selectedItem != null) _selectedItem.Select();
                         }
                     }
                     break;
@@ -311,16 +311,16 @@ namespace PlanEditor
                     break;
             }
         }
-        
+
         private void GridField_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            _curPosMouse = new Point(e.GetPosition(null).X, e.GetPosition(null).Y);           
+            _curPosMouse = new Point(e.GetPosition(null).X, e.GetPosition(null).Y);
         }
-        
+
         #endregion
-        
+
         #region Click events
-        
+
         private void Click_AddObstacle(object sender, RoutedEventArgs e)
         {
             if (_selectedItem == null) return;
@@ -328,7 +328,7 @@ namespace PlanEditor
             var owner = _selectedItem as Place;
             if (owner == null) return;
 
-            var winObst = new WinObstacle(owner) {Owner = this};
+            var winObst = new WinObstacle(owner) { Owner = this };
             var result = winObst.ShowDialog();
             if (result == true)
             {
@@ -375,7 +375,7 @@ namespace PlanEditor
         {
             if (_building == null) return;
 
-            var findWin = new FindWindow(_building) {Owner = this};
+            var findWin = new FindWindow(_building) { Owner = this };
             findWin.Show();
         }
 
@@ -385,20 +385,20 @@ namespace PlanEditor
             var result = dlg.ShowDialog();
 
             if (result != true) return;
-            
+
             SaveToHtmlData.Save(_building, dlg.FileName);
 
             string folder = System.IO.Path.GetDirectoryName(dlg.FileName);
             SaveImage.SaveFile(_building, folder);
         }
-        
+
         private void Click_Export(object sender, RoutedEventArgs e)
         {
             if (_building == null) return;
 
             if (!CheckPlacesDoors())
             {
-                MessageBox.Show(this, "–û—à–∏–±–∫–∞", "–ó–¥–∞–Ω–∏–µ —Å–æ–¥–µ—Ä–∂–∏—Ç –æ—à–∏–±–∫–∏ (–Ω–µ –≤—Å–µ –ø–æ–º–µ—â–µ–Ω–∏—è –¥–æ—Å—Ç—É–ø–Ω—ã)");//<!------------------------------
+                MessageBox.Show(this, "Œ¯Ë·Í‡", "«‰‡ÌËÂ ÒÓ‰ÂÊËÚ Ó¯Ë·ÍË (ÌÂ ‚ÒÂ ÔÓÏÂ˘ÂÌËˇ ‰ÓÒÚÛÔÌ˚)");//<!------------------------------
                 return;
             }//*/
 
@@ -418,7 +418,7 @@ namespace PlanEditor
             }
             if (isCollide)
             {
-                MessageBox.Show(this, "–û—à–∏–±–∫–∞", "–ò–º–µ—é—Ç—Å—è –ø–µ—Ä–µ—Å–µ–∫–∞—é—â–∏–µ—Å—è –ø–æ–º–µ—â–µ–Ω–∏—è");//<!------------------------------
+                MessageBox.Show(this, "Œ¯Ë·Í‡", "»ÏÂ˛ÚÒˇ ÔÂÂÒÂÍ‡˛˘ËÂÒˇ ÔÓÏÂ˘ÂÌËˇ");//<!------------------------------
                 return;
             }
 
@@ -432,7 +432,7 @@ namespace PlanEditor
                 var rg = new RecognizeGrid(_grid, _building);
                 rg.Recognize();
                 Helpers.IO.SaveToEvac.Save(dlg.FileName, rg.Grid, _building);
-                MessageBox.Show(this, "–≠–∫—Å–ø–æ—Ä—Ç –≥–æ—Ç–æ–≤");//<!------------------------------
+                MessageBox.Show(this, "›ÍÒÔÓÚ „ÓÚÓ‚");//<!------------------------------
             }
 
             /*
@@ -454,7 +454,7 @@ namespace PlanEditor
              */
         }
 
-        // –ø—Ä–æ–≤–µ—Ä–∏—Ç—å, —á—Ç–æ–±—ã –≤—Å–µ –ø–æ–º–µ—â–µ–Ω–∏—è –∏–º–µ–∏ –¥–≤–µ—Ä–∏
+        // ÔÓ‚ÂËÚ¸, ˜ÚÓ·˚ ‚ÒÂ ÔÓÏÂ˘ÂÌËˇ ËÏÂË ‰‚ÂË
         private bool CheckPlacesDoors()
         {
             bool isOK = true;
@@ -475,7 +475,7 @@ namespace PlanEditor
 
                         if (ver1.HasValue && !ver1.Value) Graph.Vertices.Add(new Vertex(p1));
                         if (ver2.HasValue && !ver2.Value) Graph.Vertices.Add(new Vertex(p2));
-                        
+
                         var v1 = Graph.GetVertexByPlace(portal.RoomA);
                         var v2 = Graph.GetVertexByPlace(portal.RoomB);
 
@@ -500,7 +500,7 @@ namespace PlanEditor
                 }
                 if (edge.Portal.RoomB == null)
                 {
-                     start.Add(edge.VerA);
+                    start.Add(edge.VerA);
                 }
             }
 
@@ -540,7 +540,7 @@ namespace PlanEditor
             }
 
             if (newVertices.Count == 0) return;
-            
+
             RecurseCheck(newVertices, visited);
         }
 
@@ -615,12 +615,12 @@ namespace PlanEditor
                 }
                 else
                 {
-                    MessageBox.Show("–û—à–∏–±–∫–∞ –≤ —á—Ç–µ–Ω–∏–∏ —Ñ–∞–π–ª–∞"); //<!------------------------------
+                    MessageBox.Show("Œ¯Ë·Í‡ ‚ ˜ÚÂÌËË Ù‡ÈÎ‡"); //<!------------------------------
                     ActiveDeactiveFileMenu(false);
                 }
             }
         }
-        
+
         private void Click_Path(object sender, RoutedEventArgs e)
         {
             _mode = CanvasMode.Path;
@@ -655,8 +655,8 @@ namespace PlanEditor
         }
 
         private void Click_AddRoom(object sender, RoutedEventArgs e)
-        {            
-            var r = new WinRoom(_lastClick, _building) {Owner = this};
+        {
+            var r = new WinRoom(_lastClick, _building) { Owner = this };
             var isOk = r.ShowDialog();
 
             if (isOk == null || isOk == false)
@@ -667,7 +667,7 @@ namespace PlanEditor
             {
                 _isChanged = true;
 
-                var entity = r.Entity;         
+                var entity = r.Entity;
                 entity.UI.RenderTransform = _transformGroup;
                 ContentPanel.Children.Add(entity.UI);
 
@@ -681,9 +681,9 @@ namespace PlanEditor
                     case Entity.EntityType.Halfway:
                         var place = entity as Place;
                         _building.Places[_curStage].Add(place);
-                    break;
-                }                
-            }            
+                        break;
+                }
+            }
         }
 
         private void Click_AddDoor(object sender, RoutedEventArgs e)
@@ -691,7 +691,7 @@ namespace PlanEditor
             if (_mode != CanvasMode.Edit)
                 _mode = CanvasMode.Connect;
         }
-        
+
         private void Click_EditBuilding(object sender, RoutedEventArgs e)
         {
             var lx = _building.Lx;
@@ -704,11 +704,11 @@ namespace PlanEditor
             {
                 if (lx != _building.Lx || ly != _building.Ly)
                 {
-                    _building.xMax = _building.Lx / Data.Sigma;
-                    _building.yMax = _building.Ly / Data.Sigma;
+                    _building.xMax = _building.Lx / Constants.Sigma;
+                    _building.yMax = _building.Ly / Constants.Sigma;
 
-                    _building.Row = (int)(_building.xMax / Data.GridStep);
-                    _building.Col = (int)(_building.yMax / Data.GridStep);
+                    _building.Row = (int)(_building.xMax / Constants.GridStep);
+                    _building.Col = (int)(_building.yMax / Constants.GridStep);
 
                     DrawGrid();
                 }
@@ -718,7 +718,7 @@ namespace PlanEditor
         private void Click_NextStage(object sender, RoutedEventArgs e)
         {
             if (_curStage == _building.Stages - 1) return;
-            
+
             SetHidden();
             ++_curStage;
             SetVisible();
@@ -734,23 +734,23 @@ namespace PlanEditor
             SetVisible();
             ChangeStageName();
         }
-        
+
         private void Click_Remove(object sender, RoutedEventArgs e)
         {
             if (_selectedItems.Count > 0)
             {
-                var mb = MessageBox.Show("–£–¥–∞–ª–∏—Ç—å –≤—ã–±—Ä–∞–Ω–Ω—ã–µ —ç–ª–µ–º–µ–Ω—Ç—ã?", "–ü–æ–¥—Ç–≤–µ—Ä–∂–¥–µ–Ω–∏–µ —É–¥–∞–ª–µ–Ω–∏—è", MessageBoxButton.YesNo);//<!------------------------------
+                var mb = MessageBox.Show("”‰‡ÎËÚ¸ ‚˚·‡ÌÌ˚Â ˝ÎÂÏÂÌÚ˚?", "œÓ‰Ú‚ÂÊ‰ÂÌËÂ Û‰‡ÎÂÌËˇ", MessageBoxButton.YesNo);//<!------------------------------
                 if (mb == MessageBoxResult.No) return;
-                
+
                 _selectedItems.Add(_selectedItem);
                 _selectedItem = null;
 
-                 foreach (var v in _selectedItems) RemoveEntity(v);
+                foreach (var v in _selectedItems) RemoveEntity(v);
                 _selectedItems.Clear();
             }
             if (_selectedItem != null)
             {
-                var mb = MessageBox.Show("–£–¥–∞–ª–∏—Ç—å –≤—ã–±—Ä–∞–Ω–Ω—ã–µ —ç–ª–µ–º–µ–Ω—Ç—ã?", "–ü–æ–¥—Ç–≤–µ—Ä–∂–¥–µ–Ω–∏–µ —É–¥–∞–ª–µ–Ω–∏—è", MessageBoxButton.YesNo);//<!------------------------------
+                var mb = MessageBox.Show("”‰‡ÎËÚ¸ ‚˚·‡ÌÌ˚Â ˝ÎÂÏÂÌÚ˚?", "œÓ‰Ú‚ÂÊ‰ÂÌËÂ Û‰‡ÎÂÌËˇ", MessageBoxButton.YesNo);//<!------------------------------
                 if (mb == MessageBoxResult.No) return;
 
                 if (_mode == CanvasMode.Edit)
@@ -772,7 +772,7 @@ namespace PlanEditor
                         place.Obstacles.Remove(obst);
                         ContentPanel.Children.Remove(obst.UI);
                     }
-                } 
+                }
                 else
                 {
                     RemoveEntity(_selectedItem);
@@ -816,8 +816,8 @@ namespace PlanEditor
                     _building.Stairways.Remove(stairway);
 
                     foreach (var obs in stairway.Obstacles) ContentPanel.Children.Remove(obs.UI);
-                    
-                     stairway.Obstacles.Clear();
+
+                    stairway.Obstacles.Clear();
 
                     break;
                 default:
@@ -853,10 +853,10 @@ namespace PlanEditor
 
                     toDelete.Clear();
 
-                     foreach (var obs in place.Obstacles)
+                    foreach (var obs in place.Obstacles)
                         ContentPanel.Children.Remove(obs.UI);
-                    
-                     place.Obstacles.Clear();
+
+                    place.Obstacles.Clear();
 
                     break;
             }
@@ -913,7 +913,7 @@ namespace PlanEditor
         {
             if (_mode == CanvasMode.Edit)
             {
-                    
+
             }
             else
             {
@@ -945,21 +945,21 @@ namespace PlanEditor
                 }*/
             }
         }
-        
+
         #endregion
-        
+
         #region Connect portals
 
         private void ConnectOutsidePortal(double wide)
         {
             var place = _place1 ?? _place2;
             var portal = new Portal
-                {
-                    RoomA = place,
-                    RoomB = null,
-                    Width = wide
-                };
-            
+            {
+                RoomA = place,
+                RoomB = null,
+                Width = wide
+            };
+
             portal.RoomA.IsMovable = false;
             place.Select();
 
@@ -976,25 +976,25 @@ namespace PlanEditor
                 min = d;
                 line = v;
             }
-            
+
             if (line == null)
             {
-                MessageBox.Show("–ù–µ–≤–æ–∑–º–æ–∂–Ω–æ —Å–æ–µ–¥–∏–Ω–∏—Ç—å –ø–æ–º–µ—â–µ–Ω–∏–µ");//<!------------------------------
+                MessageBox.Show("ÕÂ‚ÓÁÏÓÊÌÓ ÒÓÂ‰ËÌËÚ¸ ÔÓÏÂ˘ÂÌËÂ");//<!------------------------------
                 return;
             }
 
             if (Helper.IsHorizontal(line.X1, line.Y1, line.X2, line.Y2))
             {
-                portal.Orientation = Portal.PortalOrient.Horizontal;                
+                portal.Orientation = Portal.PortalOrient.Horizontal;
                 portal.Min = Math.Min(line.X1, line.X2);
                 portal.Max = Math.Max(line.X1, line.X2);
 
                 if (portal.Max < wide)
                 {
-                    MessageBox.Show("–®–∏—Ä–∏–Ω–∞ –¥–≤–µ—Ä–∏ –∑–∞–¥–∞–Ω–∞ –Ω–µ –≤–µ—Ä–Ω–∞");//<!------------------------------
+                    MessageBox.Show("ÿËËÌ‡ ‰‚ÂË Á‡‰‡Ì‡ ÌÂ ‚ÂÌ‡");//<!------------------------------
                     return;
                 }
-                
+
                 portal.CreateUI(line.Y2);
             }
             else
@@ -1005,14 +1005,14 @@ namespace PlanEditor
 
                 if (portal.Max < wide)
                 {
-                    MessageBox.Show("–®–∏—Ä–∏–Ω–∞ –¥–≤–µ—Ä–∏ –∑–∞–¥–∞–Ω–∞ –Ω–µ –≤–µ—Ä–Ω–∞");//<!------------------------------
+                    MessageBox.Show("ÿËËÌ‡ ‰‚ÂË Á‡‰‡Ì‡ ÌÂ ‚ÂÌ‡");//<!------------------------------
                     return;
                 }
-                
+
                 portal.CreateUI(line.X1);
             }
 
-            var mb = MessageBox.Show("–°–æ–∑–¥–∞—Ç—å –¥–≤–µ—Ä—å, –≤–µ–¥—É—â—É—é –Ω–∞ —É–ª–∏—Ü—É?", "–ü–æ–¥—Ç–≤–µ—Ä–∂–¥–µ–Ω–∏–µ", MessageBoxButton.YesNo);//<!------------------------------
+            var mb = MessageBox.Show("—ÓÁ‰‡Ú¸ ‰‚Â¸, ‚Â‰Û˘Û˛ Ì‡ ÛÎËˆÛ?", "œÓ‰Ú‚ÂÊ‰ÂÌËÂ", MessageBoxButton.YesNo);//<!------------------------------
             if (mb == MessageBoxResult.Yes)
             {
                 portal.UI.RenderTransform = _transformGroup;
@@ -1024,10 +1024,10 @@ namespace PlanEditor
             _place1 = null;
             _place2 = null;
         }
-        
+
         private void ConncetInnerPortal(double wide)
         {
-            double compWide = wide/Data.Sigma;
+            double compWide = wide / Constants.Sigma;
             double dX = Helper.Tan(_clickOne.X, _clickTwo.X);
             double dY = Helper.Tan(_clickOne.Y, _clickTwo.Y);
 
@@ -1090,11 +1090,11 @@ namespace PlanEditor
 
                         if (d < compWide)
                         {
-                            MessageBox.Show("–®–∏—Ä–∏–Ω–∞ –¥–≤–µ—Ä–∏ –ø—Ä–µ–≤—ã—à–∞–µ—Ç —Ä–∞–∑–º–µ—Ä—ã —Å—Ç–µ–Ω");//<!------------------------------
+                            MessageBox.Show("ÿËËÌ‡ ‰‚ÂË ÔÂ‚˚¯‡ÂÚ ‡ÁÏÂ˚ ÒÚÂÌ");//<!------------------------------
                             continue;
                         }
 
-                        double dist = Helper.Tan(line1.Y1, line2.Y1)/2;
+                        double dist = Helper.Tan(line1.Y1, line2.Y1) / 2;
                         startPoint = line1.Y1 + dist;
 
                         orient = Portal.PortalOrient.Horizontal;
@@ -1115,11 +1115,11 @@ namespace PlanEditor
 
                         if (d < compWide)
                         {
-                            MessageBox.Show("–®–∏—Ä–∏–Ω–∞ –¥–≤–µ—Ä–∏ –ø—Ä–µ–≤—ã—à–∞–µ—Ç —Ä–∞–∑–º–µ—Ä—ã —Å—Ç–µ–Ω");//<!------------------------------
+                            MessageBox.Show("ÿËËÌ‡ ‰‚ÂË ÔÂ‚˚¯‡ÂÚ ‡ÁÏÂ˚ ÒÚÂÌ");//<!------------------------------
                             continue;
                         }
 
-                        double dist = Helper.Tan(line1.X1, line2.X1)/2;
+                        double dist = Helper.Tan(line1.X1, line2.X1) / 2;
                         startPoint = line1.X1 + dist;
 
                         orient = Portal.PortalOrient.Vertical;
@@ -1164,11 +1164,11 @@ namespace PlanEditor
                 {
                     if (door.Width != wide)
                     {
-                        MessageBox.Show("–†–∞–∑–º–µ—Ä –¥–≤–µ—Ä–∏ –Ω–µ —Å–æ–æ–æ—Ç–≤–µ—Ç—Å—Ç–≤—É–µ—Ç —Ä–∞–Ω–µ–µ —É—Å—Ç–∞–Ω–æ–≤–ª–µ–Ω–Ω–æ–π");
+                        MessageBox.Show("–‡ÁÏÂ ‰‚ÂË ÌÂ ÒÓÓÓÚ‚ÂÚÒÚ‚ÛÂÚ ‡ÌÂÂ ÛÒÚ‡ÌÓ‚ÎÂÌÌÓÈ");
                         wide = door.Width;
                     }
                 }*/
-                var mb = MessageBox.Show("–°–æ–µ–¥–∏–Ω–∏—Ç—å –¥–∞–Ω–Ω—ã–µ –ø–æ–º–µ—â–µ–Ω–∏—è?", "–ü–æ–¥—Ç–≤–µ—Ä–∂–¥–µ–Ω–∏–µ", MessageBoxButton.YesNo);//<!------------------------------
+                var mb = MessageBox.Show("—ÓÂ‰ËÌËÚ¸ ‰‡ÌÌ˚Â ÔÓÏÂ˘ÂÌËˇ?", "œÓ‰Ú‚ÂÊ‰ÂÌËÂ", MessageBoxButton.YesNo);//<!------------------------------
                 if (mb == MessageBoxResult.Yes)
                     CreatePortal(min, max, _place1, _place2, orient, startPoint, wide);
             }
@@ -1235,13 +1235,13 @@ namespace PlanEditor
 
                 if (_place1 == null && _place2 == null)
                 {
-                    MessageBox.Show("–ü–æ–º–µ—â–µ–Ω–∏—è –Ω–µ –≤—ã–±—Ä–∞–Ω—ã");//<!------------------------------
+                    MessageBox.Show("œÓÏÂ˘ÂÌËˇ ÌÂ ‚˚·‡Ì˚");//<!------------------------------
                     return;
                 }
 
                 if ((_place1 != null && _place1.IsCollide) || (_place2 != null && _place2.IsCollide))
                 {
-                    MessageBox.Show("–ü–æ–º–µ—â–µ–Ω–∏—è –ø–µ—Ä–µ—Å–µ–∫–∞—é—Ç—Å—è, –Ω–µ–≤–æ–∑–º–æ–∂–Ω–æ —Å–æ–µ–¥–∏–Ω–∏—Ç—å");//<!------------------------------
+                    MessageBox.Show("œÓÏÂ˘ÂÌËˇ ÔÂÂÒÂÍ‡˛ÚÒˇ, ÌÂ‚ÓÁÏÓÊÌÓ ÒÓÂ‰ËÌËÚ¸");//<!------------------------------
                     return;
                 }
 
@@ -1251,7 +1251,7 @@ namespace PlanEditor
                 if (isOk != null && isOk == true)
                 {
                     var wide = door.Wide;
-                    if (wide < 0) MessageBox.Show("–®–∏—Ä–∏–Ω–∞ –∑–∞–¥–∞–Ω–∞ –Ω–µ –≤–µ—Ä–Ω–æ");//<!------------------------------
+                    if (wide < 0) MessageBox.Show("ÿËËÌ‡ Á‡‰‡Ì‡ ÌÂ ‚ÂÌÓ");//<!------------------------------
                     else
                     {
                         if (_place1 == null || _place2 == null)
@@ -1270,16 +1270,16 @@ namespace PlanEditor
             var v3 = Helper.Tan(a2, b1);
             var v4 = Helper.Tan(a2, b2);
 
-            var mas = new[] {v1, v2, v3, v4};
-            var min = mas.Concat(new[] {double.MaxValue}).Min();
+            var mas = new[] { v1, v2, v3, v4 };
+            var min = mas.Concat(new[] { double.MaxValue }).Min();
 
-            return min < Data.GridStep;
+            return min < Constants.GridStep;
         }
 
         private bool DefineNeighRooms(Place place1, Place place2)
         {
-            var mas1 = new[] {double.MaxValue, double.MinValue, double.MaxValue, double.MinValue};
-            var mas2 = new[] {double.MaxValue, double.MinValue, double.MaxValue, double.MinValue};
+            var mas1 = new[] { double.MaxValue, double.MinValue, double.MaxValue, double.MinValue };
+            var mas2 = new[] { double.MaxValue, double.MinValue, double.MaxValue, double.MinValue };
 
             foreach (var line in place1.Lines)
             {
@@ -1311,13 +1311,13 @@ namespace PlanEditor
             var by = mas2[2] - mas1[3];
 
             var tmpY = Math.Min(ay, by);
-            var y = Math.Sqrt(tmpY*tmpY);
+            var y = Math.Sqrt(tmpY * tmpY);
 
             var ax = mas1[1] - mas2[0];
             var bx = mas2[0] - mas1[1];
 
             var tmpX = Math.Min(ax, bx);
-            var x = Math.Sqrt(tmpX*tmpX);
+            var x = Math.Sqrt(tmpX * tmpX);
 
             return x > y;
         }
@@ -1327,19 +1327,19 @@ namespace PlanEditor
         {
             if (max < wide)
             {
-                MessageBox.Show("–®–∏—Ä–∏–Ω–∞ –¥–≤–µ—Ä–∏ –∑–∞–¥–∞–Ω–∞ –Ω–µ –≤–µ—Ä–Ω–∞");//<!------------------------------
+                MessageBox.Show("ÿËËÌ‡ ‰‚ÂË Á‡‰‡Ì‡ ÌÂ ‚ÂÌ‡");//<!------------------------------
                 return;
             }
 
             var portal = new Portal
-                {
-                    RoomA = place1,
-                    RoomB = place2,
-                    Min = min,
-                    Max = max,
-                    Orientation = orientation,
-                    Width = wide,
-                };
+            {
+                RoomA = place1,
+                RoomB = place2,
+                Min = min,
+                Max = max,
+                Orientation = orientation,
+                Width = wide,
+            };
 
             portal.RoomA.IsMovable = false;
             portal.RoomB.IsMovable = false;
@@ -1353,7 +1353,7 @@ namespace PlanEditor
             _isChanged = true;
         }
 
-       
+
 
         #endregion
 
@@ -1380,7 +1380,7 @@ namespace PlanEditor
             _lastPosX = x;
             _lastPosY = y;
         }
-        
+
         private void MovePortal(double moveX, double moveY, Entity v)
         {
             var portal = v as Portal;
@@ -1393,14 +1393,14 @@ namespace PlanEditor
             double y = p.Y;
 
             if (portal.Orientation == Portal.PortalOrient.Horizontal)
-            {                
+            {
                 x = p.X + moveX;
                 y = p.Y;
                 moveY = 0;
-                
+
                 if (x < portal.Min) return;
                 double d = Helper.Tan(x, portal.Max);
-                double wide = portal.Width/Data.Sigma;
+                double wide = portal.Width / Constants.Sigma;
                 if (d <= wide) return;
             }
             else
@@ -1411,7 +1411,7 @@ namespace PlanEditor
                 if (y < portal.Min) return;
 
                 double d = Helper.Tan(y, portal.Max);
-                double wide = portal.Width / Data.Sigma;
+                double wide = portal.Width / Constants.Sigma;
                 if (d <= wide) return;
             }
 
@@ -1425,7 +1425,7 @@ namespace PlanEditor
                 var ls = pg.Figures[0].Segments[i] as LineSegment;
                 if (ls == null) continue;
 
-                _x = ls.Point.X + moveX;                    
+                _x = ls.Point.X + moveX;
                 _y = ls.Point.Y + moveY;
                 ls.Point = new Point(_x, _y);
             }
@@ -1444,10 +1444,10 @@ namespace PlanEditor
             double y = p.Y + moveY;
 
             // Check for leaving canvas zone
-            double wide = x + place.Wide / Data.Sigma;
-            double height = y + place.Length / Data.Sigma;
-            if (x < Data.GridStep || wide > _building.xMax - Data.GridStep) return;
-            if (y < Data.GridStep || height > _building.yMax - Data.GridStep) return;
+            double wide = x + place.Wide / Constants.Sigma;
+            double height = y + place.Length / Constants.Sigma;
+            if (x < Constants.GridStep || wide > _building.xMax - Constants.GridStep) return;
+            if (y < Constants.GridStep || height > _building.yMax - Constants.GridStep) return;
 
             pg.Figures[0].StartPoint = new Point(x, y);
 
@@ -1466,7 +1466,7 @@ namespace PlanEditor
 
             if (place.Obstacles != null)
                 foreach (var obstacle in place.Obstacles) MoveObstacle(moveX, moveY, obstacle);
-        
+
             CollidePlaces(place, _building.Places[_curStage]);
 
             _isChanged = true;
@@ -1482,8 +1482,8 @@ namespace PlanEditor
             double y = p.Y + moveY;
 
             // Check for leaving canvas zone
-            double wide = x + o.Wide / Data.Sigma;
-            double height = y + o.Length / Data.Sigma;
+            double wide = x + o.Wide / Constants.Sigma;
+            double height = y + o.Length / Constants.Sigma;
             if (x < o.MinPoint.X || wide > o.MaxPoint.X) return;
             if (y < o.MinPoint.Y || height > o.MaxPoint.Y) return;
 
@@ -1588,7 +1588,7 @@ namespace PlanEditor
 
                 var px2 = pl.PointsX;
                 var py2 = pl.PointsY;
-                
+
                 for (int i = 0; i < px1.Count; ++i)
                 {
                     double x = px1[i];
@@ -1606,7 +1606,7 @@ namespace PlanEditor
                 {
                     place.Collide();
                     if (!place.Collisions.Contains(pl))
-                        place.Collisions.Add(pl); 
+                        place.Collisions.Add(pl);
 
                     pl.Collide();
                     if (!pl.Collisions.Contains(place))
@@ -1671,7 +1671,7 @@ namespace PlanEditor
 
             if (!isInterscept) place.NonCollide();
         }
-        
+
         private void MovePath(double x, double y)
         {
             if (!_firstClick && _line == null) return;
@@ -1746,17 +1746,17 @@ namespace PlanEditor
                     }
                 }
             }
-            
+
         }
 
         #endregion
 
         private void ChangeStageName()
         {
-            int s = _curStage + 1;                            
-            Stage.Text = "–≠—Ç–∞–∂ " + s;
+            int s = _curStage + 1;
+            Stage.Text = "›Ú‡Ê " + s;
         }
-        
+
         private void SetHidden()
         {
             if (_building.Places.Count > _curStage)
@@ -1771,7 +1771,7 @@ namespace PlanEditor
             if (_building.Portals.Count > _curStage)
             {
                 foreach (var v in _building.Portals[_curStage])
-                 v.Hide();
+                    v.Hide();
             }
 
             int s = _curStage + 1;
@@ -1798,7 +1798,7 @@ namespace PlanEditor
                 foreach (var v in _building.Portals[_curStage])
                     v.Show();
             }
-            
+
             int s = _curStage + 1;
             foreach (var v in _building.Stairways)
             {
@@ -1830,12 +1830,12 @@ namespace PlanEditor
             MenuAdd.IsEnabled = true;
             MenuTools.IsEnabled = true;
 
-            _building.xMax = _building.Lx / Data.Sigma;
-            _building.yMax = _building.Ly / Data.Sigma;
+            _building.xMax = _building.Lx / Constants.Sigma;
+            _building.yMax = _building.Ly / Constants.Sigma;
 
-            _building.Row = (int)(_building.xMax / Data.GridStep);
-            _building.Col = (int)(_building.yMax / Data.GridStep);
-            
+            _building.Row = (int)(_building.xMax / Constants.GridStep);
+            _building.Col = (int)(_building.yMax / Constants.GridStep);
+
             DrawGrid();
 
             if (!ContentPanel.Children.Contains(Stage)) ContentPanel.Children.Add(Stage);
@@ -1844,20 +1844,20 @@ namespace PlanEditor
         private void AddNewLine(double x, double y)
         {
             _line = new Line
-                {
-                    X1 = x,
-                    Y1 = y,
-                    X2 = x,
-                    Y2 = y,
-                    Stroke = Colours.Black,
-                    StrokeThickness = 1,
-                    RenderTransform = _transformGroup
-                };
+            {
+                X1 = x,
+                Y1 = y,
+                X2 = x,
+                Y2 = y,
+                Stroke = Colours.Black,
+                StrokeThickness = 1,
+                RenderTransform = _transformGroup
+            };
 
             ContentPanel.Children.Add(_line);
             _lines.Add(_line);
         }
-        
+
         private void DrawPlan()
         {
             if (_building.Places.Count > _curStage)
@@ -1877,7 +1877,7 @@ namespace PlanEditor
                     v.Hide();
             }
         }
-        
+
         private void DrawGrid()
         {
             _grid = new RegGrid.Grid(_building);
@@ -1887,20 +1887,20 @@ namespace PlanEditor
                 ContentPanel.Children.Remove(v);
 
             _drawGrid.Clear();
-            
+
             for (int m = 0; m < _building.Row + 1; ++m)
             {
                 var l = new Line
-                    {
-                        X1 = m*Data.GridStep,
-                        Y1 = 0,
-                        X2 = m*Data.GridStep,
-                        Y2 = _building.yMax,
-                        Stroke = Colours.LightGray,
-                        StrokeThickness = 1,
-                        RenderTransform = _transformGroup,
-                    };
-                    
+                {
+                    X1 = m * Constants.GridStep,
+                    Y1 = 0,
+                    X2 = m * Constants.GridStep,
+                    Y2 = _building.yMax,
+                    Stroke = Colours.LightGray,
+                    StrokeThickness = 1,
+                    RenderTransform = _transformGroup,
+                };
+
                 Panel.SetZIndex(l, -1);
 
                 ContentPanel.Children.Add(l);
@@ -1911,15 +1911,15 @@ namespace PlanEditor
             for (int n = 0; n < _building.Col + 1; ++n)
             {
                 var l = new Line
-                    {
-                        X1 = 0,
-                        Y1 = n*Data.GridStep,
-                        X2 = _building.xMax,
-                        Y2 = n*Data.GridStep,
-                        Stroke = Colours.LightGray,
-                        StrokeThickness = 1,
-                        RenderTransform = _transformGroup
-                    };
+                {
+                    X1 = 0,
+                    Y1 = n * Constants.GridStep,
+                    X2 = _building.xMax,
+                    Y2 = n * Constants.GridStep,
+                    Stroke = Colours.LightGray,
+                    StrokeThickness = 1,
+                    RenderTransform = _transformGroup
+                };
 
                 Panel.SetZIndex(l, -1);
 
@@ -1928,7 +1928,7 @@ namespace PlanEditor
                 _drawGrid.Add(l);
             }
         }
-        
+
         private void MouseRightButtonDownPath()
         {
             if (_lines.Count == 0) return;
@@ -1936,7 +1936,7 @@ namespace PlanEditor
             _line.X2 = _lines[0].X1;
             _line.Y2 = _lines[0].Y1;
 
-            var pg = new PathGeometry {FillRule = FillRule.Nonzero};
+            var pg = new PathGeometry { FillRule = FillRule.Nonzero };
 
             var pf = new PathFigure();
             pg.Figures.Add(pf);
@@ -1945,35 +1945,35 @@ namespace PlanEditor
 
             for (int i = 1; i < _lines.Count; ++i)
             {
-                var ls = new LineSegment {Point = new Point(_lines[i].X1, _lines[i].Y1)};
+                var ls = new LineSegment { Point = new Point(_lines[i].X1, _lines[i].Y1) };
                 pf.Segments.Add(ls);
             }
 
-            var line = new LineSegment {Point = new Point(_lines[0].X1, _lines[0].Y1)};
+            var line = new LineSegment { Point = new Point(_lines[0].X1, _lines[0].Y1) };
             pf.Segments.Add(line);
 
             foreach (var l in _lines)
                 ContentPanel.Children.Remove(l);
 
             var p = new Path
-                {
-                    Fill = Colours.Indigo,
-                    StrokeThickness = 2,
-                    Stroke = Colours.Black,
-                    Data = pg,
-                    RenderTransform = _transformGroup
-                };
+            {
+                Fill = Colours.Indigo,
+                StrokeThickness = 2,
+                Stroke = Colours.Black,
+                Data = pg,
+                RenderTransform = _transformGroup
+            };
 
-            var pl = new Place {UI = p};
+            var pl = new Place { UI = p };
             _building.Places[_curStage].Add(pl);
-            
+
             ContentPanel.Children.Add(p);
-                       
+
             _firstClick = false;
             _lines.Clear();
             _line = null;
         }
-        
+
         private Entity SelectObject(double x, double y)
         {
             if (_selectedItem != null)
@@ -2057,7 +2057,7 @@ namespace PlanEditor
                 }
             }
         }
-        
+
         private void DeselectAll()
         {
             foreach (var v in _selectedItems)
@@ -2070,7 +2070,7 @@ namespace PlanEditor
         {
             if (_isChanged)
             {
-                var mb = MessageBox.Show("–ò–º–µ—é—Ç—Å—è –Ω–µ —Å–æ—Ö—Ä–∞–Ω–µ–Ω–Ω—ã–µ –¥–∞–Ω–Ω—ã–µ, —Å–æ—Ö—Ä–∞–Ω–∏—Ç—å?", "–ü–æ–¥—Ç–≤–µ—Ä–∂–¥–µ–Ω–∏–µ", MessageBoxButton.YesNo);//<!------------------------------
+                var mb = MessageBox.Show("»ÏÂ˛ÚÒˇ ÌÂ ÒÓı‡ÌÂÌÌ˚Â ‰‡ÌÌ˚Â, ÒÓı‡ÌËÚ¸?", "œÓ‰Ú‚ÂÊ‰ÂÌËÂ", MessageBoxButton.YesNo);//<!------------------------------
                 if (mb == MessageBoxResult.Yes) SaveProject();
             }
         }
@@ -2090,7 +2090,7 @@ namespace PlanEditor
                 stairway.UI.Visibility = Visibility.Visible;
             }
         }
-       
+
         private void ActiveDeactiveMenu(bool isEnabled)
         {
             SelectTool.IsEnabled = isEnabled;
@@ -2112,7 +2112,7 @@ namespace PlanEditor
         private void Click_CheckEntity(object sender, RoutedEventArgs e)
         {
             if (_selectedItem == null) return;
-            
+
             _selectedItems.Clear();
 
             switch (_selectedItem.Type)
@@ -2158,5 +2158,5 @@ namespace PlanEditor
                     break;
             }
         }
-    }    
+    }
 }

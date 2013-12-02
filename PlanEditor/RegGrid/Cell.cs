@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Shapes;
 using PlanEditor.Entities;
-using PlanEditor.Helpers;
 
 namespace PlanEditor.RegGrid
 {

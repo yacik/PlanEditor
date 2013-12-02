@@ -57,6 +57,13 @@ namespace PlanEditor
             Stairway.Visibility = Visibility.Hidden;
             _startPoint = point;
             _building = building;
+
+            name.Text = TempData.TempRoom.Name;
+            people.Text = TempData.TempRoom.Ppl;
+            Wide.Text = TempData.TempRoom.Wide;
+            Leng.Text = TempData.TempRoom.Length;
+            Height.Text = TempData.TempRoom.Height;
+            EvacWide.Text = TempData.TempRoom.EvacWide;
         }
 
         private void InitializeCombo()
@@ -151,7 +158,8 @@ namespace PlanEditor
             {
                 Stairway.Visibility = Visibility.Hidden;
             }
-            
+
+            IsFire.IsChecked = _place.IsOnFire;
         }
 
         private void type_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -208,6 +216,13 @@ namespace PlanEditor
             else
             {
                 PlaceNull();
+
+                TempData.TempRoom.Name = name.Text;
+                TempData.TempRoom.Ppl = people.Text;
+                TempData.TempRoom.Wide = Wide.Text;
+                TempData.TempRoom.Length = Leng.Text;
+                TempData.TempRoom.Height = Height.Text;
+                TempData.TempRoom.EvacWide = EvacWide.Text;
             }
         }
 
@@ -281,7 +296,7 @@ namespace PlanEditor
             _lst5.Add("Методический кабинет");
             _lst5.Add("Студенческий клуб");
 
-            _lst6.Add("Аспирантская);");
+            _lst6.Add("Аспирантская");
             _lst6.Add("НИЛ");
 
             _lst7.Add("АТС");
@@ -416,22 +431,24 @@ namespace PlanEditor
             double wide = double.Parse(Wide.Text.ToString());
             double len = double.Parse(Leng.Text.ToString());
 
-            double w = wide / Data.Sigma;
-            double l = len / Data.Sigma;
+            double w = wide / Constants.Sigma;
+            double l = len / Constants.Sigma;
 
             var pg = _place.UI.Data as PathGeometry;
             if (pg != null && pg.Figures[0].Segments.Count < 5)
             {
                 EditPlace(w, l);
             }
+
+            if (IsFire.IsChecked.HasValue) _place.IsOnFire = IsFire.IsChecked.Value;
         }
        
         private void PlaceNull()
         {
             double wide = double.Parse(Wide.Text);
             double len = double.Parse(Leng.Text);
-            double w = wide / Data.Sigma;
-            double l = len / Data.Sigma;
+            double w = wide / Constants.Sigma;
+            double l = len / Constants.Sigma;
 
             if (type.SelectedIndex == 7)
             {
@@ -447,6 +464,8 @@ namespace PlanEditor
 
                 stairway.UI.Fill = Colours.Violet;
                 Entity = stairway;
+
+                if (IsFire.IsChecked.HasValue) stairway.IsOnFire = IsFire.IsChecked.Value;
             }
             else
             {
@@ -471,6 +490,8 @@ namespace PlanEditor
                     p.UI.Fill = Colours.Indigo;
                 }
                 Entity = p;
+
+                if (IsFire.IsChecked.HasValue) p.IsOnFire = IsFire.IsChecked.Value;
             }
         }
       
@@ -531,15 +552,7 @@ namespace PlanEditor
 
         private void CheckFields()
         {
-            var isOk = true;
-            foreach (var field in _fields)
-            {
-                if (field.Value == false)
-                {
-                    isOk = false;
-                    break;
-                }
-            }
+            var isOk = _fields.All(field => field.Value != false);
 
             BtnOk.IsEnabled = (isOk && !_isStairway);
         }

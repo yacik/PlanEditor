@@ -26,7 +26,7 @@
                     <MenuItem Header="Сохранить" x:Name="MISave" Click="Click_Save"/>
                     <MenuItem Header="Экспортировать" x:Name="MIExport" Click="Click_Export"/>
                     <MenuItem Header="Редактировать" x:Name="MIEdit" Click="Click_EditBuilding"/>
-                    <MenuItem Header="Таблица" x:Name="MITable" Click="Click_ExportToHtml"/>
+                    <MenuItem Header="Таблица помещений" x:Name="MITable" Click="Click_ExportToHtml"/>
                 </MenuItem>
                 <MenuItem Header="Инструменты" x:Name="MenuTools">
                     <!--<MenuItem Header="Увеличить" Click="Click_ZoomIn"/>
@@ -38,6 +38,8 @@
                     <Separator/>
                     <MenuItem Header="Этаж выше" x:Name="StageNext" Click="Click_NextStage"/>
                     <MenuItem Header="Этаж ниже" x:Name="StageTo" Click="Click_PrevStage"/>
+                    <!--<MenuItem Header="Вырезать" x:Name="Cut" Click="Click_Cut"/>
+                    <MenuItem Header="Вставить" x:Name="Paste" Click="Click_Paste"/>-->
                 </MenuItem>
                 <MenuItem Header="Добавить" x:Name="MenuAdd">
                     <MenuItem Header="Помещение" x:Name="AddPlace" Click="Click_AddRoom" />
