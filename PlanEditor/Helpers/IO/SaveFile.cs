@@ -1,4 +1,8 @@
-﻿using System;
+﻿/*
+ * Сохраняет файл во временный файл-проект
+ */
+
+using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 

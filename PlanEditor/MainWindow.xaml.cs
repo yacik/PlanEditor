@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Win32;
 using PlanEditor.Graph;
@@ -288,7 +289,20 @@ namespace PlanEditor
                         {
                             DeselectAll();
                             _selectedItem = SelectObject(x, y);
-                            if (_selectedItem != null) _selectedItem.Select();
+                            if (_selectedItem != null)
+                            {
+                                _selectedItem.Select();
+                                if (_selectedItem.Type == Entity.EntityType.Halfway ||
+                                    _selectedItem.Type == Entity.EntityType.Place)
+                                {
+                                    var p = (Place) _selectedItem;
+                                    for (int i = 0; i < _building.Places[_curStage].Count; ++i)
+                                    {
+                                        var pl = _building.Places[_curStage][i];
+                                        if (pl.Equals(p)) Debug.WriteLine(i);    
+                                    }
+                                }
+                            }
                         }
                     }
                     break;
@@ -392,18 +406,16 @@ namespace PlanEditor
             SaveImage.SaveFile(_building, folder);
         }
 
-        private void Click_Export(object sender, RoutedEventArgs e)
+        public bool CheckBeforeExport()
         {
-            if (_building == null) return;
+            if (_building == null) return false;
 
             if (!CheckPlacesDoors())
             {
                 MessageBox.Show(this, "ќшибка", "«дание содержит ошибки (не все помещени€ доступны)");//<!------------------------------
-                return;
+                return false;
             }//*/
-
-            #region IsCollide
-
+            
             bool isCollide = false;
             foreach (var places in _building.Places)
             {
@@ -419,28 +431,48 @@ namespace PlanEditor
             if (isCollide)
             {
                 MessageBox.Show(this, "ќшибка", "»меютс€ пересекающиес€ помещени€");//<!------------------------------
-                return;
+                return false;
             }
 
-            #endregion
+            return true;
+        }
 
-            var dlg = new SaveFileDialog { DefaultExt = ".txt", Filter = "Text Files (*.txt) |*txt" };
-            var result = dlg.ShowDialog();
+        private void Click_ExportFDS(object sender, RoutedEventArgs e)
+        {
+            //if (CheckBeforeExport())
+            //{
+                var dlg = new SaveFileDialog {DefaultExt = ".json", Filter = "JSON FDS file (*.json) |*json"};
+                var result = dlg.ShowDialog();
 
-            if (result == true)
+                if (result == true)
+                {
+                    SaveToFDS.Save(_building, dlg.FileName);
+                    MessageBox.Show(this, "Ёкспорт готов"); //<!------------------------------
+                }
+            //}
+        }
+
+        private void Click_Export(object sender, RoutedEventArgs e)
+        {
+            if (CheckBeforeExport())
             {
-                var rg = new RecognizeGrid(_grid, _building);
-                rg.Recognize();
-                Helpers.IO.SaveToEvac.Save(dlg.FileName, rg.Grid, _building);
-                MessageBox.Show(this, "Ёкспорт готов");//<!------------------------------
-            }
+                var dlg = new SaveFileDialog {DefaultExt = ".json", Filter = "JSON export evac file (*.json) |*json"};
+                var result = dlg.ShowDialog();
 
-            /*
+                if (result == true)
+                {
+                    var rg = new RecognizeGrid(_grid, _building);
+                    rg.Recognize();
+
+                    SaveToEvac.Save(dlg.FileName, rg.Grid, _building);
+                    MessageBox.Show(this, "Ёкспорт готов"); //<!------------------------------
+                }
+                /*
                 var processInfo = new ProcessStartInfo("java.exe", "-jar app.jar")
-                      {
-                          CreateNoWindow = true,
-                          UseShellExecute = false
-                      };
+                        {
+                            CreateNoWindow = true,
+                            UseShellExecute = false
+                        };
                 Process proc;
 
                 if ((proc = Process.Start(processInfo)) == null)
@@ -451,7 +483,8 @@ namespace PlanEditor
                 proc.WaitForExit();
                 int exitCode = proc.ExitCode;
                 proc.Close();
-             */
+                */
+            }
         }
 
         // проверить, чтобы все помещени€ имеи двери
@@ -460,6 +493,7 @@ namespace PlanEditor
             bool isOK = true;
 
             #region fillgraph
+
             foreach (var portals in _building.Portals)
             {
                 foreach (var portal in portals)
@@ -486,6 +520,7 @@ namespace PlanEditor
                     }
                 }
             }
+
             #endregion
 
             // check graph
@@ -1060,7 +1095,7 @@ namespace PlanEditor
             _selectedItems.Add(_place1);
             _selectedItems.Add(_place2);
 
-            var isVerNeigh = DefineNeighRooms(_place1, _place2);
+            var isVerNeigh = StuffHelper.DefineNeighRooms(_place1, _place2);
 
             var max = 0.00;
             var startPoint = 0.00;
@@ -1078,7 +1113,7 @@ namespace PlanEditor
 
                     if (isHor1 && isHor2 && isVerNeigh)
                     {
-                        if (!IsNearest(line1.Y1, line1.Y2, line2.Y1, line2.Y2)) continue;
+                        if (!StuffHelper.IsNearest(line1.Y1, line1.Y2, line2.Y1, line2.Y2)) continue;
 
                         var mas1 = Helper.GetMinMax(line1.X1, line1.X2);
                         var mas2 = Helper.GetMinMax(line2.X1, line2.X2);
@@ -1103,7 +1138,7 @@ namespace PlanEditor
                     }
                     else if (!isHor1 && !isHor2 && !isVerNeigh)
                     {
-                        if (!IsNearest(line1.X1, line1.X2, line2.X1, line2.X2)) continue;
+                        if (!StuffHelper.IsNearest(line1.X1, line1.X2, line2.X1, line2.X2)) continue;
 
                         var mas1 = Helper.GetMinMax(line1.Y1, line1.Y2);
                         var mas2 = Helper.GetMinMax(line2.Y1, line2.Y2);
@@ -1263,64 +1298,7 @@ namespace PlanEditor
             }
         }
 
-        public bool IsNearest(double a1, double a2, double b1, double b2)
-        {
-            var v1 = Helper.Tan(a1, b1);
-            var v2 = Helper.Tan(a1, b2);
-            var v3 = Helper.Tan(a2, b1);
-            var v4 = Helper.Tan(a2, b2);
-
-            var mas = new[] { v1, v2, v3, v4 };
-            var min = mas.Concat(new[] { double.MaxValue }).Min();
-
-            return min < Constants.GridStep;
-        }
-
-        private bool DefineNeighRooms(Place place1, Place place2)
-        {
-            var mas1 = new[] { double.MaxValue, double.MinValue, double.MaxValue, double.MinValue };
-            var mas2 = new[] { double.MaxValue, double.MinValue, double.MaxValue, double.MinValue };
-
-            foreach (var line in place1.Lines)
-            {
-                var x1 = Math.Min(line.X1, line.X2);
-                var x2 = Math.Max(line.X1, line.X2);
-                var y1 = Math.Min(line.Y1, line.Y2);
-                var y2 = Math.Max(line.Y1, line.Y2);
-
-                if (mas1[0] > x1) mas1[0] = x1;
-                if (mas1[1] < x2) mas1[1] = x2;
-                if (mas1[2] > y1) mas1[2] = y1;
-                if (mas1[3] < y2) mas1[3] = y2;
-            }
-
-            foreach (var line in place2.Lines)
-            {
-                var x1 = Math.Min(line.X1, line.X2);
-                var x2 = Math.Max(line.X1, line.X2);
-                var y1 = Math.Min(line.Y1, line.Y2);
-                var y2 = Math.Max(line.Y1, line.Y2);
-
-                if (mas2[0] > x1) mas2[0] = x1;
-                if (mas2[1] < x2) mas2[1] = x2;
-                if (mas2[2] > y1) mas2[2] = y1;
-                if (mas2[3] < y2) mas2[3] = y2;
-            }
-
-            var ay = mas1[3] - mas2[2];
-            var by = mas2[2] - mas1[3];
-
-            var tmpY = Math.Min(ay, by);
-            var y = Math.Sqrt(tmpY * tmpY);
-
-            var ax = mas1[1] - mas2[0];
-            var bx = mas2[0] - mas1[1];
-
-            var tmpX = Math.Min(ax, bx);
-            var x = Math.Sqrt(tmpX * tmpX);
-
-            return x > y;
-        }
+       
 
         private void CreatePortal(double min, double max, Place place1, Place place2, Portal.PortalOrient orientation,
                                   double pos, double wide)
@@ -1352,8 +1330,6 @@ namespace PlanEditor
 
             _isChanged = true;
         }
-
-
 
         #endregion
 
@@ -1540,10 +1516,11 @@ namespace PlanEditor
                         pl.Collisions.Add(place);
                 }
             }
-
+            
             foreach (var stairway in _building.Stairways)
             {
                 if (Equals(stairway, place)) continue;
+                if (!(_curStage >= stairway.StageFrom && _curStage <= stairway.StageTo)) continue;
 
                 bool isCollide = false;
 
@@ -1630,6 +1607,7 @@ namespace PlanEditor
             foreach (var stairway in _building.Stairways)
             {
                 if (Equals(stairway, place)) continue;
+                if (!(_curStage >= stairway.StageFrom && _curStage <= stairway.StageTo)) continue;
 
                 bool isCollide = false;
 
@@ -1802,7 +1780,7 @@ namespace PlanEditor
             int s = _curStage + 1;
             foreach (var v in _building.Stairways)
             {
-                if (s >= v.StageFrom && s <= v.StageTo)
+                if (s >= v.StageFrom && s <= v.StageTo)                     
                     v.Show();
                 else
                     v.Hide();
@@ -1812,7 +1790,7 @@ namespace PlanEditor
         private bool LoadBinary(string fileName)
         {
             _building = new Building();
-            var lf = new Helpers.IO.LoadFile(fileName, _building);
+            var lf = new LoadFile(fileName, _building);
             if (lf.Load())
             {
                 _building = lf.Building;
@@ -2105,6 +2083,7 @@ namespace PlanEditor
         {
             MISave.IsEnabled = isEnabled;
             MIExport.IsEnabled = isEnabled;
+            MIExportFDS.IsEnabled = isEnabled;
             MIEdit.IsEnabled = isEnabled;
             MITable.IsEnabled = isEnabled;
         }

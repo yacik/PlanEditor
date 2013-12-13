@@ -101,7 +101,11 @@ namespace PlanEditor.Entities
 
         [NonSerialized]
         private bool _isCollide;
-        public bool IsCollide { get { return _isCollide; } }
+
+        public bool IsCollide
+        {
+            get { return _isCollide; }
+        } 
         
         public void Collide()
         {

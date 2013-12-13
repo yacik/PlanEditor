@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using PlanEditor.Entities;
 
 namespace PlanEditor.Graph
@@ -18,51 +19,28 @@ namespace PlanEditor.Graph
         {
             if (portal == null) return null;
 
-            foreach (var edge in Edgies) if (edge.Portal.Equals(portal)) return true;
-
-            return false;
+            return Edgies.Any(edge => edge.Portal.Equals(portal));
         }
 
         public bool? IsPlace(Place place)
         {
             if (place == null) return null;
 
-            foreach (var vertex in Vertices)
-            {
-                if (vertex.Place != null)
-                {
-                    if (vertex.Place.Equals(place)) return true;
-                }
-            }
-            
-            return false;
+            return Vertices.Where(vertex => vertex.Place != null).Any(vertex => vertex.Place.Equals(place));
         }
 
         public Vertex GetVertexByPlace(Place place)
         {
             if (place == null) return null;
 
-            foreach (var vertex in Vertices)
-            {
-                if (vertex.Place != null)
-                {
-                    if (vertex.Place.Equals(place)) return vertex;
-                }
-            }
-
-            return null;
+            return Vertices.Where(vertex => vertex.Place != null).FirstOrDefault(vertex => vertex.Place.Equals(place));
         }
 
         public Edge GetEdgeByPortal(Portal portal)
         {
             if (portal == null) return null;
 
-            foreach (var edge in Edgies)
-            {
-                if (edge.Portal.Equals(portal)) return edge;
-            }
-
-            return null;
+            return Edgies.FirstOrDefault(edge => edge.Portal.Equals(portal));
         }
     }
 }

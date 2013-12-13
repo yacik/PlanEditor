@@ -44,9 +44,9 @@ namespace PlanEditor.Helpers.IO
                                 graphics.FillRectangle(Brushes.DarkSlateBlue, xMin, yMin, x, y);
                                 break;
                         }
-
-                        ++roomCount;
+                        
                         graphics.DrawString(roomCount.ToString(), new Font("Verdana", 12), Brushes.Black, new PointF(xMin, yMin));
+                        ++roomCount;
                     }
                 }
 
@@ -68,9 +68,9 @@ namespace PlanEditor.Helpers.IO
                         int y = yMax - yMin;
 
                         graphics.FillRectangle(Brushes.DarkSlateGray, xMin, yMin, x, y);
-
-                        ++strwCount;
+                        
                         graphics.DrawString(strwCount.ToString(), new Font("Verdana", 12), Brushes.Black, new PointF(xMin, yMin));
+                        ++strwCount;
                     }
                 }
 

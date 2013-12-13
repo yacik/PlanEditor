@@ -25,6 +25,7 @@
                     <MenuItem Header="Открыть" Click="Click_Open"/>
                     <MenuItem Header="Сохранить" x:Name="MISave" Click="Click_Save"/>
                     <MenuItem Header="Экспортировать" x:Name="MIExport" Click="Click_Export"/>
+                    <MenuItem Header="Экспортировать FDS" x:Name="MIExportFDS" Click="Click_ExportFDS"/>
                     <MenuItem Header="Редактировать" x:Name="MIEdit" Click="Click_EditBuilding"/>
                     <MenuItem Header="Таблица помещений" x:Name="MITable" Click="Click_ExportToHtml"/>
                 </MenuItem>

@@ -35,8 +35,7 @@ namespace PlanEditor.RegGrid
                             {
                                 if (MyMath.Helper.IsCollide(cell.CenterX, cell.CenterY, portal.PointsX, portal.PointsY))
                                 {
-                                    if (portal.Cells == null)
-                                        portal.Cells = new List<Cell>();
+                                    if (portal.Cells == null) portal.Cells = new List<Cell>();
 
                                     portal.Cells.Add(cell);
                                     cell.Owner = portal;

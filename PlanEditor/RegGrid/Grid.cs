@@ -2,6 +2,8 @@
 
 
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using PlanEditor.Helpers;
 
 namespace PlanEditor.RegGrid
@@ -19,7 +21,6 @@ namespace PlanEditor.RegGrid
         
         public void CreateGrid()
         {
-            _building.NumNodes = 1;
             for (int i = 0; i < _building.Stages; ++i)
             {
                 var cells = new List<Cell>();
@@ -31,14 +32,12 @@ namespace PlanEditor.RegGrid
                         double x = m * Constants.GridStep + Constants.GridStep/2;
                         double y = n * Constants.GridStep + Constants.GridStep/2;
                         var c = new Cell(x, y, m, n, i);
-
                         cells.Add(c);
-
-                        ++_building.NumNodes;
                     }
                 }
                 Cells.Add(cells);
             }
+            _building.NumNodes = Cells.Sum(c => c.Count);
         }
     }
 }

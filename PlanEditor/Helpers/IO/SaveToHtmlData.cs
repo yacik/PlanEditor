@@ -22,6 +22,7 @@ namespace PlanEditor.Helpers.IO
 
                     writer.WriteLine("<tr>");
                     writer.WriteLine("<td>Номер помещения</td>");
+                    writer.WriteLine("<td>Название помещения</td>");
                     writer.WriteLine("<td>Ширина</td>");
                     writer.WriteLine("<td>Длина</td>");
                     writer.WriteLine("<td>Высота</td>");
@@ -33,12 +34,11 @@ namespace PlanEditor.Helpers.IO
                     for (int num = 0; num < building.Places[i].Count; ++num)
                     {
                         var place = building.Places[i][num];
-
-                        ++numPlace;
-
+                        
                         writer.WriteLine("<tr>");
 
                         writer.WriteLine("<td>" + numPlace + "</td>");
+                        writer.WriteLine("<td>" + place.Name + "</td>");
                         writer.WriteLine("<td>" + place.Wide + "</td>");
                         writer.WriteLine("<td>" + place.Length + "</td>");
                         writer.WriteLine("<td>" + place.Height + "</td>");
@@ -47,6 +47,8 @@ namespace PlanEditor.Helpers.IO
                         writer.WriteLine("<td>" + place.MainType + ", " + place.SubType + "</td>");
 
                         writer.WriteLine("</tr>");
+
+                        ++numPlace;
                     }
 
                     writer.WriteLine("</table>");
@@ -103,8 +105,7 @@ namespace PlanEditor.Helpers.IO
                     for (int num = 0; num < building.Portals[i].Count; ++num)
                     {
                         var portal = building.Portals[i][num];
-                        ++numPortal;
-
+                        
                         writer.WriteLine("<tr>");
                         writer.WriteLine("<td>" + numPortal + "</td>");
                         writer.WriteLine("<td>" + portal.Wide + "</td>");
@@ -112,6 +113,8 @@ namespace PlanEditor.Helpers.IO
                         writer.WriteLine("<td>" + portal.Depth  + "</td>");
 
                         writer.WriteLine("</tr>");
+
+                        ++numPortal;
                     }
 
                     writer.WriteLine("</table>");
