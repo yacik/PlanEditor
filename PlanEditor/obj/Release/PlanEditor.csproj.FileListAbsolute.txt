@@ -26,3 +26,30 @@ C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\PlanEditor.csprojResolveAssemblyReference.cache
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Release\Newtonsoft.Json.dll
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Release\Newtonsoft.Json.xml
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Release\Plan Editor.exe.config
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Release\Plan Editor.exe
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Release\Plan Editor.pdb
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Release\MahApps.Metro.dll
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Release\Newtonsoft.Json.dll
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Release\System.Windows.Interactivity.dll
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Release\zxing.dll
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Release\Newtonsoft.Json.xml
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\FindWindow.baml
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\WinBuilding.baml
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\WinObstacle.baml
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\WinPortal.baml
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\MainWindow.baml
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\WinRoom.baml
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\FindWindow.g.cs
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\WinBuilding.g.cs
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\WinObstacle.g.cs
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\WinPortal.g.cs
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\MainWindow.g.cs
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\WinRoom.g.cs
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\App.g.cs
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\Plan Editor_MarkupCompile.cache
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\Plan Editor.g.resources
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\PlanEditor.Properties.Resources.resources
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\PlanEditor.csproj.GenerateResource.Cache
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\Plan Editor.exe
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\Plan Editor.pdb

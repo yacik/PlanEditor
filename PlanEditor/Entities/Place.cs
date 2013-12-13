@@ -19,7 +19,7 @@ namespace PlanEditor.Entities
             Name = "";
             IsMovable = true;
             ScanarioID = -1;
-            IsOnFire = false;
+            FireType = 0;
         }
 
         public int CountNodes { get; set; }	        // Количество узлов сетки, принадлежащих помещению 
@@ -35,7 +35,7 @@ namespace PlanEditor.Entities
 
         public bool IsMovable { get; set; }
 
-        public bool IsOnFire { get; set; }
+        public int FireType { get; set; }
         public int ScanarioID { get; set; }
 
         public override string ToString()

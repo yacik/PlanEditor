@@ -96,6 +96,17 @@ namespace PlanEditor
             _fields.Add(StageFrom, true);
             _fields.Add(StageTo, true);
             _fields.Add(people, true);
+
+            if (_place.FireType == 1)
+            {
+                if (IsFire.IsChecked.HasValue)
+                    IsFire.IsChecked = true;
+            }
+            else if (_place.FireType == 2)
+            {
+                if (IsBlocked.IsChecked.HasValue)
+                    IsBlocked.IsChecked = true;
+            }
             
             var pg = _place.UI.Data as PathGeometry;
             if (pg == null) return;
@@ -159,7 +170,7 @@ namespace PlanEditor
                 Stairway.Visibility = Visibility.Hidden;
             }
 
-            IsFire.IsChecked = _place.IsOnFire;
+            
         }
 
         private void type_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -440,8 +451,8 @@ namespace PlanEditor
                 EditPlace(w, l);
             }
 
-            if (IsFire.IsChecked.HasValue) _place.IsOnFire = IsFire.IsChecked.Value;
-        }
+            CheckFireType();
+        }        
        
         private void PlaceNull()
         {
@@ -464,8 +475,6 @@ namespace PlanEditor
 
                 stairway.UI.Fill = Colours.Violet;
                 Entity = stairway;
-
-                if (IsFire.IsChecked.HasValue) stairway.IsOnFire = IsFire.IsChecked.Value;
             }
             else
             {
@@ -491,7 +500,7 @@ namespace PlanEditor
                 }
                 Entity = p;
 
-                if (IsFire.IsChecked.HasValue) p.IsOnFire = IsFire.IsChecked.Value;
+                CheckFireType();
             }
         }
       
@@ -555,6 +564,38 @@ namespace PlanEditor
             var isOk = _fields.All(field => field.Value != false);
 
             BtnOk.IsEnabled = (isOk && !_isStairway);
+        }
+
+        private void CB_Checked(object sender, RoutedEventArgs e)
+        {
+            var box = e.Source as CheckBox;
+            if (box != null)
+            {
+                if (box.Name == "IsBlocked")
+                {
+                    IsFire.IsChecked = false;
+                }
+                else if (box.Name == "IsFire")
+                {
+                    IsBlocked.IsChecked = false;
+                }
+            }
+        }
+
+        private void CheckFireType()
+        {
+            if (IsFire.IsChecked.HasValue && IsFire.IsChecked.Value)
+            {
+                _place.FireType = 1;
+            }
+            else if (IsBlocked.IsChecked.HasValue && IsBlocked.IsChecked.Value)
+            {
+                _place.FireType = 2;
+            }
+            else
+            {
+                _place.FireType = 0;
+            }
         }
     }
 }

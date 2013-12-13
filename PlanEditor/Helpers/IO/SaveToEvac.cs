@@ -31,7 +31,7 @@ namespace PlanEditor.Helpers.IO
             DifHRoom = place.DifHRoom;
             MainType = place.MainType;
             SubType = place.SubType;
-            scenario = place.IsOnFire ? 1 : 0;
+            scenario = place.FireType;
             //timeblock = (scenario == 1) ? 95.00 : 0.00;
             timeblock = 0.00;
             
@@ -456,7 +456,7 @@ namespace PlanEditor.Helpers.IO
 
 
             #region Scenarios
-            var fs = new StreamReader(@"C:\Users\Andrey\Desktop\timeblock.json");
+            var fs = new StreamReader("timeblock.json");
             string json = fs.ReadToEnd();
             fs.Close();
 

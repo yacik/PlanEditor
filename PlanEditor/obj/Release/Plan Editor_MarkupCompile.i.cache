@@ -4,16 +4,16 @@
 winexe
 C#
 .cs
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Release\
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\
 PlanEditor
 none
 false
 DEBUG;TRACE
-C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\App.xaml
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\App.xaml
 6949205987
 
-42180097941
-18-1863480427
+421555144081
+181927946189
 FindWindow.xaml;WinBuilding.xaml;WinObstacle.xaml;WinPortal.xaml;MainWindow.xaml;WinRoom.xaml;
 
 False

@@ -31,13 +31,17 @@ namespace PlanEditor.Helpers.IO
             {
                 var strw = (Stairway) place;
                 z2 = strw.Height * strw.StageTo;
+                sFrom = strw.StageFrom;
+                sTo = strw.StageTo;
             }
             else
             {
                 z2 = place.Height; // meters
+                sFrom = -1;
+                sTo = -1;
             }
 
-            scenario = place.IsOnFire ? 1 : 0;
+            scenario = place.FireType;
         }
         
         [DataMember] public int ID;
@@ -52,6 +56,8 @@ namespace PlanEditor.Helpers.IO
         [DataMember] public double x2;
         [DataMember] public double y2;
         [DataMember] public double z2;
+        [DataMember] public double sFrom;
+        [DataMember] public double sTo;
     };
 
     [DataContract]
