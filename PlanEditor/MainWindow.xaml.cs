@@ -17,7 +17,7 @@ using System.Windows.Shapes;
 using PlanEditor.Entities;
 using Building = PlanEditor.Entities.Building;
 using Path = System.Windows.Shapes.Path;
-
+//comment
 namespace PlanEditor
 {
     public partial class MainWindow : Window
