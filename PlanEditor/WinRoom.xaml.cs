@@ -58,6 +58,7 @@ namespace PlanEditor
             _startPoint = point;
             _building = building;
 
+            // Последние введенные данные сохраняются в кэш
             name.Text = TempData.TempRoom.Name;
             people.Text = TempData.TempRoom.Ppl;
             Wide.Text = TempData.TempRoom.Wide;
@@ -169,7 +170,6 @@ namespace PlanEditor
             {
                 Stairway.Visibility = Visibility.Hidden;
             }
-
             
         }
 
@@ -200,6 +200,7 @@ namespace PlanEditor
             {
                 _isStairway = (type.SelectedIndex == 7 && _place.Type != Entity.EntityType.Stairway);
                 Stairway.Visibility = Visibility.Hidden;
+                
                 CheckFields();
             }
             else if (type.SelectedIndex == 7)
@@ -470,7 +471,9 @@ namespace PlanEditor
                     Height = double.Parse(Height.Text),
                     StageFrom = int.Parse(StageFrom.Text),
                     StageTo = int.Parse(StageTo.Text),
-                    UI = CreateNew(w, l)
+                    UI = CreateNew(w, l),
+                    MainType = type.SelectedIndex,
+                    SubType = -1
                 };
 
                 stairway.UI.Fill = Colours.Violet;

@@ -1,0 +1,324 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="PlanEditor.App" Collapsed="true">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>App.xaml.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.FindWindow" Collapsed="true">
+    <Position X="9.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAIBAAQAAAAACAAAAAAAAAAAAAAAgAAA=</HashCode>
+      <FileName>FindWindow.xaml.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.MainWindow" Collapsed="true">
+    <Position X="16.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FFqAjgwwiLMMYAAQCuGDALBqSQoEXEggHxSoCRcgACg=</HashCode>
+      <FileName>MainWindow.xaml.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.WinBuilding" Collapsed="true">
+    <Position X="16.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ICBQgQAAgIAAUAAAAACAAIkAAAAAAAAAAACAAAAAAAE=</HashCode>
+      <FileName>WinBuilding.xaml.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.WinObstacle" Collapsed="true">
+    <Position X="7.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAggAAAAAAAAAAAgAAABAEAAAAEABAAAAAAAA=</HashCode>
+      <FileName>WinObstacle.xaml.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.WinPortal" Collapsed="true">
+    <Position X="9.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAhgAAAAIAAACAAAAAAAAAAgAAAIAIAAAAAAA=</HashCode>
+      <FileName>WinPortal.xaml.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.WinRoom" Collapsed="true">
+    <Position X="11" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EBIAAQAAoRAABQIAAASBgkAAAgAJQKEAAAAAAlwgAIA=</HashCode>
+      <FileName>WinRoom.xaml.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Entities.Building" Collapsed="true">
+    <Position X="9.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACBBIAIIAAjIAEgQKACAQiAAEAcgACIEgAAAABIEA=</HashCode>
+      <FileName>Entities\Building.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Entities.Entity" Collapsed="true">
+    <Position X="2.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAYAAICAAQAAEAAQAARAAEAEAAAAAQAIQAABEAA=</HashCode>
+      <FileName>Entities\Entity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Entities.Obstacle" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAACAAAAAAIAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\Obstacle.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Entities.Place" Collapsed="true">
+    <Position X="2.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AhAAAgoABCAEgACMAADAAAQAEAAAAAACAAAAAElAAFA=</HashCode>
+      <FileName>Entities\Place.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Entities.Portal" Collapsed="true">
+    <Position X="5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQABRAAAAIAEAIAAEAAAAAAAgAgAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\Portal.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Entities.QRPointer" Collapsed="true">
+    <Position X="11" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAgAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\QRPointer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Entities.Stairway" Collapsed="true">
+    <Position X="2.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAEQEA=</HashCode>
+      <FileName>Entities\Stairway.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Graph.Edge" Collapsed="true">
+    <Position X="7.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAADAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAABAAA=</HashCode>
+      <FileName>Graph\Edge.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Graph.SimpleGraph" Collapsed="true">
+    <Position X="7.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAAAAAAAAAAAAAACAAAAAAGABAAQAAAAA=</HashCode>
+      <FileName>Graph\Graph.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Graph.Vertex" Collapsed="true">
+    <Position X="14.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAA=</HashCode>
+      <FileName>Graph\Vertex.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Helpers.Colours" Collapsed="true">
+    <Position X="12.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAFAABAAgAAUgIAARIUBAEQFAQAAAAAIAAAkDAABZA=</HashCode>
+      <FileName>Helpers\Colours.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Helpers.Constants" Collapsed="true">
+    <Position X="14.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAABAAAAACAAAAAAAAAAA=</HashCode>
+      <FileName>Helpers\Constants.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Helpers.PELogger" Collapsed="true">
+    <Position X="9.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Helpers\PELogger.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Helpers.PELog" Collapsed="true">
+    <Position X="7.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAEAABAAAAAAAGAAAA=</HashCode>
+      <FileName>Helpers\PELogger.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Helpers.StuffHelper" Collapsed="true">
+    <Position X="9.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Helpers\StuffHelper.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Helpers.IO.LoadFile" Collapsed="true">
+    <Position X="14.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgBAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Helpers\IO\LoadFile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Helpers.IO.SaveFile" Collapsed="true">
+    <Position X="16.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Helpers\IO\SaveFile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Helpers.IO.SaveImage" Collapsed="true">
+    <Position X="7.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAA=</HashCode>
+      <FileName>Helpers\IO\SaveImage.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Helpers.IO.SaveQR" Collapsed="true">
+    <Position X="9.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Helpers\IO\SaveQR.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Helpers.IO.SaveToEvac" Collapsed="true">
+    <Position X="11" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAIAIAAAAAAYAAAAIAQAAAAAABAAEAAAAgAAA=</HashCode>
+      <FileName>Helpers\IO\SaveToEvac.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Helpers.IO.SaveToFDS" Collapsed="true">
+    <Position X="12.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Helpers\IO\SaveToFDS.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Helpers.IO.SaveToHtmlData" Collapsed="true">
+    <Position X="14.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Helpers\IO\SaveToHtmlData.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.MyMath.Helper" Collapsed="true">
+    <Position X="12.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgAAAAAAAAAAAAAAAAAEAAAgBAAAEAAAA=</HashCode>
+      <FileName>Math\MyMath.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Properties.Resources" Collapsed="true">
+    <Position X="14.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAABEAAAAQAAAAAAAAAAAAAAAIA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.Properties.Settings" Collapsed="true">
+    <Position X="16.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAIAAAAAABAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.RegGrid.Cell" Collapsed="true">
+    <Position X="11" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAEGAAQAAAAAAAAAAAAAAAAAJIAAAA=</HashCode>
+      <FileName>RegGrid\Cell.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.RegGrid.ConverteGridToGraph" Collapsed="true">
+    <Position X="16.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>RegGrid\ConverteGridToGraph.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.RegGrid.Grid" Collapsed="true">
+    <Position X="11" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAIAAgAAAAAAAAAAAAAAAAAgAAA=</HashCode>
+      <FileName>RegGrid\Grid.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.RegGrid.RecognizeGrid" Collapsed="true">
+    <Position X="12.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAABAAIAAAAAAAAAAAAABAAAAAAAgAAA=</HashCode>
+      <FileName>RegGrid\RecognizeGrid.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.TempData.TempDoor" Collapsed="true">
+    <Position X="11" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAAAAAAAAAAAgAAAIAAAAAAA=</HashCode>
+      <FileName>TempData\TempDoor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlanEditor.TempData.TempRoom" Collapsed="true">
+    <Position X="12.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAABAAAAACAAAAAAARAEAAAAAAAAAAIAAAAAEA=</HashCode>
+      <FileName>TempData\TempRoom.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="PlanEditor.Helpers.IO.Room" Collapsed="true">
+    <Position X="9.25" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CBAAEAIABAAAgADIAADQAARAAwAAAACgAQAIAgAAAEA=</HashCode>
+      <FileName>Helpers\IO\SaveToEvac.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="PlanEditor.Helpers.IO.Building" Collapsed="true">
+    <Position X="11" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAFhgQBIAADoAAAACAAARCAAEAACIAAAgIAAAAAAA=</HashCode>
+      <FileName>Helpers\IO\SaveToEvac.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="PlanEditor.Helpers.IO.Door" Collapsed="true">
+    <Position X="14.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAIgAABAAwAAAgSgAQAIAAAAAAA=</HashCode>
+      <FileName>Helpers\IO\SaveToEvac.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="PlanEditor.Helpers.IO.Mine" Collapsed="true">
+    <Position X="7.5" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAwAAAAAAAAAAAAABAAAAAAAAAAAAEQEA=</HashCode>
+      <FileName>Helpers\IO\SaveToEvac.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="PlanEditor.Helpers.IO.Cell" Collapsed="true">
+    <Position X="12.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAkgAAgAAAAAA=</HashCode>
+      <FileName>Helpers\IO\SaveToEvac.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="PlanEditor.Helpers.IO.Accommodation" Collapsed="true">
+    <Position X="7.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAgEAAAAAAAgACAAAAAAARAAwAAAACgAQAAAgIAAAA=</HashCode>
+      <FileName>Helpers\IO\SaveToFDS.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="PlanEditor.Helpers.IO.Entry" Collapsed="true">
+    <Position X="16.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAEgAAAAAACAABAAwAAAACgAQIAAAAAAAA=</HashCode>
+      <FileName>Helpers\IO\SaveToFDS.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="PlanEditor.Helpers.IO.Bldg" Collapsed="true">
+    <Position X="9.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAIAAAAAAAARCAAAAAAAAAAgIAAAAAAA=</HashCode>
+      <FileName>Helpers\IO\SaveToFDS.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

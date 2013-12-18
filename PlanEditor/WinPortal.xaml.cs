@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using PlanEditor.Entities;
 using PlanEditor.Helpers;
+using System.Collections.Generic;
 
 
 namespace PlanEditor
@@ -11,6 +12,10 @@ namespace PlanEditor
     public partial class WinPortal : Window
     {
         public double Wide { get; private set; }
+        public double Height { get; private set; }
+        public double Deep { get; private set; }
+        public bool IsBlocked { get; private set; }
+        private readonly Dictionary<object, bool> _fields = new Dictionary<object, bool>();
         private readonly Portal _portal;
 
         public WinPortal()
@@ -27,6 +32,10 @@ namespace PlanEditor
             WideText.Text = TempData.TempDoor.Wide;
             HeightText.Text = TempData.TempDoor.Height;
             DepthText.Text = TempData.TempDoor.Depth;
+
+            _fields.Add(WideText, false);
+            _fields.Add(HeightText, false);
+            _fields.Add(DepthText, false);
         }
 
         public WinPortal(Portal portal)
@@ -40,6 +49,11 @@ namespace PlanEditor
             HeightText.Text = _portal.Height.ToString();
             WideText.Text = _portal.Width.ToString();
             DepthText.Text = _portal.Depth.ToString();
+
+            if (portal.RoomB == null)
+                IsBlockedChkBox.IsChecked = _portal.IsBlocked;
+            else
+                IsBlockedChkBox.IsEnabled = false;                
         }
 
 
@@ -53,7 +67,10 @@ namespace PlanEditor
 
             if (_portal == null)
             {
-                Wide = double.Parse(WideText.Text);
+                Wide = double.Parse(WideText.Text);                
+                Height = double.Parse(HeightText.Text);
+                Deep = double.Parse(DepthText.Text);
+                IsBlocked = IsBlockedChkBox.IsChecked.Value;
             }
             else
             {
@@ -64,6 +81,7 @@ namespace PlanEditor
                 {
                     _portal.Height = double.Parse(HeightText.Text);
                     _portal.Depth = double.Parse(DepthText.Text);
+                    _portal.IsBlocked = IsBlockedChkBox.IsChecked.Value;                    
 
                     EditPlace();
                 } 
@@ -71,12 +89,13 @@ namespace PlanEditor
                 {
                     PELogger.GetLogger.WriteLn(ex.Message);
                 }
-            }
-
-            
+            }            
         }
         private void Text_Changed(object sender, TextChangedEventArgs e)
         {
+            var tb = e.Source as TextBox;
+            if (tb == null) return;
+
             double d;
             var isParsed = double.TryParse(WideText.Text, out d);
             
@@ -87,9 +106,11 @@ namespace PlanEditor
             else
             {
                 double metr = (_portal.Max - _portal.Min) * Constants.Sigma;
-                btnOk.IsEnabled = (d > 0 && isParsed && d <= metr);
+                _fields[tb] = (d > 0 && isParsed && d <= metr);
             }
-        }
+
+            CheckField();
+        }        
 
         private void EditPlace()
         {
@@ -137,6 +158,28 @@ namespace PlanEditor
                 
                 ls.Point = new Point(x, y);
             }
+        }
+
+        private void HD_Changed(object sender, TextChangedEventArgs e)
+        {
+            var tb = e.Source as TextBox;
+            if (tb != null)
+            {
+                double d;
+                if (double.TryParse(tb.Text, out d))
+                {
+                    tb.BorderBrush = (d < 0.1) ? Brushes.Red : Brushes.DarkGray;
+                }
+            }
+
+            CheckField();
+        }
+
+        private void CheckField()
+        {
+           // var isOk = _fields.All(field => field.Value != false);
+
+            //btnOk.IsEnabled = isOk;
         }
     }
 }

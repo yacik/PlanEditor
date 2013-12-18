@@ -17,6 +17,9 @@ namespace PlanEditor.Entities
         [NonSerialized] 
         public List<Entity> Collisions = new List<Entity>();
 
+        public int ID { get; set; } //!!! Данный ID формируется в процессе экспорта
+        public Guid GUID { get; set; } // уникальный идентификатор, для того чтобы 
+
         public void Show()
         {
             if (UI != null) UI.Visibility = Visibility.Visible;

@@ -25,12 +25,13 @@ namespace PlanEditor.Entities
         public double Max { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
-        public double Depth { get; set; }
+        public double Depth { get; set; }        
+        public bool IsBlocked { get; set; }
 
         [NonSerialized]
         public List<Cell> Cells = new List<Cell>();
 
-        public void CreateUI(double v) // Call this function when add new portal on canvas
+        public void CreateUI(double v) // Функция вызывается, перед тем, как поместить в канвас, для отображения
         {
             var wide = Width / Constants.Sigma;
 

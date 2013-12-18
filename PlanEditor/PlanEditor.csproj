@@ -70,6 +70,11 @@
     </ApplicationDefinition>
     <Compile Include="Entities\Obstacle.cs" />
     <Compile Include="Entities\QRPointer.cs" />
+    <Compile Include="EvacStruct\Building.cs" />
+    <Compile Include="EvacStruct\Cell.cs" />
+    <Compile Include="EvacStruct\Door.cs" />
+    <Compile Include="EvacStruct\Mine.cs" />
+    <Compile Include="EvacStruct\Room.cs" />
     <Compile Include="FindWindow.xaml.cs">
       <DependentUpon>FindWindow.xaml</DependentUpon>
     </Compile>
@@ -162,7 +167,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="ClassDiagram2.cd" />
+    <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -173,7 +178,9 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Readme.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

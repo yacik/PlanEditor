@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using PlanEditor.Entities;
+using System.Diagnostics;
 
 namespace PlanEditor.Helpers.IO
 {
@@ -33,6 +34,7 @@ namespace PlanEditor.Helpers.IO
                 z2 = strw.Height * strw.StageTo;
                 sFrom = strw.StageFrom;
                 sTo = strw.StageTo;
+                MainType = 7;
             }
             else
             {
@@ -73,6 +75,14 @@ namespace PlanEditor.Helpers.IO
             y2 = portal.PointsY[2];
             z1 = stage;
             z2 = (portal.Height < 1) ? 3.0 : portal.Height; // meters
+
+            isBlocked = portal.IsBlocked;
+
+            if (portal.RoomA != null) roomA = portal.RoomA.ID;
+            else roomA = -1;
+            
+            if (portal.RoomB != null) roomB = portal.RoomB.ID;
+            else roomB = -1;            
         }
 
         [DataMember] public int ID;
@@ -82,6 +92,10 @@ namespace PlanEditor.Helpers.IO
         [DataMember] public double x2;
         [DataMember] public double y2;
         [DataMember] public double z2;
+        [DataMember] public bool isBlocked;
+        [DataMember] public int roomA;
+        [DataMember] public int roomB;
+
     }
 
     [DataContract]
@@ -104,7 +118,6 @@ namespace PlanEditor.Helpers.IO
         [DataMember] public double Wide;
         [DataMember] public double Length;
         [DataMember] public double Height;
-
         [DataMember] public List<Accommodation> Rooms;
         [DataMember] public List<Entry> Portals;
     };
@@ -116,10 +129,9 @@ namespace PlanEditor.Helpers.IO
         public static void Save(Entities.Building building, string fileName)
         {
             var bldg = new Bldg(building);
-            int countPlaces = 0;
-            int countPortals = 0;
-            int countStairway = 0;
 
+            int countPlaces = 0; 
+            int countStairway = 0;
             for (int curStage = 0; curStage < building.Stages; ++curStage)
             {
                 if (building.Places.Count > curStage)
@@ -127,13 +139,8 @@ namespace PlanEditor.Helpers.IO
                     foreach (var place in building.Places[curStage])
                     {
                         bldg.Rooms.Add(new Accommodation(place, countPlaces, curStage));
+                        place.ID = countPlaces;
                         ++countPlaces;
-                    }
-
-                    foreach (var portal in building.Portals[curStage])
-                    {
-                        bldg.Portals.Add(new Entry(portal, countPortals, curStage));
-                        ++countPortals;
                     }
 
                     foreach (var strws in building.Stairways)
@@ -141,6 +148,16 @@ namespace PlanEditor.Helpers.IO
                         bldg.Rooms.Add(new Accommodation(strws, countStairway, curStage));
                         ++countStairway;
                     }
+                }
+            }
+
+            int countPortals = 0;
+            for (int curStage = 0; curStage < building.Stages; ++curStage)
+            {
+                foreach (var portal in building.Portals[curStage])
+                {
+                    bldg.Portals.Add(new Entry(portal, countPortals, curStage));
+                    ++countPortals;
                 }
             }
 

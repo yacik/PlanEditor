@@ -1,17 +1,14 @@
 ﻿using System.Drawing;
 using System.Linq;
 using PlanEditor.Entities;
+using System.Collections.Generic;
 
 namespace PlanEditor.Helpers.IO
 {
     public class SaveImage
     {
-        public static void SaveFile(Entities.Building building, string folder)
+        public static void SaveFile(EvacStruct.Building building, string folder)
         {
-            int roomCount = 0;
-            int strwCount = 0;
-            int portalCount = 0;
-
             for (int i = 0; i < building.Stages; ++i)
             {
                 int wide = (int) (building.Lx/Constants.Sigma);
@@ -20,81 +17,31 @@ namespace PlanEditor.Helpers.IO
                 var bitmap = new Bitmap(wide, height);
                 var graphics = Graphics.FromImage(bitmap);
                 graphics.Clear(Color.DarkGray);
+
+                foreach (var room in building.Rooms)
+                {
+                    if (room.z1 != i) continue;
+
+                    int x = (int)(room.x2 - room.x1);
+                    int y = (int)(room.y2 - room.y1);
+
+                    graphics.FillRectangle(Brushes.DarkSlateBlue, (int)room.x1, (int)room.y1, x, y);
+
+                    graphics.DrawString(room.ID.ToString(), new Font("Verdana", 12), Brushes.Black, new PointF((int)room.x1, (int)room.y1));
+                }
+
+                foreach (var portal in building.Portals)
+                {
+                    if (portal.z1 != i) continue;
+
+                    int x = (int)(portal.x2 - portal.x1);
+                    int y = (int)(portal.y2 - portal.y1);
+
+                    graphics.FillRectangle(Brushes.DarkSeaGreen, (int)portal.x1, (int)portal.y1, x, y);
+
+                    //graphics.DrawString(portal.ID.ToString(), new Font("Verdana", 12), Brushes.Black, new PointF((int)portal.x1, (int)portal.y1));
+                }
                 
-                if (building.Places[i] != null)
-                {
-                    foreach (var place in building.Places[i])
-                    {
-                        place.PrepareForSave();
-                        
-                        int xMin = (int)place.ExportX.Min(v => v);
-                        int xMax = (int)place.ExportX.Max(v => v);
-                        int yMin = (int)place.ExportY.Min(v => v);
-                        int yMax = (int)place.ExportY.Max(v => v);
-
-                        int x = xMax - xMin;
-                        int y = yMax - yMin;
-
-                        switch (place.Type)
-                        {
-                            case Entity.EntityType.Halfway:
-                                graphics.FillRectangle(Brushes.DarkGreen, xMin, yMin, x, y);
-                                break;
-                            default:
-                                graphics.FillRectangle(Brushes.DarkSlateBlue, xMin, yMin, x, y);
-                                break;
-                        }
-                        
-                        graphics.DrawString(roomCount.ToString(), new Font("Verdana", 12), Brushes.Black, new PointF(xMin, yMin));
-                        ++roomCount;
-                    }
-                }
-
-                foreach (var stairway in building.Stairways)
-                {
-                    int stageFrom = stairway.StageFrom - 1;
-                    int stageTo = stairway.StageTo - 1;
-
-                    if (i >= stageFrom && i <=stageTo )
-                    {
-                        stairway.PrepareForSave();
-
-                        int xMin = (int) stairway.ExportX.Min(v => v);
-                        int xMax = (int) stairway.ExportX.Max(v => v);
-                        int yMin = (int) stairway.ExportY.Min(v => v);
-                        int yMax = (int) stairway.ExportY.Max(v => v);
-
-                        int x = xMax - xMin;
-                        int y = yMax - yMin;
-
-                        graphics.FillRectangle(Brushes.DarkSlateGray, xMin, yMin, x, y);
-                        
-                        graphics.DrawString(strwCount.ToString(), new Font("Verdana", 12), Brushes.Black, new PointF(xMin, yMin));
-                        ++strwCount;
-                    }
-                }
-
-                if (building.Portals[i] != null)
-                {
-                    foreach (var portal in building.Portals[i])
-                    {
-                        portal.PrepareForSave();
-
-                        int xMin = (int)portal.ExportX.Min(v => v);
-                        int xMax = (int)portal.ExportX.Max(v => v);
-                        int yMin = (int)portal.ExportY.Min(v => v);
-                        int yMax = (int)portal.ExportY.Max(v => v);
-
-                        int x = xMax - xMin;
-                        int y = yMax - yMin;
-
-                        graphics.FillRectangle(Brushes.DarkSeaGreen, xMin, yMin, x, y);
-
-                        ++portalCount;
-                        graphics.DrawString(portalCount.ToString(), new Font("Verdana", 12), Brushes.Black, new PointF(xMin, yMin));
-                    }
-                }
-
                 int stage = i + 1;
                 bitmap.Save(folder + "\\stage_" + stage + ".png", System.Drawing.Imaging.ImageFormat.Png);
             }

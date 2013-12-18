@@ -31,8 +31,7 @@ namespace PlanEditor.Entities
         public double DifHRoom { get; set; }	    // разность высот пола, равная нулю при горизонтальном его расположении, м	
         public double EvacWide { get; set; }
         public int MainType { get; set; }
-        public int SubType { get; set; }
-
+        public int SubType { get; set; }        
         public bool IsMovable { get; set; }
 
         public int FireType { get; set; }

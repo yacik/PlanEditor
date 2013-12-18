@@ -39,7 +39,7 @@ namespace PlanEditor
         private double _lastPosX;
         private double _lastPosY;
         private Line _line;
-        private Building _building;
+        private Entities.Building _building;
         private bool _firstClick;
         private int _curStage;
         private bool _isConnected = true;
@@ -134,7 +134,7 @@ namespace PlanEditor
             }
 
             if (Key.LeftShift == e.Key) _shiftPressed = true;
-
+            
             if (Key.C == e.Key)
             {
                 foreach (var ptls in _building.Portals)
@@ -400,10 +400,10 @@ namespace PlanEditor
 
             if (result != true) return;
 
-            SaveToHtmlData.Save(_building, dlg.FileName);
+            //SaveToHtmlData.Save(_building, dlg.FileName);
 
-            string folder = System.IO.Path.GetDirectoryName(dlg.FileName);
-            SaveImage.SaveFile(_building, folder);
+            //string folder = System.IO.Path.GetDirectoryName(dlg.FileName);
+            //SaveImage.SaveFile(_building, folder);
         }
 
         public bool CheckBeforeExport()
@@ -1969,9 +1969,11 @@ namespace PlanEditor
                 }
             }
 
+            int stage = _curStage + 1;
             foreach (var p in _building.Stairways.Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
             {
-                entity = p;
+                if (stage >= p.StageFrom && stage <= p.StageTo)
+                    entity = p;
             }
 
             if (_building.Portals.Count > _curStage)
