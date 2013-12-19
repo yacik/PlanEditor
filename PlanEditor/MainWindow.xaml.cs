@@ -17,14 +17,14 @@ using System.Windows.Shapes;
 using PlanEditor.Entities;
 using Building = PlanEditor.Entities.Building;
 using Path = System.Windows.Shapes.Path;
-//comment
+
 namespace PlanEditor
 {
     public partial class MainWindow : Window
     {
         private enum CanvasMode
         {
-            Move,
+            Move, 
             Path,
             Select,
             Connect,
@@ -35,7 +35,7 @@ namespace PlanEditor
 
         private TransformGroup _transformGroup;
         private TranslateTransform _translation;
-        private ScaleTransform _scale;
+        private ScaleTransform _scale;  // увеличение
         private double _lastPosX;
         private double _lastPosY;
         private Line _line;
@@ -48,14 +48,14 @@ namespace PlanEditor
         private Point _clickOne;
         private Point _clickTwo;
         private Point _lastClick = new Point(100, 100);
-        private Point _curPosMouse;
+        private Point _curPosMouse;  // позиция мышки
         private RegGrid.Grid _grid;
-        private readonly List<Entity> _selectedItems = new List<Entity>();
+        private readonly List<Entity> _selectedItems = new List<Entity>();  // список выделенных элементов
         private readonly List<Obstacle> _obstacles = new List<Obstacle>();
         private readonly List<Line> _lines = new List<Line>();
         private readonly List<Line> _drawGrid = new List<Line>();
         private SimpleGraph Graph = new SimpleGraph();
-        private bool _shiftPressed;
+        private bool _shiftPressed;  //флаг нажатия клавиши Shift
         private bool _isChanged;
         private Entity _selectedItem;
 
@@ -74,7 +74,7 @@ namespace PlanEditor
             MenuTools.IsEnabled = false;
 
             _building = new Building();
-            _grid = new RegGrid.Grid(_building);
+            _grid = new RegGrid.Grid(_building);  // инициализация сетки
 
             Stage.SetValue(Panel.ZIndexProperty, 100);
             _mode = CanvasMode.Select;
@@ -150,6 +150,7 @@ namespace PlanEditor
             }
         }
 
+        // Метод обработки нажатия клавиши Shiht
         private void GridField_KeyUp(object sender, KeyEventArgs e)
         {
             if (Key.LeftShift == e.Key) _shiftPressed = false;
@@ -160,6 +161,7 @@ namespace PlanEditor
 
         }
 
+        // Метод обработки нажатия левой кнопки мыши 
         private void GridField_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.MiddleButton == MouseButtonState.Pressed)
@@ -168,20 +170,24 @@ namespace PlanEditor
                 _lastPosY = e.GetPosition(null).Y;
             }
         }
-
+        // Метод обработки перемещения мыши в рабочем поле
         private void GridField_MouseMove(object sender, MouseEventArgs e)
         {
             double x = e.GetPosition(null).X;
             double y = e.GetPosition(null).Y;
 
+            // Если нажата левая кнопка мыши
             if (e.MiddleButton == MouseButtonState.Pressed)
             {
+                // Срабатывае метод Move();
                 Move(x, y);
             }
             else
             {
+                // Иначе, все зависит от _mode
                 switch (_mode)
                 {
+                    // Срабатывают методы класса CanvasMode
                     case CanvasMode.Path:
                         MovePath(x, y);
                         break;
@@ -198,25 +204,25 @@ namespace PlanEditor
 
                     case CanvasMode.Edit:
                         if (e.LeftButton == MouseButtonState.Pressed)
-                        {
                             MoveSelected(x, y);
-                        }
                         break;
                 }
             }
         }
 
+        // Метод сохранения координат в момент отпускания левой кнопки мыши
         private void GridField_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             _lastPosX = e.GetPosition(null).X;
             _lastPosY = e.GetPosition(null).Y;
         }
-
+        // Метод обработки координат в момент нажатия левой кнопки мыши
         private void GridField_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             double x = e.GetPosition(null).X - _translation.X;
             double y = e.GetPosition(null).Y - _translation.Y;
-
+            // Опредление места клика.
+            // Если кординаты близки к предыдущим, то таковыми и остаются, иначе присваивается новое значение
             _lastClick = (x < Constants.GridStep || x > _building.xMax || y < Constants.GridStep || y > _building.yMax)
                              ? _lastClick
                              : new Point(x, y);
@@ -325,7 +331,7 @@ namespace PlanEditor
                     break;
             }
         }
-
+        // Метод определения координат правого клика
         private void GridField_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             _curPosMouse = new Point(e.GetPosition(null).X, e.GetPosition(null).Y);
@@ -353,9 +359,10 @@ namespace PlanEditor
             }
         }
 
+        // Метод создания нового проекта
         private void Click_New(object sender, RoutedEventArgs e)
         {
-            _building.RemoveAll();
+            _building.RemoveAll(); // Очистка поля
             var bldg = new WinBuilding(_building, WinBuilding.Mode.New);
             var isOk = bldg.ShowDialog();
             if (isOk == null) return;
@@ -373,18 +380,18 @@ namespace PlanEditor
                 ActiveDeactiveFileMenu(false);
             }
         }
-
+        // Метод, вызывающий функцию сохранения проекта
         private void Click_Save(object sender, RoutedEventArgs e)
         {
             SaveProject();
         }
-
+        // ФУНКЦИЯ НЕ ИСПОЛЬЗУЕТСЯ
         private void Click_EditTool(object sender, RoutedEventArgs e)
         {
             _mode = CanvasMode.Edit;
             ActiveDeactiveMenu(false);
         }
-
+        
         private void Click_FindTool(object sender, RoutedEventArgs e)
         {
             if (_building == null) return;
@@ -392,7 +399,7 @@ namespace PlanEditor
             var findWin = new FindWindow(_building) { Owner = this };
             findWin.Show();
         }
-
+        
         private void Click_ExportToHtml(object sender, RoutedEventArgs e)
         {
             var dlg = new SaveFileDialog { DefaultExt = ".html", Filter = "html file (*.html) |*html" };
@@ -405,7 +412,8 @@ namespace PlanEditor
             //string folder = System.IO.Path.GetDirectoryName(dlg.FileName);
             //SaveImage.SaveFile(_building, folder);
         }
-
+        
+        // Метод прверки проекта перед выгрузкой/загрузкой
         public bool CheckBeforeExport()
         {
             if (_building == null) return false;
@@ -437,6 +445,7 @@ namespace PlanEditor
             return true;
         }
 
+        // Метод экспортирования данных для FDS
         private void Click_ExportFDS(object sender, RoutedEventArgs e)
         {
             //if (CheckBeforeExport())
@@ -452,6 +461,7 @@ namespace PlanEditor
             //}
         }
 
+        // Метод экспортирования данных в .json
         private void Click_Export(object sender, RoutedEventArgs e)
         {
             if (CheckBeforeExport())
@@ -487,7 +497,7 @@ namespace PlanEditor
             }
         }
 
-        // проверить, чтобы все помещения имеи двери
+        // Проверка помещения на наличие дверей.
         private bool CheckPlacesDoors()
         {
             bool isOK = true;
@@ -579,6 +589,7 @@ namespace PlanEditor
             RecurseCheck(newVertices, visited);
         }
 
+        // Метод открытия файлов
         private void Click_Open(object sender, RoutedEventArgs e)
         {
             var dlg = new OpenFileDialog { DefaultExt = ".rintd", Filter = "RINTD Files (*.rintd) |*rintd" };
@@ -673,6 +684,7 @@ namespace PlanEditor
             DeselectAll();
         }
 
+        // Метод обработки нажатия МЕНЮ
         private void Click_Menu(object sender, RoutedEventArgs e)
         {
             if (_selectedItems.Count == 0 && _selectedItem == null)
@@ -688,7 +700,7 @@ namespace PlanEditor
                 MouseMenuRemove.IsEnabled = true;
             }
         }
-
+        // Метод обработки ДОБАВИТЬ ПОМЕЩЕНИЕ
         private void Click_AddRoom(object sender, RoutedEventArgs e)
         {
             var r = new WinRoom(_lastClick, _building) { Owner = this };
@@ -720,7 +732,7 @@ namespace PlanEditor
                 }
             }
         }
-
+        // Метод обработки ДОБАВИТЬ ДВЕРЬ
         private void Click_AddDoor(object sender, RoutedEventArgs e)
         {
             if (_mode != CanvasMode.Edit)
@@ -897,19 +909,23 @@ namespace PlanEditor
             }
         }
 
+        // Функция сохранения проекта
         private void SaveProject()
         {
+            // Окно-диалог сохранения. Формат данных *.rintd
             var dlg = new SaveFileDialog { DefaultExt = ".rintd", Filter = "RINTD Files (*.rintd) |*rintd" };
 
             var result = dlg.ShowDialog();
 
             if (result == true)
             {
+                // dlg.FileName - имя сохраненного файла
                 SaveFile.Save(dlg.FileName, _building);
                 _isChanged = false;
             }
         }
 
+        // Удаление дверей
         private void RemovePortal(Entity v)
         {
             var portal = v as Portal;
@@ -1735,6 +1751,7 @@ namespace PlanEditor
             Stage.Text = "Этаж " + s;
         }
 
+        // Что делает этот метод?
         private void SetHidden()
         {
             if (_building.Places.Count > _curStage)
@@ -1799,6 +1816,9 @@ namespace PlanEditor
             return false;
         }
 
+        /**
+         * Создание нового пректа
+         */
         private void CreateNewProject()
         {
             ContentPanel.Children.Clear();
@@ -1856,6 +1876,10 @@ namespace PlanEditor
             }
         }
 
+        /**
+         * private method DrawGrid
+         * Создание сетки
+         */
         private void DrawGrid()
         {
             _grid = new RegGrid.Grid(_building);
@@ -1907,6 +1931,9 @@ namespace PlanEditor
             }
         }
 
+        /**
+         * Метод обработки нажатия правой кнопки мыши
+         */ 
         private void MouseRightButtonDownPath()
         {
             if (_lines.Count == 0) return;
@@ -1987,10 +2014,12 @@ namespace PlanEditor
             return entity;
         }
 
+        // Метод определения объекта выделения
         private void SelectObjects(double x, double y)
         {
             if (_building.Places.Count > _curStage)
             {
+                // Интересный цикл. Как он работает?
                 foreach (var p in _building.Places[_curStage].Where(p => Helper.IsCollide(x, y, p.PointsX, p.PointsY)))
                 {
                     if (_selectedItems.Contains(p))
@@ -2038,6 +2067,7 @@ namespace PlanEditor
             }
         }
 
+        // метод снятия выделения
         private void DeselectAll()
         {
             foreach (var v in _selectedItems)
@@ -2045,16 +2075,17 @@ namespace PlanEditor
 
             _selectedItems.Clear();
         }
-
+        // Метод предупреждения пользователя о несохраненных данных перед закрытием редактора
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)
         {
             if (_isChanged)
             {
                 var mb = MessageBox.Show("Имеются не сохраненные данные, сохранить?", "Подтверждение", MessageBoxButton.YesNo);//<!------------------------------
-                if (mb == MessageBoxResult.Yes) SaveProject();
+                if (mb == MessageBoxResult.Yes) SaveProject(); // Перенаправление на метод сохранения
             }
         }
 
+        // Метод скрытия лестницы
         private void SetHiddenStairways()
         {
             foreach (var stairway in _building.Stairways)
@@ -2062,7 +2093,7 @@ namespace PlanEditor
                 stairway.UI.Visibility = Visibility.Hidden;
             }
         }
-
+        // Метод показа лестницы
         private void SetVisibleStairways()
         {
             foreach (var stairway in _building.Stairways)
@@ -2090,10 +2121,13 @@ namespace PlanEditor
             MITable.IsEnabled = isEnabled;
         }
 
+        // Проверка выделенного объета
+        // С какой целью?
         private void Click_CheckEntity(object sender, RoutedEventArgs e)
         {
+            // Если выделенных объектов нет, метод завершает работу
             if (_selectedItem == null) return;
-
+            // Если список не пуст, то он чистится
             _selectedItems.Clear();
 
             switch (_selectedItem.Type)
