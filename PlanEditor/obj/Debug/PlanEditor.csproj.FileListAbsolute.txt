@@ -26,14 +26,6 @@ C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\obj\Debug\PlanEditor.csprojResolveAssemblyReference.cache
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\Newtonsoft.Json.dll
 C:\Users\Andrey\Documents\Visual Studio 2012\Projects\PlanEditor\PlanEditor\bin\Debug\Newtonsoft.Json.xml
-C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\Plan Editor.exe.config
-C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\Plan Editor.exe
-C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\Plan Editor.pdb
-C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\MahApps.Metro.dll
-C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\Newtonsoft.Json.dll
-C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\System.Windows.Interactivity.dll
-C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\zxing.dll
-C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\Newtonsoft.Json.xml
 C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Debug\FindWindow.baml
 C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Debug\WinBuilding.baml
 C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Debug\WinObstacle.baml
@@ -51,6 +43,13 @@ C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Debug\Plan Editor_Mark
 C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Debug\Plan Editor.g.resources
 C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Debug\PlanEditor.Properties.Resources.resources
 C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Debug\PlanEditor.csproj.GenerateResource.Cache
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\Plan Editor.exe.config
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\Plan Editor.exe
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\Plan Editor.pdb
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\MahApps.Metro.dll
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\Newtonsoft.Json.dll
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\System.Windows.Interactivity.dll
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\zxing.dll
+C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\bin\Debug\Newtonsoft.Json.xml
 C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Debug\Plan Editor.exe
 C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Debug\Plan Editor.pdb
-C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Debug\PlanEditor.csprojResolveAssemblyReference.cache

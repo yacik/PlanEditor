@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using PlanEditor.Helpers;
+using System.Diagnostics;
 
 namespace PlanEditor.Entities
 {
@@ -17,9 +18,20 @@ namespace PlanEditor.Entities
         [NonSerialized] 
         public List<Entity> Collisions = new List<Entity>();
 
-        public int ID { get; set; } //!!! Данный ID формируется в процессе экспорта
-        public Guid GUID { get; set; } // уникальный идентификатор, для того чтобы 
+        private Guid _id;
+        public string ID 
+        { 
+            get 
+            {
+                if (_id.ToString().Contains("00000000"))
+                {
+                    _id = Guid.NewGuid();                    
+                }
 
+                return _id.ToString().Substring(0, 8);                
+            }         
+        }        
+        
         public void Show()
         {
             if (UI != null) UI.Visibility = Visibility.Visible;

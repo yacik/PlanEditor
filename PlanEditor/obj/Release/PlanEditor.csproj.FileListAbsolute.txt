@@ -53,4 +53,3 @@ C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\PlanEditor.Pro
 C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\PlanEditor.csproj.GenerateResource.Cache
 C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\Plan Editor.exe
 C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\Plan Editor.pdb
-C:\Users\yacik\Documents\GitHub\PlanEditor\PlanEditor\obj\Release\PlanEditor.csprojResolveAssemblyReference.cache

@@ -26,6 +26,16 @@ namespace PlanEditor.Helpers.IO
             
             Entities.Clear();
             Stairways.Clear();
+            
+            /*int countRooms = 0;
+            foreach (var rooms in building.Places)
+            {
+                foreach (var room in rooms)
+                {
+                    room.ID_tmp = countRooms;
+                    ++countRooms;
+                }
+            }*/
 
             // Создаем список лестниц для последующий обработки (в зависимости от кол-ва этажей)
             // потом для каждой лестнице на этаже определяем ячейки
@@ -63,7 +73,7 @@ namespace PlanEditor.Helpers.IO
                     _building.Rooms.Add(room);
                 }
             }
-
+            
             RegGrid.RecognizeGrid.DefineStairways(Stairways, grid); // распознаем ячейки на лестницах
 
             /*for (int i = 0; i < building.Stages; ++i)
@@ -116,7 +126,7 @@ namespace PlanEditor.Helpers.IO
                   //+6; // внутренняя ячейка горизонтальной поверхности cо ступеньками
                   //+7; // внутренняя ячейка шахты (не принадлежит слою и не имеет соседей в горизонтальной плоскости)
                   //+9; // код узла шахты не подлежащий расчету эвакуации (проекция на уровень layer лестничного проема
-                      //10; // код узла лестничного перехода, относящийся к шахте >=10 (узел принадлежит уровню layer)
+                  //10; // код узла лестничного перехода, относящийся к шахте >=10 (узел принадлежит уровню layer)
                 
                 if (grid.Cells.Count > curStage)
                 {
@@ -253,13 +263,12 @@ namespace PlanEditor.Helpers.IO
             string json = fs.ReadToEnd();
             fs.Close();
 
-            var time = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<int, double>>>(json);
-
+            var time = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, double>>>(json);
+           
             // т.к. ID для эвакуации не совпадают с ID для пожара и редактора, нужно преобразовать
             foreach (var scenario in time)
             {
                 var tm = new Dictionary<int, double>();
-
                 foreach (var s in scenario.Value)
                 {
                     for (int curStage = 0; curStage < building.Stages; ++curStage)
@@ -270,20 +279,26 @@ namespace PlanEditor.Helpers.IO
                             {
                                 if (s.Key == place.ID)
                                 {
-                                    var room = _building.Rooms.SingleOrDefault(r => r.parent == place);
+                                    var room = _building.Rooms.SingleOrDefault(r => r.parent.ID == place.ID);                                    
                                     if (!tm.Keys.Contains(room.ID))
                                     {
-                                        tm.Add(room.ID, s.Value);
+                                        tm.Add(room.ID, s.Value);                                       
                                     }
-                                }                                
+                                }                            
                             }
                         }
                     }
                 }
 
-                _building.Times.Add(scenario.Key, tm);
+                foreach (var room in _building.Rooms)
+                {
+                    if (room.parent.ID == scenario.Key)
+                    {
+                        _building.Times.Add(room.ID, tm);
+                    }
+                }                
             }
-            
+
             #endregion
 
             #region Save
@@ -301,9 +316,17 @@ namespace PlanEditor.Helpers.IO
             var folder = Path.GetDirectoryName(fileName);
             SaveImage.SaveFile(_building, folder);
 
+            // Сохраняем таблицу помещений
+            SaveToHtmlData.Save(building, _building, folder);
+
             #endregion
 
             
+        }
+
+        private static object GetScen(int p)
+        {
+            throw new System.NotImplementedException();
         }
 
         private static void DefineScenarion(List<Room> rooms)

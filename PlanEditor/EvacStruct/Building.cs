@@ -26,7 +26,7 @@ namespace PlanEditor.EvacStruct
             Portals = new List<Door>();
             Grid = new List<Cell>();
             Mines = new List<Mine>();
-            Times = new Dictionary<string, Dictionary<int, double>>();
+            Times = new Dictionary<int, Dictionary<int, double>>();
             Nx = building.Row;
             Ny = building.Col;
 
@@ -62,9 +62,9 @@ namespace PlanEditor.EvacStruct
         [DataMember] public int Ny;
         [DataMember] public List<Room> Rooms;
         [DataMember] public List<Door> Portals;
-        public List<Cell> Grid;
-        public List<Mine> Mines;
-        [DataMember] public Dictionary<string, Dictionary<int, double>> Times;
+        [DataMember] public List<Cell> Grid;       
+        [DataMember] public List<Mine> Mines;
+        [DataMember] public Dictionary<int, Dictionary<int, double>> Times;
         [DataMember] public int OuterDoors;
         [DataMember] public int InnerDoors;
         [DataMember] public double Wide;

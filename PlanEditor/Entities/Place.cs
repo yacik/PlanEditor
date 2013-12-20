@@ -9,7 +9,6 @@ namespace PlanEditor.Entities
     [Serializable]
     public class Place : Entity
     {
-
         public Place()
         {
             MainType = -1;

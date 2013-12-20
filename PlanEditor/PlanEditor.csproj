@@ -75,6 +75,9 @@
     <Compile Include="EvacStruct\Door.cs" />
     <Compile Include="EvacStruct\Mine.cs" />
     <Compile Include="EvacStruct\Room.cs" />
+    <Compile Include="FDSStruct\Accommodation.cs" />
+    <Compile Include="FDSStruct\Bldg.cs" />
+    <Compile Include="FDSStruct\Entry.cs" />
     <Compile Include="FindWindow.xaml.cs">
       <DependentUpon>FindWindow.xaml</DependentUpon>
     </Compile>

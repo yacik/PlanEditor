@@ -298,16 +298,7 @@ namespace PlanEditor
                             if (_selectedItem != null)
                             {
                                 _selectedItem.Select();
-                                if (_selectedItem.Type == Entity.EntityType.Halfway ||
-                                    _selectedItem.Type == Entity.EntityType.Place)
-                                {
-                                    var p = (Place) _selectedItem;
-                                    for (int i = 0; i < _building.Places[_curStage].Count; ++i)
-                                    {
-                                        var pl = _building.Places[_curStage][i];
-                                        if (pl.Equals(p)) Debug.WriteLine(i);    
-                                    }
-                                }
+                                Debug.WriteLine(_selectedItem.ID);
                             }
                         }
                     }
@@ -1702,7 +1693,7 @@ namespace PlanEditor
 
             if (_mode == CanvasMode.Edit)
             {
-                if (_selectedItem == null) return;
+                if (_selectedItem == null) return;                
                 var place = _selectedItem as Place;
                 if (place == null) return;
                 double _x = x - _translation.X;

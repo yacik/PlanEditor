@@ -15,7 +15,7 @@ namespace PlanEditor.Entities
         
         public int StageFrom { get; set; }
         public int StageTo { get; set; }
-        
+                
         [NonSerialized] public List<Cell> Cells = new List<Cell>();
 
         public void Print()
